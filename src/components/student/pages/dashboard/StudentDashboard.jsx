@@ -13,7 +13,7 @@ function StudentDashboard({ onStartTest }) {
       <Tabs defaultValue="tests" className="space-y-6">
 
         {/* Top Tabs */}
-        <TabsList className="bg-white shadow-sm border border-gray-100 rounded-xl p-2 w-sm">
+        <TabsList className="bg-white shadow-sm border border-gray-100 rounded-xl p-2 w-md">
           
           <TabsTrigger value="tests" className="flex items-center gap-2">
             <BookOpen className="size-4" />

@@ -189,7 +189,7 @@ export default function MyTests({ onStartTest }) {
 
         <div className="space-y-3">
           {completedTests.map((test) => (
-            <Card key={test.id} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={test.id} className="p-6 hover:shadow-md transition-shadow border-2 border-gray-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
                 <div className="flex-1">
