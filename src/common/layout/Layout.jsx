@@ -1,16 +1,25 @@
 import React from 'react'
 import Header from './Header'
+import { AuthProvider, useAuth } from '../helper/AuthContext'
+import LoginModal from '../modal/LoginModal';
+import RegistrationModal from '../modal/RegistrationModal';
+
+function Modals() {
+    const { modalState } = useAuth();
+    if (modalState === 'login') return <LoginModal />;
+    if (modalState === 'register') return <RegistrationModal />;
+    return null;
+}
 
 function Layout({ children }) {
     return (
-        <div className='w-full h-screen flex flex-col'>
-            <header className='w-full h-1/10 bg-[#FCFEFE]'>
+        <AuthProvider>
+            <div className='w-full h-screen flex flex-col'>
                 <Header />
-            </header>
-            <main className='w-full h-9/10 bg-[#EFFBF6]'>
-                {children}
-            </main>
-        </div>
+                <main className='w-full flex-grow bg-[#EFFBF6]'>{children}</main>
+                <Modals />
+            </div>
+        </AuthProvider>
     )
 }
 

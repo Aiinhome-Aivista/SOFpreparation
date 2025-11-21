@@ -1,0 +1,49 @@
+const getAuthToken = () => {
+    return sessionStorage.getItem("accesstoken");
+};
+
+/**
+ * A global API service function to handle all fetch requests.
+ * @param {string} url - The endpoint URL for the API call.
+ * @param {object} [options={}] - The options for the fetch request (method, body, headers).
+ * @returns {Promise<any>} A promise that resolves with the JSON response.
+ */
+const ApiService = async (url, options = {}) => {
+    const token = getAuthToken();
+
+    const defaultHeaders = {
+        'Content-Type': 'application/json',
+    };
+
+    if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+    }
+
+    const config = {
+        ...options,
+        headers: {
+            ...defaultHeaders,
+            ...options.headers,
+        },
+    };
+
+    if (config.body) {
+        config.body = JSON.stringify(config.body);
+    }
+
+    try {
+        const response = await fetch(url, config);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'An unknown API error occurred.' }));
+            throw new Error(errorData.message || response.statusText);
+        }
+
+        return response.status === 204 ? null : response.json();
+    } catch (error) {
+        console.error('ApiService Error:', error.message);
+        throw error; // Re-throw the error to be handled by the calling function
+    }
+};
+
+export default ApiService;

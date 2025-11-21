@@ -1,0 +1,23 @@
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export const GET_APIS = {}
+
+export const POST_APIS = {
+  register: BASE_URL+'ParentsMicroservices/register',
+  login: BASE_URL+'AuthMicroservices/login'
+}
+
+
+/* login 
+{
+    "email": "",
+    "password": ""
+}
+
+register 
+{
+    "fullName": "saikat sutradhar",
+    "email": "saikat@example.com",
+    "password": "password123",
+    "role": "parent"
+} */
