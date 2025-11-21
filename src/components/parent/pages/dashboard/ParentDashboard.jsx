@@ -1,45 +1,45 @@
 import React, { useState } from 'react'
 import ManageChild from '../manage-child/ManageChild'
 import GenerateTestParent from '../generate-test/GenerateTestParent'
-import ChildPerformance from '../child-performance/ChildPerformance';
-
+import ChildPerformance from '../child-performance/ChildPerformance'
 
 function ParentDashboard() {
   const [activeTab, setActiveTab] = useState("children");
 
   return (
-    <div className="px-8 py-4 w-full">
-      {/* Tab Buttons */}
-      <div className="flex gap-6 pb-3">
+    <div className="px-8 md:px-16 py-6 w-full">
+
+      <div className="flex gap-4 pb-6">
         {[
           { id: "children", label: "Children" },
           { id: "test", label: "Test Generator" },
           { id: "performance", label: "Child Performance" },
-          
-
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`pb-2 text-lg font-medium transition ${activeTab === tab.id
-              ? "text-blue-600"
-              : "text-gray-600 hover:text-gray-800"
-              }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                px-6 py-3 rounded-xl font-semibold
+                ${isActive
+                  ? "bg-[#1C398E] text-white"
+                  : "bg-[#E8F0FF] text-[#1C398E] hover:bg-[#bcd2ff]"
+                }
+              `}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6">
-        {activeTab === "children" && <ManageChild />}
-        {activeTab === "test" && <GenerateTestParent />}
-        {activeTab === "performance" && <ChildPerformance />}
-
-      </div>
+      {activeTab === "children" && <ManageChild />}
+      {activeTab === "test" && <GenerateTestParent />}
+      {activeTab === "performance" && <ChildPerformance />}
     </div>
-  )
+  );
 }
 
-export default ParentDashboard
+export default ParentDashboard;
