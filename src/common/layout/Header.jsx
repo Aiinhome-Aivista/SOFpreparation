@@ -16,7 +16,7 @@ function Header() {
           </div>
         </div>
         <div className='flex gap-2'>
-          <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border border-blue-200 text-blue-700 border cursor-pointer">
+          <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border border-blue-200 text-blue-700 cursor-pointer">
             Login
           </button>
           <button onClick={openRegisterModal} className="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
