@@ -9,9 +9,9 @@ function Index() {
   return (
     <Routes>
       <Route path="/" element={<Layout><Home /></Layout>} />
-      <Route path="parent/dashboard" element={<ParentDashboard />} />
-      <Route path="parent/generate-test" element={<GenerateTestParent />} />
-      <Route path="student/dashboard" element={<StudentDashboard />} />
+      <Route path="parent/dashboard" element={<Layout><ParentDashboard/></Layout>} />
+      <Route path="parent/generate-test" element={<Layout><GenerateTestParent/></Layout>} />
+      <Route path="student/dashboard" element={<Layout><StudentDashboard/></Layout>} />
     </Routes >
   )
 }
