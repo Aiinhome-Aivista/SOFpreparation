@@ -168,7 +168,7 @@ export default function MyTests({ onStartTest }) {
                     (test.status === "overdue"
                       ? "bg-red-600 hover:bg-red-700"
                       : "bg-blue-600 hover:bg-blue-700") +
-                    " text-white px-4 py-2 rounded-md w-full sm:w-auto flex items-center justify-center"
+                    " text-white px-4 py-2 rounded-md w-full sm:w-auto flex items-center justify-center cursor-pointer"
                   }
                 >
                   <PlayCircle className="size-4 mr-2" />
@@ -225,7 +225,7 @@ export default function MyTests({ onStartTest }) {
                 </div>
 
                 {/* Replace Button component here too */}
-                <button className="px-4 py-2 rounded-md border bg-white text-blue-600 w-full sm:w-auto">
+                <button className="px-4 py-2 cursor-pointer rounded-md border bg-white text-blue-600 w-full sm:w-auto">
                   View Details
                 </button>
               </div>

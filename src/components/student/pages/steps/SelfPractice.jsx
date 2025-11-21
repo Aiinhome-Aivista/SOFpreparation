@@ -144,7 +144,7 @@ export default function SelfPractice({ onStartTest }) {
             {/* SUBMIT BUTTON */}
             <button
               onClick={handleGeneratePractice}
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center justify-center gap-2"
+              className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center justify-center gap-2"
             >
               <Shuffle className="size-5" />
               Generate & Start Practice
@@ -218,7 +218,7 @@ export default function SelfPractice({ onStartTest }) {
             <h3 className="text-blue-900 mb-4">Quick Start</h3>
             <div className="space-y-2">
               <button
-                className="w-full flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
+                className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
                   setSubject("imo");
                   setDifficulty("easy");
@@ -230,7 +230,7 @@ export default function SelfPractice({ onStartTest }) {
               </button>
 
               <button
-                className="w-full flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
+                className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
                   setSubject("nso");
                   setDifficulty("medium");
@@ -242,7 +242,7 @@ export default function SelfPractice({ onStartTest }) {
               </button>
 
               <button
-                className="w-full flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
+                className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
                   setSubject("ieo");
                   setDifficulty("hard");

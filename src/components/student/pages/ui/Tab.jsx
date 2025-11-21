@@ -50,7 +50,7 @@ export function TabsTrigger({
         (isActive
           ? "bg-blue-600 text-white shadow "
           : "text-gray-600 hover:bg-gray-100 ") +
-        "px-3 py-1 rounded-xl text-sm flex items-center gap-2 transition-all " +
+        "px-3 py-1 cursor-pointer rounded-xl text-sm flex items-center gap-2 transition-all " +
         className
       }
     >
