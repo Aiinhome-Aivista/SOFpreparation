@@ -11,7 +11,7 @@ export function Progress({ value = 0, className = "" }) {
       }
     >
       <div
-        className="h-full bg-blue-600 transition-all"
+        className="h-full bg-black transition-all"
         style={{ width: `${percent}%` }}
       ></div>
     </div>

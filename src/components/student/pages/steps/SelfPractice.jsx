@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Card } from "../ui/Cards";
 import { Badge } from "../ui/Badge";
 import { Shuffle, Target, BookOpen } from "lucide-react";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 
 export default function SelfPractice({ onStartTest }) {
   const [subject, setSubject] = useState("");
@@ -13,6 +15,13 @@ export default function SelfPractice({ onStartTest }) {
     { value: "nso", label: "NSO - Science", topics: 15 },
     { value: "ieo", label: "IEO - English", topics: 10 },
     { value: "igko", label: "IGKO - General Knowledge", topics: 18 },
+  ];
+
+  const difficulties = [
+    { label: "Easy - Build Foundation", value: "easy" },
+    { label: "Medium - Regular Practice", value: "medium" },
+    { label: "Hard - Challenge Yourself", value: "hard" },
+    { label: "Mixed - All Levels", value: "mixed" },
   ];
 
   const handleGeneratePractice = () => {
@@ -28,7 +37,7 @@ export default function SelfPractice({ onStartTest }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-blue-900 mb-2">Self Practice</h2>
+        <h2 className="text-blue-900 text-xl font-medium mb-2">Self Practice</h2>
         <p className="text-gray-600">
           Generate random question sets to practice at your own pace
         </p>
@@ -36,7 +45,7 @@ export default function SelfPractice({ onStartTest }) {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Practice Generator */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="lg:col-span-2 p-6 border-2 border-gray-200">
           <div className="flex items-center gap-2 mb-6">
             <Shuffle className="size-5 text-blue-600" />
             <h3 className="text-blue-900">Create Practice Session</h3>
@@ -49,18 +58,17 @@ export default function SelfPractice({ onStartTest }) {
                 Select Subject *
               </label>
 
-              <select
+              <Dropdown
                 value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="h-9 w-full rounded-md border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Choose a subject</option>
-                {subjects.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => setSubject(e.value)}
+                options={subjects}
+                optionLabel="label"
+                placeholder="Choose a Subject"
+                filter
+                filterBy="label"
+                className="w-full"
+                showClear
+              />
 
               {subject && (
                 <p className="text-sm text-gray-600">
@@ -76,17 +84,17 @@ export default function SelfPractice({ onStartTest }) {
                 Difficulty Level *
               </label>
 
-              <select
+              <Dropdown
                 value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
-                className="h-9 w-full rounded-md border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Choose difficulty</option>
-                <option value="easy">Easy - Build Foundation</option>
-                <option value="medium">Medium - Regular Practice</option>
-                <option value="hard">Hard - Challenge Yourself</option>
-                <option value="mixed">Mixed - All Levels</option>
-              </select>
+                onChange={(e) => setDifficulty(e.value)}
+                options={difficulties}
+                optionLabel="label"
+                placeholder="Choose Difficulty"
+                filter
+                filterBy="label"
+                className="w-full"
+                showClear
+              />
             </div>
 
             {/* NUMBER OF QUESTIONS */}
@@ -95,13 +103,18 @@ export default function SelfPractice({ onStartTest }) {
                 Number of Questions
               </label>
 
-              <input
-                type="number"
-                min="5"
-                max="50"
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(e.target.value)}
-                className="h-9 w-full rounded-md border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-blue-500"
+              <InputNumber
+                value={Number(numQuestions)}
+                onValueChange={(e) =>
+                  setNumQuestions(e.value?.toString() || "10")
+                }
+                min={5}
+                max={50}
+                showButtons
+                step={1}
+                placeholder="Enter questions"
+                inputClassName="text-sm"
+                className="w-full"
               />
 
               <p className="text-xs text-gray-600">
@@ -142,7 +155,7 @@ export default function SelfPractice({ onStartTest }) {
         {/* Right Column */}
         <div className="space-y-4">
           {/* Stats */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <Target className="size-5 text-green-600" />
               <h3 className="text-blue-900">Your Practice Stats</h3>
@@ -167,7 +180,7 @@ export default function SelfPractice({ onStartTest }) {
           </Card>
 
           {/* Recommendations */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-blue-900">Recommended</h3>
             </div>
@@ -201,7 +214,7 @@ export default function SelfPractice({ onStartTest }) {
             </div>
           </Card>
           {/* Quick Start Presets */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <h3 className="text-blue-900 mb-4">Quick Start</h3>
             <div className="space-y-2">
               <button

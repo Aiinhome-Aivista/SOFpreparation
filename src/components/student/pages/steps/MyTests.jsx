@@ -127,7 +127,7 @@ export default function MyTests({ onStartTest }) {
                 {/* Left Info */}
                 <div className="flex-1">
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                       <PlayCircle className="size-5 text-white" />
                     </div>
 
@@ -189,7 +189,7 @@ export default function MyTests({ onStartTest }) {
 
         <div className="space-y-3">
           {completedTests.map((test) => (
-            <Card key={test.id} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={test.id} className="p-6 hover:shadow-md transition-shadow border-2 border-gray-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
                 <div className="flex-1">

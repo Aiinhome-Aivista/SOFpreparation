@@ -89,7 +89,7 @@ export default function SmartStudy() {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
           <Sparkles className="size-6 text-white" />
         </div>
         <div>
@@ -101,7 +101,7 @@ export default function SmartStudy() {
       {/* Overview Stats */}
       <div className="grid sm:grid-cols-3 gap-4">
         
-        <Card className="p-4 bg-gradient-to-br from-red-50 to-orange-50 border-red-100">
+        <Card className="p-4 bg-linear-to-br from-red-50 to-orange-50 border-2 border-red-100">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="size-5 text-red-600" />
             <span className="text-sm text-gray-700">Needs Attention</span>
@@ -109,7 +109,7 @@ export default function SmartStudy() {
           <p className="text-2xl text-red-700">{weakAreas.length} Topics</p>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-green-100">
+        <Card className="p-4 bg-linear-to-br from-green-50 to-emerald-50 border-2 border-gray-200">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="size-5 text-green-600" />
             <span className="text-sm text-gray-700">Strong Areas</span>
@@ -117,7 +117,7 @@ export default function SmartStudy() {
           <p className="text-2xl text-green-700">{strongAreas.length} Topics</p>
         </Card>
 
-        <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-100">
+        <Card className="p-4 bg-linear-to-br from-blue-50 to-cyan-50 border-2 border-gray-200">
           <div className="flex items-center gap-3 mb-2">
             <TrendingUp className="size-5 text-blue-600" />
             <span className="text-sm text-gray-700">Overall Progress</span>
@@ -128,7 +128,7 @@ export default function SmartStudy() {
       </div>
 
       {/* Weak Areas */}
-      <Card className="p-6 border-red-200">
+      <Card className="p-6 border-red-200 border-2">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="size-5 text-red-600" />
           <h3 className="text-blue-900">Areas Needing Attention</h3>
@@ -181,7 +181,7 @@ export default function SmartStudy() {
       </Card>
 
       {/* Improvement Tips */}
-      <Card className="p-6 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+      <Card className="p-6 border-2 border-blue-200 bg-linear-to-br from-blue-50 to-cyan-50">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="size-5 text-blue-600" />
           <h3 className="text-blue-900">Tips for Improvement</h3>
@@ -211,7 +211,7 @@ export default function SmartStudy() {
       </Card>
 
       {/* Strong Areas */}
-      <Card className="p-6 border-green-200">
+      <Card className="p-6 border-green-200 border-2">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle className="size-5 text-green-600" />
           <h3 className="text-blue-900">Strong Areas - Keep it Up!</h3>
@@ -242,7 +242,7 @@ export default function SmartStudy() {
       </Card>
 
       {/* Recommendation */}
-      <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+      <Card className="p-6 bg-linear-to-r from-purple-50 to-pink-50 border-2 border-gray-200">
         <div className="flex items-start gap-4">
 
           <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">

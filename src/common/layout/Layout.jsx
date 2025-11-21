@@ -16,7 +16,7 @@ function Layout({ children }) {
         <AuthProvider>
             <div className='w-full h-screen flex flex-col'>
                 <Header />
-                <main className='w-full flex-grow bg-[#EFFBF6]'>{children}</main>
+                <main className='w-full grow bg-[#EFFBF6] h-full overflow-y-auto'>{children}</main>
                 <Modals />
             </div>
         </AuthProvider>
