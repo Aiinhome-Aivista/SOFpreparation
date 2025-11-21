@@ -16,10 +16,10 @@ function Header() {
           </div>
         </div>
         <div className='flex gap-2'>
-          <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border-blue-200 text-blue-700 border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 cursor-pointer">
+          <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border border-blue-200 text-blue-700 border cursor-pointer">
             Login
           </button>
-          <button onClick={openRegisterModal} className="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 bg-primary text-white hover:bg-primary/90 cursor-pointer">
+          <button onClick={openRegisterModal} className="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
             Register Now
           </button>
         </div>
