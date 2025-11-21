@@ -37,7 +37,7 @@ export default function SelfPractice({ onStartTest }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-blue-900 mb-2">Self Practice</h2>
+        <h2 className="text-blue-900 text-xl font-medium mb-2">Self Practice</h2>
         <p className="text-gray-600">
           Generate random question sets to practice at your own pace
         </p>
@@ -45,7 +45,7 @@ export default function SelfPractice({ onStartTest }) {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Practice Generator */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="lg:col-span-2 p-6 border-2 border-gray-200">
           <div className="flex items-center gap-2 mb-6">
             <Shuffle className="size-5 text-blue-600" />
             <h3 className="text-blue-900">Create Practice Session</h3>
@@ -155,7 +155,7 @@ export default function SelfPractice({ onStartTest }) {
         {/* Right Column */}
         <div className="space-y-4">
           {/* Stats */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <div className="flex items-center gap-2 mb-4">
               <Target className="size-5 text-green-600" />
               <h3 className="text-blue-900">Your Practice Stats</h3>
@@ -180,7 +180,7 @@ export default function SelfPractice({ onStartTest }) {
           </Card>
 
           {/* Recommendations */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-blue-900">Recommended</h3>
             </div>
@@ -214,7 +214,7 @@ export default function SelfPractice({ onStartTest }) {
             </div>
           </Card>
           {/* Quick Start Presets */}
-          <Card className="p-6">
+          <Card className="p-6 border-2 border-gray-200">
             <h3 className="text-blue-900 mb-4">Quick Start</h3>
             <div className="space-y-2">
               <button
