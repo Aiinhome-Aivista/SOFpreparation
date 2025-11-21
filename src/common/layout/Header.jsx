@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '../helper/AuthContext';
 
 function Header() {
-  const { openLoginModal, openRegisterModal } = useAuth();
+  const { user, logout, openLoginModal, openRegisterModal } = useAuth();
 
   return (
     <header className="w-full bg-[#FCFEFE] border-b border-gray-300 py-4 px-4">
@@ -15,14 +15,24 @@ function Header() {
             <p className="text-sm text-[#00a63e]">Aiinhome | SPE</p>
           </div>
         </div>
-        <div className='flex gap-2'>
-          <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border border-blue-200 text-blue-700 border cursor-pointer">
-            Login
-          </button>
-          <button onClick={openRegisterModal} className="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-            Register Now
-          </button>
-        </div>
+        {user ? (
+          <div className='flex items-center gap-4'>
+            <span className='text-sm font-medium text-blue-900'>Welcome, {user.name}</span>
+            <button onClick={logout} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-red-200 text-red-700 cursor-pointer hover:bg-red-50">
+              <LogOut className="size-4" />
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className='flex gap-2'>
+            <button onClick={openLoginModal} className="px-2 py-1 rounded-lg border border-blue-200 text-blue-700 cursor-pointer">
+              Login
+            </button>
+            <button onClick={openRegisterModal} className="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+              Register Now
+            </button>
+          </div>
+        )}
       </div>
     </header>
   )
