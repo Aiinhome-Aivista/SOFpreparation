@@ -40,9 +40,9 @@ export default function LoginModal() {
       if (response.isSuccess && response.data) {
         login(response.data); // Update context with user data
         const role = response.data.role;
-        if (role === 'parent') navigate('/parent/dashboard');
-        else if (role === 'student') navigate('/student/dashboard');
-        else if (role === 'admin') navigate('/admin/dashboard');
+        if (role === 'parent') navigate('parent/dashboard');
+        else if (role === 'student') navigate('student/dashboard');
+        else if (role === 'admin') navigate('admin/dashboard');
       } else {
         setError(response.message || 'Login failed. Please try again.');
       }
