@@ -1,47 +1,55 @@
-import React from 'react'
-// import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs'
-import { BookOpen, Sparkles, Target } from 'lucide-react'
+import React from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/Tab";
+
+import { BookOpen, Sparkles, Target } from "lucide-react";
+
+import MyTests from "../steps/MyTests";
+import SmartStudy from "../steps/SmartStudy";
+import SelfPractice from "../steps/SelfPractice";
 
 function StudentDashboard({ onStartTest }) {
   return (
-    <></>
-      // <div className="container mx-auto px-4 py-8">
-      //   <Tabs defaultValue="tests" className="space-y-6">
+    <div className="container mx-auto px-4 py-8">
+      <Tabs defaultValue="tests" className="space-y-6">
+
+        {/* Top Tabs */}
+        <TabsList className="bg-white shadow-sm border border-gray-100 rounded-xl p-2 w-sm">
           
-      //     {/* Top Tabs */}
-      //     <TabsList className="bg-white shadow-sm border rounded-xl p-1">
-      //       <TabsTrigger value="tests" className="flex items-center gap-2">
-      //         <BookOpen className="size-4" />
-      //         My Tests
-      //       </TabsTrigger>
+          <TabsTrigger value="tests" className="flex items-center gap-2">
+            <BookOpen className="size-4" />
+            My Tests
+          </TabsTrigger>
 
-      //       <TabsTrigger value="smart" className="flex items-center gap-2">
-      //         <Sparkles className="size-4" />
-      //         Smart Study
-      //       </TabsTrigger>
+          <TabsTrigger value="smart" className="flex items-center gap-2">
+            <Sparkles className="size-4" />
+            Smart Study
+          </TabsTrigger>
 
-      //       <TabsTrigger value="practice" className="flex items-center gap-2">
-      //         <Target className="size-4" />
-      //         Self Practice
-      //       </TabsTrigger>
-      //     </TabsList>
+          <TabsTrigger value="practice" className="flex items-center gap-2">
+            <Target className="size-4" />
+            Self Practice
+          </TabsTrigger>
+        </TabsList>
 
-      //     {/* TAB CONTENTS */}
-      //     <TabsContent value="tests">
-      //       <MyTests onStartTest={onStartTest} />
-      //     </TabsContent>
+        {/* Tab Contents */}
+        <TabsContent value="tests">
+          <MyTests onStartTest={onStartTest} />
+          {/* <div>test</div> */}
+        </TabsContent>
 
-      //     <TabsContent value="smart">
-      //       <SmartStudy />
-      //     </TabsContent>
+        <TabsContent value="smart">
+          <SmartStudy />
+          {/* <div>smart</div> */}
+        </TabsContent>
 
-      //     <TabsContent value="practice">
-      //       <SelfPractice onStartTest={onStartTest} />
-      //     </TabsContent>
+        <TabsContent value="practice">
+          <SelfPractice onStartTest={onStartTest} />
+          {/* <div>practice</div> */}
+        </TabsContent>
 
-      //   </Tabs>
-      // </div>
-  )
+      </Tabs>
+    </div>
+  );
 }
 
-export default StudentDashboard
+export default StudentDashboard;
