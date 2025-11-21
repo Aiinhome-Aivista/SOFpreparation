@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router-dom"
 import Home from "../../components/Home"
-import ParentDashboard from "../../components/parent/ParentDashboard"
-import GenerateTestParent from "../../components/parent/GenerateTestParent"
 import StudentDashboard from "../../components/student/StudentDashboard"
 import Layout from "../layout/Layout"
+import GenerateTestParent from "../../components/parent/pages/generate-test/GenerateTestParent"
+import ParentDashboard from "../../components/parent/pages/dashboard/ParentDashboard"
 
 function Index() {
   return (
