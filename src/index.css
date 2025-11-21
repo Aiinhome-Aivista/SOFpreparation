@@ -96,3 +96,22 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
+/* Scrollbar styles for WebKit browsers */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dbeafe00;
+  /* Tailwind's blue-100 */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca6b9;
+  /* Tailwind's blue-600 */
+  border-radius: 10px;
+  border: 2px solid #dbeafe;
+  /* Same as track for a nice padding effect */
+}
