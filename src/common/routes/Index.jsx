@@ -3,14 +3,15 @@ import Home from "../../components/Home"
 import ParentDashboard from "../../components/parent/ParentDashboard"
 import GenerateTestParent from "../../components/parent/GenerateTestParent"
 import StudentDashboard from "../../components/student/StudentDashboard"
+import Layout from "../layout/Layout"
 
 function Index() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Layout><Home /></Layout>} />
       <Route path="parent/dashboard" element={<ParentDashboard />} />
       <Route path="parent/generate-test" element={<GenerateTestParent />} />
-      <Route path="student/dashboard" element={<StudentDashboard/>} />
+      <Route path="student/dashboard" element={<StudentDashboard />} />
     </Routes >
   )
 }
