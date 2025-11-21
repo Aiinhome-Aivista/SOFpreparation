@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 
 /* ROOT */
@@ -27,7 +25,7 @@ export function TabsList({ children, className = "", activeTab, setActiveTab }) 
   };
 
   return (
-    <div className={"inline-flex bg-white border rounded-xl p-1 gap-1" + className}>
+    <div className={"inline-flex bg-white border rounded-xl p-1 gap-1 " + className}>
       {React.Children.map(children, enhance)}
     </div>
   );

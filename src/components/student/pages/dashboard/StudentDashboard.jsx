@@ -1,8 +1,5 @@
-import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/Tab";
-
 import { BookOpen, Sparkles, Target } from "lucide-react";
-
 import MyTests from "../steps/MyTests";
 import SmartStudy from "../steps/SmartStudy";
 import SelfPractice from "../steps/SelfPractice";
@@ -12,7 +9,6 @@ function StudentDashboard({ onStartTest }) {
     <div className="container mx-auto px-4 py-8">
       <Tabs defaultValue="tests" className="space-y-6">
 
-        {/* Top Tabs */}
         <TabsList className="bg-white shadow-sm border border-gray-100 rounded-xl p-2 w-md">
           
           <TabsTrigger value="tests" className="flex items-center gap-2">
@@ -31,20 +27,17 @@ function StudentDashboard({ onStartTest }) {
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab Contents */}
         <TabsContent value="tests">
           <MyTests onStartTest={onStartTest} />
-          {/* <div>test</div> */}
+         
         </TabsContent>
 
         <TabsContent value="smart">
           <SmartStudy />
-          {/* <div>smart</div> */}
         </TabsContent>
 
         <TabsContent value="practice">
           <SelfPractice onStartTest={onStartTest} />
-          {/* <div>practice</div> */}
         </TabsContent>
 
       </Tabs>
