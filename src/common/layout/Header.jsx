@@ -1,9 +1,8 @@
-import { Trophy, LogOut } from 'lucide-react'
-import React from 'react';
+import { Trophy, LogOut, UserPlus } from 'lucide-react'
 import { useAuth } from '../helper/AuthContext';
 
 function Header() {
-  const { user, logout, openLoginModal, openRegisterModal } = useAuth();
+  const { user, openLogoutModal, openLoginModal, openRegisterModal } = useAuth();
 
   return (
     <header className="w-full bg-[#FCFEFE] border-b border-gray-300 py-4 px-4">
@@ -17,8 +16,14 @@ function Header() {
         </div>
         {user ? (
           <div className='flex items-center gap-4'>
-            <span className='text-sm font-medium text-blue-900'>Welcome, {user.name}</span>
-            <button onClick={logout} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-red-200 text-red-700 cursor-pointer hover:bg-red-50">
+            <span className='text-sm font-semibold text-blue-900'>{user.name}</span>
+            {user.role === 'parent' && (
+              <button onClick={openLogoutModal} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-blue-300 text-blue-900 cursor-pointer hover:bg-blue-100">
+                <UserPlus className="size-4" />
+                Add Child
+              </button>
+            )}
+            <button onClick={openLogoutModal} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-300 text-gray-900 cursor-pointer hover:bg-gray-100">
               <LogOut className="size-4" />
               Logout
             </button>

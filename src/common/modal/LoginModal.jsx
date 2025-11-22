@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { UserCircle, User, Shield, X } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../service/ApiService';
 import { POST_APIS } from '../../../connection';
+import { Toast } from 'primereact/toast';
 
 export default function LoginModal() {
+  const toast = useRef(null);
   const { closeModal, openRegisterModal, login } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('parent');
@@ -15,13 +17,11 @@ export default function LoginModal() {
   const [studentPassword, setStudentPassword] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
     let email, password;
     if (activeTab === 'parent') {
@@ -38,16 +38,21 @@ export default function LoginModal() {
     try {
       const response = await ApiService(POST_APIS.login, { method: 'POST', body: { email, password } });
       if (response.isSuccess && response.data) {
-        login(response.data); // Update context with user data
         const role = response.data.role;
-        if (role === 'parent') navigate('parent/dashboard');
-        else if (role === 'student') navigate('student/dashboard');
-        else if (role === 'admin') navigate('admin/dashboard');
+        if (role === activeTab) {
+          login(response.data); // Update context with user data
+          toast.current.show({ severity: 'success', summary: 'Login Successful', detail: response.message || 'You have successfully logged in!' });
+          if (role === 'parent') navigate('parent/dashboard');
+          else if (role === 'student') navigate('student/dashboard');
+          else if (role === 'admin') navigate('admin/dashboard');
+        } else {
+          toast.current.show({ severity: 'error', summary: 'Login Failed', detail: `Please use the ${role.charAt(0).toUpperCase() + role.slice(1)} tab to log in.` });
+        }
       } else {
-        setError(response.message || 'Login failed. Please try again.');
+        toast.current.show({ severity: 'error', summary: 'Login Failed', detail: response.message || 'Please check your credentials.' });
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      toast.current.show({ severity: 'error', summary: 'Login Failed', detail: err.message || 'An unexpected error occurred.' });
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +61,7 @@ export default function LoginModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4">
+        <Toast ref={toast} />
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold text-blue-900">Login to SOF Prep Excellence</h2>
@@ -91,13 +97,11 @@ export default function LoginModal() {
             </button>
           </div>
 
-          {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
-
           {activeTab === 'parent' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
                 <label htmlFor="parent-email" className="text-sm font-medium text-gray-700">Email</label>
-                <input id="parent-email" type="email" placeholder="parent@example.com" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input id="parent-email" type="text" placeholder="parent@example.com" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="space-y-1">
                 <label htmlFor="parent-password" className="text-sm font-medium text-gray-700">Password</label>
@@ -112,7 +116,7 @@ export default function LoginModal() {
           {activeTab === 'student' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
-                <label htmlFor="student-email" className="text-sm font-medium text-gray-700">Student ID / Email</label>
+                <label htmlFor="student-email" className="text-sm font-medium text-gray-700">Student Email</label>
                 <input id="student-email" type="text" placeholder="student@example.com" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
               </div>
               <div className="space-y-1">
@@ -129,7 +133,7 @@ export default function LoginModal() {
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
                 <label htmlFor="admin-email" className="text-sm font-medium text-gray-700">Admin Email</label>
-                <input id="admin-email" type="email" placeholder="admin@sof.com" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <input id="admin-email" type="text" placeholder="admin@sof.com" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" />
               </div>
               <div className="space-y-1">
                 <label htmlFor="admin-password" className="text-sm font-medium text-gray-700">Password</label>
