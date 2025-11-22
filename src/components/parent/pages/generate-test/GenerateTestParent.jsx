@@ -150,7 +150,7 @@ export default function GenerateTestParent({ children = [] }) {
           {/* Button */}
           <button
             onClick={createTest}
-            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full py-3 flex justify-center items-center gap-2 font-medium"
+            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full py-3 flex justify-center items-center gap-2 font-medium cursor-pointer"
           >
             <Plus size={20} />
             Generate Test & Assign

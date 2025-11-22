@@ -2,14 +2,14 @@ import React from "react";
 import { Chart } from "primereact/chart";
 import "chart.js/auto";
 
-function TopicStrengthAnalysis() {
+function SubjectWisePerformance() {
   const data = {
-    labels: ["Algebra", "Geometry", "Physics", "Chemistry", "Grammar", "Vocabulary"],
+    labels: ["Math", "Science", "English", "GK"],
     datasets: [
       {
-        label: "Score",
-        data: [90, 75, 70, 65, 88, 82],
-        borderWidth: 1,
+        label: "Average Score",
+        data: [85, 78, 94, 70],
+        borderWidth: 0,
       },
     ],
   };
@@ -20,7 +20,10 @@ function TopicStrengthAnalysis() {
       legend: { display: false },
     },
     scales: {
-      r: {
+      x: {
+        grid: { display: false },
+      },
+      y: {
         min: 0,
         max: 100,
         ticks: { stepSize: 25 },
@@ -31,17 +34,17 @@ function TopicStrengthAnalysis() {
   return (
     <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 md:p-6 h-full">
       <h3 className="text-lg font-semibold text-slate-800 mb-1">
-        Topic Strength Analysis
+        Subject-wise Performance
       </h3>
       <p className="text-xs text-slate-500 mb-4">
-        Identify strong and weak topic areas
+        Compare performance across different subjects
       </p>
 
       <div className="h-64 md:h-72">
-        <Chart type="radar" data={data} options={options} />
+        <Chart type="bar" data={data} options={options} />
       </div>
     </div>
   );
 }
 
-export default TopicStrengthAnalysis;
+export default SubjectWisePerformance;

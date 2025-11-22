@@ -21,7 +21,7 @@ function ParentDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                px-6 py-3 rounded-xl font-semibold
+                px-6 py-3 rounded-xl font-semibold cursor-pointer
                 ${isActive
                   ? "bg-[#1C398E] text-white"
                   : "bg-[#E8F0FF] text-[#1C398E] hover:bg-[#bcd2ff]"
