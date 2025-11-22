@@ -106,7 +106,7 @@ export default function MyTests({ onStartTest }) {
               Complete these tests before the due date
             </p>
           </div>
-          <Badge className="bg-blue-600 text-white">
+          <Badge className="bg-blue-600 text-white px-3 py-1 rounded-md">
             {pendingTests.length} Tests
           </Badge>
         </div>
