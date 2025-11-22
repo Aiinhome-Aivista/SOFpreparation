@@ -1,12 +1,27 @@
-/* import {Navigate} from "react-router-dom"
+import { Navigate } from "react-router-dom";
 
 const authGuard = () => {
-  const JWT_TOKEN = sessionStorage.getItem("accesstoken")
-  return JWT_TOKEN ? true : false
-}
+  try {
+    const sessionDataString = localStorage.getItem("user");
+    if (sessionDataString) {
+      const sessionData = JSON.parse(sessionDataString);
+      // Check if session is expired
+      if (new Date().getTime() > sessionData.expiry) {
+        localStorage.removeItem("user");
+        return false;
+      }
+      // Check if the token exists
+      return !!sessionData.userData.token;
+    }
+  } catch (error) {
+    // If parsing fails, treat as not authenticated
+    return false;
+  }
+  return false;
+};
 
-const ProtectedRoute = ({element}) => {
-  return authGuard() ? element : <Navigate to="/" />
-}
+const ProtectedRoute = ({ element }) => {
+  return authGuard() ? element : <Navigate to="/" />;
+};
 
-export default ProtectedRoute */
+export default ProtectedRoute;

@@ -5,15 +5,17 @@ import StudentDashboard from "../../components/student/pages/dashboard/StudentDa
 import GenerateTestParent from "../../components/parent/pages/generate-test/GenerateTestParent"
 import ParentDashboard from "../../components/parent/pages/dashboard/ParentDashboard"
 import AdminDashboard from "../../components/admin/dashboard/AdminDashboard"
+import ProtectedRoute from "./ProtectedRoute"
+import PublicRoute from "./PublicRoute"
 
 function Index() {
   return (
     <Routes>
-      <Route path="/" element={<Layout><Home /></Layout>} />
-      <Route path="parent/dashboard" element={<Layout><ParentDashboard/></Layout>} />
-      <Route path="parent/generate-test" element={<Layout><GenerateTestParent/></Layout>} />
-      <Route path="student/dashboard" element={<Layout><StudentDashboard/></Layout>} />
-      <Route path="admin/dashboard" element={<Layout><AdminDashboard/></Layout>} />
+      <Route path="/" element={<PublicRoute element={<Layout><Home /></Layout>} />} />
+      <Route path="parent/dashboard" element={<ProtectedRoute element={<Layout><ParentDashboard /></Layout>} />} />
+      <Route path="parent/generate-test" element={<ProtectedRoute element={<Layout><GenerateTestParent /></Layout>} />} />
+      <Route path="student/dashboard" element={<ProtectedRoute element={<Layout><StudentDashboard /></Layout>} />} />
+      <Route path="admin/dashboard" element={<ProtectedRoute element={<Layout><AdminDashboard /></Layout>} />} />
     </Routes >
   )
 }
