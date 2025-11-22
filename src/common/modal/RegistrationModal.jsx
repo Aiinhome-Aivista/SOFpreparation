@@ -30,7 +30,7 @@ function RegistrationModal() {
                             Create your parent account to get started with SOF Prep Excellence
                         </p>
                     </div>
-                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                         <X className="size-5" />
                     </button>
                 </div>
@@ -82,7 +82,7 @@ function RegistrationModal() {
                         </p>
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md">
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md cursor-pointer">
                         Create Parent Account
                     </button>
                 </form>
@@ -90,7 +90,7 @@ function RegistrationModal() {
                 <div className="pt-4 mt-4 border-t">
                     <p className="text-center text-sm text-gray-600">
                         Already have an account?{' '}
-                        <button type="button" onClick={() => { closeModal(); openLoginModal(); }} className="text-blue-600 hover:underline font-medium">
+                        <button type="button" onClick={() => { closeModal(); openLoginModal(); }} className="text-blue-600 hover:underline font-medium cursor-pointer">
                             Login here
                         </button>
                     </p>

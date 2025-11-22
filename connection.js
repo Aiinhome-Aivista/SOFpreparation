@@ -1,10 +1,10 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://122.163.121.176:3019/';
 
 export const GET_APIS = {}
 
 export const POST_APIS = {
-  register: BASE_URL+'ParentsMicroservices/register',
-  login: BASE_URL+'AuthMicroservices/login'
+  register: `${BASE_URL}ParentsMicroservices/register`,
+  login: `${BASE_URL}AuthMicroservices/login`
 }
 
 

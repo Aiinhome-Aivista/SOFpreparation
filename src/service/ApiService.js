@@ -1,7 +1,3 @@
-const getAuthToken = () => {
-    return sessionStorage.getItem("accesstoken");
-};
-
 /**
  * A global API service function to handle all fetch requests.
  * @param {string} url - The endpoint URL for the API call.
@@ -9,15 +5,9 @@ const getAuthToken = () => {
  * @returns {Promise<any>} A promise that resolves with the JSON response.
  */
 const ApiService = async (url, options = {}) => {
-    const token = getAuthToken();
-
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
-
-    if (token) {
-        defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
 
     const config = {
         ...options,
