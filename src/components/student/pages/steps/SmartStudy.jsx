@@ -1,7 +1,7 @@
 import React from "react";
-import { Card } from "../ui/Cards";       // <-- Make sure file name matches!
-import { Badge } from "../ui/Badge";      // <-- Your simple Badge
-import { Progress } from "../ui/progress";
+import { Card } from "../ui-common/Cards";       // <-- Make sure file name matches!
+import { Badge } from "../ui-common/Badge";      // <-- Your simple Badge
+import { Progress } from "../ui-common/Progress";
 import {
   Sparkles,
   AlertTriangle,

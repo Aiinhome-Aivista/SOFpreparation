@@ -1,6 +1,6 @@
 import React from "react";
-import { Card } from "../ui/Cards";
-import { Badge } from "../ui/Badge";
+import { Card } from "../ui-common/Cards";
+import { Badge } from "../ui-common/Badge";
 import {
   Clock,
   PlayCircle,
