@@ -82,8 +82,9 @@ function RegistrationModal() {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-start mb-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md m-4 max-h-[90vh] flex flex-col">
+                {/* Sticky Header */}
+                <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-200">
                     <div>
                         <h2 className="text-xl font-semibold text-blue-900 flex items-center gap-2">
                             <UserCircle className="size-6" />
@@ -98,8 +99,9 @@ function RegistrationModal() {
                     </button>
                 </div>
 
-                <Toast ref={toast} />
-                <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Scrollable Body */}
+                <form onSubmit={handleSubmit} className="space-y-4 p-6 overflow-y-auto">
+                    <Toast ref={toast} />
                     <div className="space-y-2">
                         <label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
                         <div className="relative"><User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="fullName" type="text" placeholder="Enter your full name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.fullName ? 'border-red-500' : ''}`} /></div>
@@ -149,16 +151,16 @@ function RegistrationModal() {
                     <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed">
                         {isLoading ? 'Creating Account...' : 'Create Parent Account'}
                     </button>
+                    
+                    <div className="pt-4 mt-4 border-t border-gray-200">
+                        <p className="text-center text-sm text-gray-600">
+                            Already have an account?{' '}
+                            <button type="button" onClick={() => { closeModal(); openLoginModal(); }} className="text-blue-600 hover:underline font-medium cursor-pointer">
+                                Login here
+                            </button>
+                        </p>
+                    </div>
                 </form>
-
-                <div className="pt-4 mt-4 border-t">
-                    <p className="text-center text-sm text-gray-600">
-                        Already have an account?{' '}
-                        <button type="button" onClick={() => { closeModal(); openLoginModal(); }} className="text-blue-600 hover:underline font-medium cursor-pointer">
-                            Login here
-                        </button>
-                    </p>
-                </div>
             </div>
         </div>
     );

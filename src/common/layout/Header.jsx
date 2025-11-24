@@ -2,7 +2,7 @@ import { Trophy, LogOut, UserPlus } from 'lucide-react'
 import { useAuth } from '../helper/AuthContext';
 
 function Header() {
-  const { user, openLogoutModal, openLoginModal, openRegisterModal } = useAuth();
+  const { user, openLogoutModal, openLoginModal, openRegisterModal, openAddChildModal } = useAuth();
 
   return (
     <header className="w-full bg-[#FCFEFE] border-b border-gray-300 py-4 px-4">
@@ -18,7 +18,7 @@ function Header() {
           <div className='flex items-center gap-4'>
             <span className='text-sm font-semibold text-blue-900'>{user.name}</span>
             {user.role === 'parent' && (
-              <button onClick={openLogoutModal} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-blue-300 text-blue-900 cursor-pointer hover:bg-blue-100">
+              <button onClick={openAddChildModal} className="flex items-center gap-2 px-2 py-1 rounded-lg border border-blue-300 text-blue-900 cursor-pointer hover:bg-blue-100">
                 <UserPlus className="size-4" />
                 Add Child
               </button>
