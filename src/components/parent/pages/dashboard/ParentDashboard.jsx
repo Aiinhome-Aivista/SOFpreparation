@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState} from 'react'
 import ManageChild from '../manage-child/ManageChild'
 import GenerateTestParent from '../generate-test/GenerateTestParent'
 import ChildPerformance from '../child-performance/ChildPerformance'
 
+
 function ParentDashboard() {
   const [activeTab, setActiveTab] = useState("children");
+ 
 
   return (
     <div className="px-8 md:px-16 py-6 w-full">
@@ -35,7 +37,7 @@ function ParentDashboard() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "children" && <ManageChild />}
+     {activeTab === "children" && <ManageChild />}
       {activeTab === "test" && <GenerateTestParent />}
       {activeTab === "performance" && <ChildPerformance />}
     </div>

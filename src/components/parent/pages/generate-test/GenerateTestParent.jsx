@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ClipboardList, Plus, CheckCircle } from "lucide-react";
 
-export default function GenerateTestParent({ children = [] }) {
+export default function GenerateTestParent() {
   const [selectedChild, setSelectedChild] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -23,6 +23,10 @@ export default function GenerateTestParent({ children = [] }) {
     ieo: ["Grammar", "Vocabulary", "Reading Comprehension", "Writing Skills"],
     igko: ["History", "Geography", "Current Affairs", "Science & Technology"],
   };
+ const children = [
+    { id: "1", fullName: "Aarav Kumar" },
+    { id: "2", fullName: "Diya Sharma" },
+  ];
 
   const toggleTopic = (topic) => {
     setSelectedTopics((prev) =>
@@ -57,16 +61,16 @@ export default function GenerateTestParent({ children = [] }) {
 
           {/* Child Select */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Select Child *</label>
+            <label className="font-medium text-sm">Select Child<span className="text-red-600"> *</span></label>
             <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 outline-none"
+              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
               value={selectedChild}
               onChange={(e) => setSelectedChild(e.target.value)}
             >
               <option value="">Choose a child</option>
               {children.map((child) => (
                 <option key={child.id} value={child.id}>
-                  {child.name} — Class {child.grade}
+                  {child.fullName}
                 </option>
               ))}
             </select>
@@ -74,9 +78,9 @@ export default function GenerateTestParent({ children = [] }) {
 
           {/* Subject Select */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Select Subject *</label>
+            <label className="font-medium text-sm">Select Subject<span className="text-red-600"> *</span></label>
             <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 outline-none"
+              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
             >
@@ -92,8 +96,8 @@ export default function GenerateTestParent({ children = [] }) {
           {/* Topics */}
           {selectedSubject && (
             <div className="space-y-2">
-              <label className="font-medium text-sm">Select Topics *</label>
-              <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border">
+              <label className="font-medium text-sm">Select Topics<span className="text-red-600"> *</span></label>
+              <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border text-sm">
                 {topics[selectedSubject]?.map((topic) => (
                   <label key={topic} className="flex gap-2 text-sm">
                     <input
@@ -111,20 +115,20 @@ export default function GenerateTestParent({ children = [] }) {
           {/* Questions & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="font-medium text-sm">Number of Questions</label>
+              <label className="font-medium text-sm">Number of Questions<span className="text-red-600"> *</span></label>
               <input
                 type="number"
-                className="w-full border rounded-lg px-3 py-2"
+                className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
                 value={numQuestions}
                 onChange={(e) => setNumQuestions(e.target.value)}
                 min="10" max="50"
               />
             </div>
             <div className="space-y-2">
-              <label className="font-medium text-sm">Time Limit (minutes)</label>
+              <label className="font-medium text-sm">Time Limit (minutes)<span className="text-red-600"> *</span></label>
               <input
                 type="number"
-                className="w-full border rounded-lg px-3 py-2"
+                className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
                 value={timeLimit}
                 onChange={(e) => setTimeLimit(e.target.value)}
                 min="10" max="120"
@@ -134,9 +138,9 @@ export default function GenerateTestParent({ children = [] }) {
 
           {/* Difficulty */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Difficulty Level *</label>
+            <label className="font-medium text-sm">Difficulty Level<span className="text-red-600"> *</span></label>
             <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2"
+              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
             >
@@ -150,7 +154,7 @@ export default function GenerateTestParent({ children = [] }) {
           {/* Button */}
           <button
             onClick={createTest}
-            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full py-3 flex justify-center items-center gap-2 font-medium cursor-pointer"
+            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer"
           >
             <Plus size={20} />
             Generate Test & Assign
@@ -167,7 +171,7 @@ export default function GenerateTestParent({ children = [] }) {
           <div className="text-sm space-y-3">
             <div>
               <span className="text-gray-600">Student:</span>
-              <p>{selectedChild ? children.find(c => c.id === selectedChild)?.name : "Not selected"}</p>
+              <p>{selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}</p>
             </div>
 
             <div>
