@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ClipboardList, Plus, CheckCircle } from "lucide-react";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 
-export default function GenerateTestParent({ children = [] }) {
+export default function GenerateTestParent() {
   const [selectedChild, setSelectedChild] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedTopics, setSelectedTopics] = useState([]);
@@ -17,12 +19,22 @@ export default function GenerateTestParent({ children = [] }) {
     { value: "igko", label: "IGKO - General Knowledge" },
   ];
 
+  const difficulties = [
+    { label: "Easy", value: "easy" },
+    { label: "Medium", value: "medium" },
+    { label: "Hard", value: "hard" },
+  ];
+
   const topics = {
     imo: ["Algebra", "Geometry", "Number System", "Mensuration", "Data Handling"],
     nso: ["Physics", "Chemistry", "Biology", "Environmental Science"],
     ieo: ["Grammar", "Vocabulary", "Reading Comprehension", "Writing Skills"],
     igko: ["History", "Geography", "Current Affairs", "Science & Technology"],
   };
+  const children = [
+    { id: "1", fullName: "Aarav Kumar" },
+    { id: "2", fullName: "Diya Sharma" },
+  ];
 
   const toggleTopic = (topic) => {
     setSelectedTopics((prev) =>
@@ -53,47 +65,44 @@ export default function GenerateTestParent({ children = [] }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-6 space-y-5">
+        <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
 
           {/* Child Select */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Select Child *</label>
-            <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 outline-none"
+            <label className="font-medium text-sm">Select Child<span className="text-red-600"> *</span></label>
+            <Dropdown
               value={selectedChild}
-              onChange={(e) => setSelectedChild(e.target.value)}
-            >
-              <option value="">Choose a child</option>
-              {children.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.name} — Class {child.grade}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setSelectedChild(e.value)}
+              options={children}
+              optionLabel="fullName"
+              optionValue="id"
+              placeholder="Choose a child"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Subject Select */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Select Subject *</label>
-            <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 outline-none"
+            <label className="font-medium text-sm">Select Subject<span className="text-red-600"> *</span></label>
+            <Dropdown
               value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-            >
-              <option value="">Choose a subject</option>
-              {subjects.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setSelectedSubject(e.value)}
+              options={subjects}
+              optionLabel="label"
+              placeholder="Choose a subject"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Topics */}
           {selectedSubject && (
             <div className="space-y-2">
-              <label className="font-medium text-sm">Select Topics *</label>
-              <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border">
+              <label className="font-medium text-sm">Select Topics<span className="text-red-600"> *</span></label>
+              <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-xl border text-sm">
                 {topics[selectedSubject]?.map((topic) => (
                   <label key={topic} className="flex gap-2 text-sm">
                     <input
@@ -111,46 +120,48 @@ export default function GenerateTestParent({ children = [] }) {
           {/* Questions & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="font-medium text-sm">Number of Questions</label>
-              <input
-                type="number"
-                className="w-full border rounded-lg px-3 py-2"
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(e.target.value)}
-                min="10" max="50"
+              <label className="font-medium text-sm">Number of Questions<span className="text-red-600"> *</span></label>
+              <InputNumber
+                value={Number(numQuestions)}
+                onValueChange={(e) => setNumQuestions(e.value?.toString() || "20")}
+                min={10} max={50}
+                showButtons
+                inputClassName="text-sm w-full"
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <label className="font-medium text-sm">Time Limit (minutes)</label>
-              <input
-                type="number"
-                className="w-full border rounded-lg px-3 py-2"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(e.target.value)}
-                min="10" max="120"
+              <label className="font-medium text-sm">Time Limit (minutes)<span className="text-red-600"> *</span></label>
+              <InputNumber
+                value={Number(timeLimit)}
+                onValueChange={(e) => setTimeLimit(e.value?.toString() || "30")}
+                min={10} max={120}
+                showButtons
+                inputClassName="text-sm w-full"
+                className="w-full"
               />
             </div>
           </div>
 
           {/* Difficulty */}
           <div className="space-y-2">
-            <label className="font-medium text-sm">Difficulty Level *</label>
-            <select
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2"
+            <label className="font-medium text-sm">Difficulty Level<span className="text-red-600"> *</span></label>
+            <Dropdown
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-            >
-              <option value="">Choose difficulty</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
+              onChange={(e) => setDifficulty(e.value)}
+              options={difficulties}
+              optionLabel="label"
+              placeholder="Choose difficulty"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Button */}
           <button
             onClick={createTest}
-            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full py-3 flex justify-center items-center gap-2 font-medium cursor-pointer"
+            className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer"
           >
             <Plus size={20} />
             Generate Test & Assign
@@ -158,7 +169,7 @@ export default function GenerateTestParent({ children = [] }) {
         </div>
 
         {/* Summary Card */}
-        <div className="bg-white rounded-2xl p-6 space-y-4">
+        <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
           <div className="flex items-center gap-2">
             <ClipboardList className="text-blue-600" size={20} />
             <p className="font-semibold text-blue-900">Test Summary</p>
@@ -167,7 +178,7 @@ export default function GenerateTestParent({ children = [] }) {
           <div className="text-sm space-y-3">
             <div>
               <span className="text-gray-600">Student:</span>
-              <p>{selectedChild ? children.find(c => c.id === selectedChild)?.name : "Not selected"}</p>
+              <p>{selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}</p>
             </div>
 
             <div>

@@ -115,3 +115,17 @@
   border: 2px solid #dbeafe;
   /* Same as track for a nice padding effect */
 }
+
+
+/* Custom styles for PrimeReact components */
+/* Dropdown */
+.p-dropdown {
+    background-color: #f3f4f6; /* bg-gray-100 */
+    border-radius: 0.6rem; /* rounded-lg */
+}
+
+/* InputNumber */
+.p-inputnumber-input {
+    background-color: #f3f4f6;
+    border-radius: 0.6rem;/* bg-gray-100 */
+}
