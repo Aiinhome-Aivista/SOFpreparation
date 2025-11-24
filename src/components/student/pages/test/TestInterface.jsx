@@ -245,7 +245,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className=" mx-auto">
           <div className="grid lg:grid-cols-4 gap-6">
             {/* Question Card */}
             <Card className="lg:col-span-3 p-8">
