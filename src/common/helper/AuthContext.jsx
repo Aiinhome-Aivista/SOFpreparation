@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
     const openLoginModal = () => setModalState('login');
     const openRegisterModal = () => setModalState('register');
     const openLogoutModal = () => setModalState('logout');
+    const openAddChildModal = () => setModalState('addChild');
     const closeModal = () => setModalState(null);
 
     const login = (userData) => {
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }) => {
         openLoginModal,
         openRegisterModal,
         openLogoutModal,
+        openAddChildModal,
         closeModal,
         user,
         login,
