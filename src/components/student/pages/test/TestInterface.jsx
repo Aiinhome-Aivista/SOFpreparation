@@ -181,7 +181,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                   // View Detailed Report - placeholder
                   alert("View detailed report (implement)");
                 }}
-                className="flex-1 border rounded-md px-4 py-2 text-sm"
+                className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
               >
                 View Detailed Report
               </button>
@@ -189,7 +189,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               <button
                 type="button"
                 onClick={onComplete}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm"
+                className="flex-1 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm"
               >
                 Back to Dashboard
               </button>
@@ -230,7 +230,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               <button
                 type="button"
                 onClick={() => setShowSubmitDialog(true)}
-                className="border rounded-md px-3 py-1 text-sm text-green-700 border-green-200 hover:bg-green-50"
+                className="border cursor-pointer rounded-md px-3 py-1 text-sm text-green-700 border-green-200 hover:bg-green-50"
               >
                 Submit Test
               </button>
@@ -273,7 +273,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
-                    className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                    className={`w-full cursor-pointer p-4 text-left rounded-lg border-2 transition-all ${
                       answers[currentQuestion] === index
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
@@ -298,7 +298,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                   type="button"
                   onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                   disabled={currentQuestion === 0}
-                  className={`rounded-md px-4 py-2 text-sm border ${
+                  className={`rounded-md cursor-pointer px-4 py-2 text-sm border ${
                     currentQuestion === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
                   }`}
                 >
@@ -309,7 +309,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                   type="button"
                   onClick={() => setCurrentQuestion(Math.min(questions.length - 1, currentQuestion + 1))}
                   disabled={currentQuestion === questions.length - 1}
-                  className={`rounded-md px-4 py-2 text-sm text-white ${
+                  className={`rounded-md cursor-pointer px-4 py-2 text-sm text-white ${
                     currentQuestion === questions.length - 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
@@ -327,7 +327,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                   <button
                     key={index}
                     onClick={() => setCurrentQuestion(index)}
-                    className={`aspect-square rounded-lg text-sm transition-all ${
+                    className={`aspect-square cursor-pointer rounded-lg text-sm transition-all ${
                       currentQuestion === index
                         ? "bg-blue-600 text-white"
                         : answers[index] !== undefined
@@ -378,7 +378,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               </div>
               <button
                 onClick={() => setShowSubmitDialog(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 cursor-pointer hover:text-gray-700"
                 aria-label="Close"
               >
                 <XCircle className="size-5" />
@@ -414,7 +414,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                 <button
                   type="button"
                   onClick={() => setShowSubmitDialog(false)}
-                  className="flex-1 border rounded-md px-4 py-2 text-sm"
+                  className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
                 >
                   Review Answers
                 </button>
@@ -422,7 +422,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
+                  className="flex-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
                 >
                   Submit Test
                 </button>
