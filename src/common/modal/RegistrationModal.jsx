@@ -1,21 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { UserCircle, User, Mail, Phone, Lock, X } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
+import { Toast } from 'primereact/toast';
+import ApiService from '../../service/ApiService';
+import { POST_APIS } from '../../../connection';
 
 function RegistrationModal() {
     const { closeModal, openLoginModal } = useAuth();
+    const toast = useRef(null);
     const [formData, setFormData] = useState({
-        name: '',
+        fullName: '',
         email: '',
         phone: '',
         password: '',
         confirmPassword: '',
     });
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }));
+        }
     };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required.';
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required.';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Email is invalid.';
+        }
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required.';
+        } else if (!/^\d{10}$/.test(formData.phone)) {
+            newErrors.phone = 'Phone number must be 10 digits.';
+        }
+        if (!formData.password) {
+            newErrors.password = 'Password is required.';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters.';
+        }
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match.';
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) {
+            toast.current.show({ severity: 'error', summary: 'Validation Error', detail: 'Please check the fields and try again.' });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const payload = {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                role: "parent"
+            };
+            const response = await ApiService(POST_APIS.register, { method: 'POST', body: payload });
+            if (response.isSuccess) {
+                toast.current.show({ severity: 'success', summary: 'Success', detail: response.message || 'Registration Successful!' });
+                setTimeout(() => { closeModal(); openLoginModal(); }, 1500);
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Registration Failed', detail: response.message || 'An error occurred.' });
+            }
+        } catch (error) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'Something went wrong!' });
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -35,16 +98,17 @@ function RegistrationModal() {
                     </button>
                 </div>
 
-                <form className="space-y-4">
+                <Toast ref={toast} />
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
-                        <div className="relative"><User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="name" type="text" placeholder="Enter your full name" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : ''}`} /></div>
-                        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                        <label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
+                        <div className="relative"><User className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="fullName" type="text" placeholder="Enter your full name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.fullName ? 'border-red-500' : ''}`} /></div>
+                        {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                        <div className="relative"><Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="email" type="email" placeholder="parent@example.com" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : ''}`} /></div>
+                        <div className="relative"><Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="email" type="text" placeholder="parent@example.com" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : ''}`} /></div>
                         {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                     </div>
 
@@ -82,8 +146,8 @@ function RegistrationModal() {
                         </p>
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md cursor-pointer">
-                        Create Parent Account
+                    <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed">
+                        {isLoading ? 'Creating Account...' : 'Create Parent Account'}
                     </button>
                 </form>
 
