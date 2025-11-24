@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ClipboardList, Plus, CheckCircle } from "lucide-react";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 
 export default function GenerateTestParent() {
   const [selectedChild, setSelectedChild] = useState("");
@@ -17,13 +19,19 @@ export default function GenerateTestParent() {
     { value: "igko", label: "IGKO - General Knowledge" },
   ];
 
+  const difficulties = [
+    { label: "Easy", value: "easy" },
+    { label: "Medium", value: "medium" },
+    { label: "Hard", value: "hard" },
+  ];
+
   const topics = {
     imo: ["Algebra", "Geometry", "Number System", "Mensuration", "Data Handling"],
     nso: ["Physics", "Chemistry", "Biology", "Environmental Science"],
     ieo: ["Grammar", "Vocabulary", "Reading Comprehension", "Writing Skills"],
     igko: ["History", "Geography", "Current Affairs", "Science & Technology"],
   };
- const children = [
+  const children = [
     { id: "1", fullName: "Aarav Kumar" },
     { id: "2", fullName: "Diya Sharma" },
   ];
@@ -57,40 +65,37 @@ export default function GenerateTestParent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-6 space-y-5">
+        <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
 
           {/* Child Select */}
           <div className="space-y-2">
             <label className="font-medium text-sm">Select Child<span className="text-red-600"> *</span></label>
-            <select
-              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
+            <Dropdown
               value={selectedChild}
-              onChange={(e) => setSelectedChild(e.target.value)}
-            >
-              <option value="">Choose a child</option>
-              {children.map((child) => (
-                <option key={child.id} value={child.id}>
-                  {child.fullName}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setSelectedChild(e.value)}
+              options={children}
+              optionLabel="fullName"
+              optionValue="id"
+              placeholder="Choose a child"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Subject Select */}
           <div className="space-y-2">
             <label className="font-medium text-sm">Select Subject<span className="text-red-600"> *</span></label>
-            <select
-              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
+            <Dropdown
               value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-            >
-              <option value="">Choose a subject</option>
-              {subjects.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => setSelectedSubject(e.value)}
+              options={subjects}
+              optionLabel="label"
+              placeholder="Choose a subject"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Topics */}
@@ -116,22 +121,24 @@ export default function GenerateTestParent() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="font-medium text-sm">Number of Questions<span className="text-red-600"> *</span></label>
-              <input
-                type="number"
-                className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(e.target.value)}
-                min="10" max="50"
+              <InputNumber
+                value={Number(numQuestions)}
+                onValueChange={(e) => setNumQuestions(e.value?.toString() || "20")}
+                min={10} max={50}
+                showButtons
+                inputClassName="text-sm w-full"
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
               <label className="font-medium text-sm">Time Limit (minutes)<span className="text-red-600"> *</span></label>
-              <input
-                type="number"
-                className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(e.target.value)}
-                min="10" max="120"
+              <InputNumber
+                value={Number(timeLimit)}
+                onValueChange={(e) => setTimeLimit(e.value?.toString() || "30")}
+                min={10} max={120}
+                showButtons
+                inputClassName="text-sm w-full"
+                className="w-full"
               />
             </div>
           </div>
@@ -139,16 +146,16 @@ export default function GenerateTestParent() {
           {/* Difficulty */}
           <div className="space-y-2">
             <label className="font-medium text-sm">Difficulty Level<span className="text-red-600"> *</span></label>
-            <select
-              className="w-full bg-gray-100 rounded-lg px-3 py-2 focus:ring-1 focus:ring-blue-900 outline-none text-sm"
+            <Dropdown
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-            >
-              <option value="">Choose difficulty</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
+              onChange={(e) => setDifficulty(e.value)}
+              options={difficulties}
+              optionLabel="label"
+              placeholder="Choose difficulty"
+              className="w-full"
+              filter
+              showClear
+            />
           </div>
 
           {/* Button */}
@@ -162,7 +169,7 @@ export default function GenerateTestParent() {
         </div>
 
         {/* Summary Card */}
-        <div className="bg-white rounded-2xl p-6 space-y-4">
+        <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
           <div className="flex items-center gap-2">
             <ClipboardList className="text-blue-600" size={20} />
             <p className="font-semibold text-blue-900">Test Summary</p>
