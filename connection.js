@@ -8,4 +8,5 @@ export const POST_APIS = {
   addChild: `${BASE_URL}ParentsMicroservices/add_child`,
   testresult: `${BASE_URL}ChildMicroservices/test_result`,
   childdetails: `${BASE_URL}ParentsMicroservices/get_child_details`,
+  updatechilddetails: `${BASE_URL}ParentsMicroservices/update_child_details`,
 };
