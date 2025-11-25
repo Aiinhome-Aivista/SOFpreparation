@@ -23,6 +23,7 @@ export default function GenerateTestParent() {
     { label: "Easy", value: "easy" },
     { label: "Medium", value: "medium" },
     { label: "Hard", value: "hard" },
+    { label: "Mixed", value: "mixed" },
   ];
 
   const topics = {
@@ -177,17 +178,19 @@ export default function GenerateTestParent() {
 
           <div className="text-sm space-y-3">
             <div>
-              <span className="text-gray-600">Student:</span>
-              <p>{selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}</p>
+              <span className="text-gray-800">Student:</span>
+              <p className={selectedChild ? "text-black" : "text-gray-500"}>
+                {selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}
+              </p>
             </div>
 
             <div>
-              <span className="text-gray-600">Subject:</span>
-              <p>{selectedSubject ? subjects.find(s => s.value === selectedSubject)?.label : "Not selected"}</p>
+              <span className="text-gray-800">Subject:</span>
+              <p className={selectedChild ? "text-black" : "text-gray-500"}>{selectedSubject ? subjects.find(s => s.value === selectedSubject)?.label : "Not selected"}</p>
             </div>
 
             <div>
-              <span className="text-gray-600">Topics:</span>
+              <span className="text-gray-800">Topics:</span>
               <div className="flex gap-2 flex-wrap mt-1">
                 {selectedTopics.length > 0 ? (
                   selectedTopics.map((topic) => (
@@ -203,17 +206,17 @@ export default function GenerateTestParent() {
 
             <div className="grid grid-cols-2 pt-3 border-t gap-3">
               <div>
-                <span className="text-gray-600">Questions:</span>
+                <span className="text-gray-800">Questions:</span>
                 <p className="text-blue-600">{numQuestions}</p>
               </div>
               <div>
-                <span className="text-gray-600">Time:</span>
+                <span className="text-gray-800">Time:</span>
                 <p className="text-blue-600">{timeLimit} min</p>
               </div>
             </div>
 
             <div>
-              <span className="text-gray-600">Difficulty:</span>
+              <span className="text-gray-800">Difficulty:</span>
               <p className="capitalize">{difficulty || "Not selected"}</p>
             </div>
 

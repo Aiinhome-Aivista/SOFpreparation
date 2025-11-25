@@ -9,19 +9,5 @@ export const POST_APIS = {
   login: `${BASE_URL}AuthMicroservices/login`,
   addChild: `${BASE_URL}ParentsMicroservices/add_child`,
   testresult: `${BASE_URL}ChildMicroservices/test_result`,
+  childdetails: `${BASE_URL}ParentsMicroservices/get_child_details`,
 };
-
-
-/* login 
-{
-    "email": "",
-    "password": ""
-}
-
-register 
-{
-    "fullName": "saikat sutradhar",
-    "email": "saikat@example.com",
-    "password": "password123",
-    "role": "parent"
-} */

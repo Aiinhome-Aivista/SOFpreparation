@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UserCircle, User, Mail, Phone, Lock, X } from 'lucide-react';
+import { UserCircle, User, Mail, Phone, Lock, X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { Toast } from 'primereact/toast';
 import ApiService from '../../service/ApiService';
@@ -17,9 +17,19 @@ function RegistrationModal() {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleInputChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        if (field === 'phone') {
+            // Allow only digits and limit to 10
+            const numericValue = value.replace(/\D/g, '');
+            if (numericValue.length <= 10) {
+                setFormData((prev) => ({ ...prev, [field]: numericValue }));
+            }
+        } else {
+            setFormData((prev) => ({ ...prev, [field]: value }));
+        }
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: null }));
         }
@@ -116,19 +126,35 @@ function RegistrationModal() {
 
                     <div className="space-y-2">
                         <label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number <span className="text-red-500">*</span></label>
-                        <div className="relative"><Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="phone" type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : ''}`} /></div>
+                        <div className="relative flex items-center">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400 z-10" />
+                            {formData.phone && <span className="absolute left-10 pl-1 pr-2 text-gray-500">+91</span>}
+                            <input id="phone" type="tel" placeholder="Enter your phone number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : ''} ${formData.phone ? 'pl-20' : 'pl-10'}`} />
+                        </div>
                         {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label htmlFor="password" className="text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="password" type="password" placeholder="Create a password (min. 6 characters)" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : ''}`} /></div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+                            <input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password (min. 6 characters)" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} className={`pl-10 pr-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : ''}`} />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
                         {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                     </div>
 
                     <div className="space-y-2">
                         <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm Password <span className="text-red-500">*</span></label>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" /><input id="confirmPassword" type="password" placeholder="Re-enter your password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} className={`pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.confirmPassword ? 'border-red-500' : ''}`} /></div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+                            <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Re-enter your password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} className={`pl-10 pr-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.confirmPassword ? 'border-red-500' : ''}`} />
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
                         {errors.confirmPassword && (<p className="text-sm text-red-500">{errors.confirmPassword}</p>)}
                     </div>
 
