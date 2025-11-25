@@ -2,6 +2,7 @@ import React, { useState} from 'react'
 import ManageChild from '../manage-child/ManageChild'
 import GenerateTestParent from '../generate-test/GenerateTestParent'
 import ChildPerformance from '../child-performance/ChildPerformance'
+import SmartAssistantChat from '../smart-assistant/SmartAssistantChat'
 
 
 function ParentDashboard() {
@@ -16,6 +17,7 @@ function ParentDashboard() {
           { id: "children", label: "Children" },
           { id: "test", label: "Test Generator" },
           { id: "performance", label: "Child Performance" },
+          { id: "smart-assistant", label: "Smart Assistant" },
         ].map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -40,6 +42,7 @@ function ParentDashboard() {
      {activeTab === "children" && <ManageChild />}
       {activeTab === "test" && <GenerateTestParent />}
       {activeTab === "performance" && <ChildPerformance />}
+      {activeTab === "smart-assistant" && <SmartAssistantChat />}
     </div>
   );
 }
