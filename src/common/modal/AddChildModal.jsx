@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { User, Mail, Lock, GraduationCap, X, Building } from 'lucide-react';
+import { User, Mail, Lock, GraduationCap, X, Building, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { Toast } from 'primereact/toast';
 import ApiService from '../../service/ApiService';
@@ -18,6 +18,8 @@ function AddChildModal() {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -109,11 +111,23 @@ function AddChildModal() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" /><input type="password" placeholder="Create a password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} className={`pl-10 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'}`} /></div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                            <input type={showPassword ? "text" : "password"} placeholder="Create a password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} className={`pl-10 pr-10 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'}`} />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Confirm Password <span className="text-red-500">*</span></label>
-                        <div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" /><input type="password" placeholder="Re-enter password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} className={`pl-10 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`} /></div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                            <input type={showConfirmPassword ? "text" : "password"} placeholder="Re-enter password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} className={`pl-10 pr-10 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`} />
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed">
                         {isLoading ? 'Creating Account...' : 'Create Child Account'}

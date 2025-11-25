@@ -5,7 +5,8 @@ export const GET_APIS = {}
 export const POST_APIS = {
   register: `${BASE_URL}ParentsMicroservices/register`,
   login: `${BASE_URL}AuthMicroservices/login`,
-  addChild: `${BASE_URL}ParentsMicroservices/add_child`
+  addChild: `${BASE_URL}ParentsMicroservices/add_child`,
+  childdetails: `${BASE_URL}ParentsMicroservices/get_child_details`,
 }
 
 

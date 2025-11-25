@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UserCircle, User, Shield, X } from 'lucide-react';
+import { UserCircle, User, Shield, X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ApiService from '../../service/ApiService';
@@ -18,6 +18,9 @@ export default function LoginModal() {
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showParentPassword, setShowParentPassword] = useState(false);
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -105,7 +108,12 @@ export default function LoginModal() {
               </div>
               <div className="space-y-1">
                 <label htmlFor="parent-password" className="text-sm font-medium text-gray-700">Password</label>
-                <input id="parent-password" type="password" placeholder="Enter your password" value={parentPassword} onChange={(e) => setParentPassword(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <div className="relative">
+                  <input id="parent-password" type={showParentPassword ? 'text' : 'password'} placeholder="Enter your password" value={parentPassword} onChange={(e) => setParentPassword(e.target.value)} required className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <button type="button" onClick={() => setShowParentPassword(!showParentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                    {showParentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={isLoading} className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md disabled:bg-blue-400">
                 {isLoading ? 'Logging in...' : 'Login as Parent'}
@@ -121,7 +129,12 @@ export default function LoginModal() {
               </div>
               <div className="space-y-1">
                 <label htmlFor="student-password" className="text-sm font-medium text-gray-700">Password</label>
-                <input id="student-password" type="password" placeholder="Enter your password" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                <div className="relative">
+                  <input id="student-password" type={showStudentPassword ? 'text' : 'password'} placeholder="Enter your password" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} required className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  <button type="button" onClick={() => setShowStudentPassword(!showStudentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                    {showStudentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={isLoading} className="cursor-pointer w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md disabled:bg-green-400">
                 {isLoading ? 'Logging in...' : 'Login as Student'}
@@ -137,7 +150,12 @@ export default function LoginModal() {
               </div>
               <div className="space-y-1">
                 <label htmlFor="admin-password" className="text-sm font-medium text-gray-700">Password</label>
-                <input id="admin-password" type="password" placeholder="Enter admin password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} required className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                <div className="relative">
+                  <input id="admin-password" type={showAdminPassword ? 'text' : 'password'} placeholder="Enter admin password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} required className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                  <button type="button" onClick={() => setShowAdminPassword(!showAdminPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer">
+                    {showAdminPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={isLoading} className="cursor-pointer w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-md disabled:bg-orange-400">
                 {isLoading ? 'Logging in...' : 'Login as Admin'}
