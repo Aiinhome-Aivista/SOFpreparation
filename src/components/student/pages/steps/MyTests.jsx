@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
 import {
@@ -9,62 +9,81 @@ import {
   AlertCircle,
   BookOpen,
 } from "lucide-react";
+import { POST_APIS } from "../../../../../connection";
 
 export default function MyTests({ onStartTest }) {
-  const pendingTests = [
-    {
-      id: "1",
-      title: "IMO Mathematics - Algebra & Geometry",
-      subject: "Mathematics",
-      questions: 25,
-      duration: 45,
-      status: "pending",
-      dueDate: "2025-11-25",
-    },
-    {
-      id: "2",
-      title: "NSO Science - Physics Fundamentals",
-      subject: "Science",
-      questions: 20,
-      duration: 30,
-      status: "pending",
-      dueDate: "2025-11-27",
-    },
-    {
-      id: "3",
-      title: "IEO English - Grammar & Comprehension",
-      subject: "English",
-      questions: 30,
-      duration: 40,
-      status: "overdue",
-      dueDate: "2025-11-18",
-    },
-  ];
+  const [pendingTests, setPendingTests] = useState([]);
+  const [completedTests, setCompletedTests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const completedTests = [
-    {
-      id: "4",
-      title: "IMO Mathematics - Number System",
-      subject: "Mathematatics",
-      questions: 20,
-      duration: 30,
-      status: "completed",
-      score: 85,
-      dueDate: "2025-11-15",
-      completedDate: "2025-11-14",
-    },
-    {
-      id: "5",
-      title: "NSO Science - Biology",
-      subject: "Science",
-      questions: 25,
-      duration: 35,
-      status: "completed",
-      score: 92,
-      dueDate: "2025-11-10",
-      completedDate: "2025-11-09",
-    },
-  ];
+  // -----------------------------
+  // 🔥 Fetch Tests from API
+  // -----------------------------
+  const fetchTests = async () => {
+    try {
+      // Read student ID from localStorage
+      const stored = JSON.parse(localStorage.getItem("user"));
+      const studentId = stored?.userData?.id;
+
+      if (!studentId) {
+        console.error("No student ID found in localStorage");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(POST_APIS.testresult, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ student_id: studentId }),
+      });
+
+      const json = await res.json();
+
+      if (json.isSuccess && Array.isArray(json.data)) {
+        const all = json.data;
+
+        // Split into pending & completed
+        const pending = all.filter((t) => t.status === "pending");
+        const completed = all.filter((t) => t.status === "completed");
+
+        // Convert API fields to match UI structure
+        setPendingTests(
+          pending.map((t) => ({
+            id: t.test_id,
+            title: t.test_title,
+            subject: "Subject " + t.subject_id,
+            questions: t.total_questions,
+            duration: t.duration_minutes,
+            status: t.status,
+            dueDate: t.due_date, // can be null
+          }))
+        );
+
+        setCompletedTests(
+          completed.map((t) => ({
+            id: t.test_id,
+            title: t.test_title,
+            subject: "Subject " + t.subject_id,
+            questions: t.total_questions,
+            duration: t.duration_minutes,
+            status: t.status,
+            completedDate: t.created_at,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("API ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTests();
+  }, []);
+
 
   const getStatusBadge = (status) => {
     if (status === "pending") {
@@ -94,9 +113,12 @@ export default function MyTests({ onStartTest }) {
     return null;
   };
 
+  if (loading) {
+    return <p className="text-center py-8 text-gray-500">Loading tests...</p>;
+  }
+
   return (
     <div className="space-y-6">
-
       {/* Pending Tests */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -123,7 +145,6 @@ export default function MyTests({ onStartTest }) {
               }
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
                 {/* Left Info */}
                 <div className="flex-1">
                   <div className="flex items-start gap-3 mb-3">
@@ -189,9 +210,11 @@ export default function MyTests({ onStartTest }) {
 
         <div className="space-y-3">
           {completedTests.map((test) => (
-            <Card key={test.id} className="p-6 hover:shadow-md transition-shadow border-2 border-gray-200">
+            <Card
+              key={test.id}
+              className="p-6 hover:shadow-md transition-shadow border-2 border-gray-200"
+            >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
                 <div className="flex-1">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -204,7 +227,9 @@ export default function MyTests({ onStartTest }) {
                         {getStatusBadge(test.status)}
                       </div>
 
-                      <p className="text-sm text-gray-600 mb-2">{test.subject}</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {test.subject}
+                      </p>
 
                       <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
