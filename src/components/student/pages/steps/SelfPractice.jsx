@@ -1,21 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
 import { Shuffle, Target, BookOpen } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
+import { GET_APIS } from "../../../../../connection";
 
 export default function SelfPractice({ onStartTest }) {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [numQuestions, setNumQuestions] = useState("10");
+  const [subjects, setSubjects] = useState([]); // ← API DATA
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
 
-  const subjects = [
-    { value: "imo", label: "IMO - Mathematics", topics: 12 },
-    { value: "nso", label: "NSO - Science", topics: 15 },
-    { value: "ieo", label: "IEO - English", topics: 10 },
-    { value: "igko", label: "IGKO - General Knowledge", topics: 18 },
-  ];
+  // const subjects = [
+  //   { value: "imo", label: "IMO - Mathematics", topics: 12 },
+  //   { value: "nso", label: "NSO - Science", topics: 15 },
+  //   { value: "ieo", label: "IEO - English", topics: 10 },
+  //   { value: "igko", label: "IGKO - General Knowledge", topics: 18 },
+  // ];
 
   const difficulties = [
     { label: "Easy - Build Foundation", value: "easy" },
@@ -23,6 +26,32 @@ export default function SelfPractice({ onStartTest }) {
     { label: "Hard - Challenge Yourself", value: "hard" },
     { label: "Mixed - All Levels", value: "mixed" },
   ];
+
+  // -------------------------------------------
+  // Fetch Subjects from API
+  // -------------------------------------------
+  const fetchSubjects = async () => {
+    try {
+      const res = await fetch(GET_APIS.subjectsdataurl);
+      const json = await res.json();
+
+      if (json.isSuccess && Array.isArray(json.data)) {
+        const loadedSubjects = json.data.map((s) => ({
+          value: s.subject_id,
+          label: s.subject_name,
+        }));
+        setSubjects(loadedSubjects);
+      }
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
+    } finally {
+      setLoadingSubjects(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
 
   const handleGeneratePractice = () => {
     if (!subject || !difficulty) {
@@ -37,7 +66,9 @@ export default function SelfPractice({ onStartTest }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-blue-900 text-xl font-medium mb-2">Self Practice</h2>
+        <h2 className="text-blue-900 text-xl font-medium mb-2">
+          Self Practice
+        </h2>
         <p className="text-gray-600">
           Generate random question sets to practice at your own pace
         </p>
@@ -63,17 +94,25 @@ export default function SelfPractice({ onStartTest }) {
                 onChange={(e) => setSubject(e.value)}
                 options={subjects}
                 optionLabel="label"
-                placeholder="Choose a Subject"
+                placeholder={
+                  loadingSubjects ? "Loading..." : "Choose a Subject"
+                }
                 filter
                 filterBy="label"
                 className="w-full"
                 showClear
+                disabled={loadingSubjects}
               />
 
-              {subject && (
+              {/* {subject && (
                 <p className="text-sm text-gray-600">
                   {subjects.find((s) => s.value === subject)?.topics} topics
                   available
+                </p>
+              )} */}
+              {subject && (
+                <p className="text-sm text-gray-600">
+                  Selected: {subjects.find((s) => s.value === subject)?.label}
                 </p>
               )}
             </div>

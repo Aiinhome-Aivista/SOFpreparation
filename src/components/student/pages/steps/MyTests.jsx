@@ -9,6 +9,7 @@ import {
   AlertCircle,
   BookOpen,
 } from "lucide-react";
+import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
 
 export default function MyTests({ onStartTest }) {
@@ -31,15 +32,10 @@ export default function MyTests({ onStartTest }) {
         return;
       }
 
-      const res = await fetch(POST_APIS.testresult, {
+      const json = await ApiService(POST_APIS.testresult, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ student_id: studentId }),
+        body: { student_id: studentId },
       });
-
-      const json = await res.json();
 
       if (json.isSuccess && Array.isArray(json.data)) {
         const all = json.data;
@@ -53,7 +49,7 @@ export default function MyTests({ onStartTest }) {
           pending.map((t) => ({
             id: t.test_id,
             title: t.test_title,
-            subject: "Subject " + t.subject_id,
+            subject: t.subject_name,
             questions: t.total_questions,
             duration: t.duration_minutes,
             status: t.status,
