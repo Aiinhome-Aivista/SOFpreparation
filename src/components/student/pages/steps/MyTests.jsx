@@ -8,6 +8,7 @@ import {
   Calendar,
   AlertCircle,
   BookOpen,
+  Loader,
 } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
@@ -61,7 +62,7 @@ export default function MyTests({ onStartTest }) {
           completed.map((t) => ({
             id: t.test_id,
             title: t.test_title,
-            subject: "Subject " + t.subject_id,
+            subject: t.subject_name,
             questions: t.total_questions,
             duration: t.duration_minutes,
             status: t.status,
@@ -109,7 +110,10 @@ export default function MyTests({ onStartTest }) {
   };
 
   if (loading) {
-    return <p className="text-center py-8 text-gray-500">Loading tests...</p>;
+    return (<div className="flex justify-center items-center h-64">
+          <Loader className="animate-spin text-blue-600" size={40} />
+          <p className="ml-4 text-gray-600">Loading Children...</p>
+        </div>);
   }
 
   return (

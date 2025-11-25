@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
 import { Shuffle, Target, BookOpen } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
-import { GET_APIS } from "../../../../../connection";
+import { GET_APIS, POST_APIS } from "../../../../../connection";
+import ApiService from "../../../../service/ApiService";
+import { Toast } from "primereact/toast";
 
 export default function SelfPractice({ onStartTest }) {
   const [subject, setSubject] = useState("");
@@ -12,6 +14,9 @@ export default function SelfPractice({ onStartTest }) {
   const [numQuestions, setNumQuestions] = useState("10");
   const [subjects, setSubjects] = useState([]); // ← API DATA
   const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [examTime, setExamTime] = useState(20); // default 20 minutes
+  const [errors, setErrors] = useState({});
+  const toast = useRef(null);
 
   // const subjects = [
   //   { value: "imo", label: "IMO - Mathematics", topics: 12 },
@@ -32,8 +37,12 @@ export default function SelfPractice({ onStartTest }) {
   // -------------------------------------------
   const fetchSubjects = async () => {
     try {
-      const res = await fetch(GET_APIS.subjectsdataurl);
-      const json = await res.json();
+      // const res = await fetch(GET_APIS.subjectsdataurl);
+      // const json = await res.json();
+
+      const json = await ApiService(GET_APIS.subjectsdataurl, {
+        method: "GET",
+      });
 
       if (json.isSuccess && Array.isArray(json.data)) {
         const loadedSubjects = json.data.map((s) => ({
@@ -53,18 +62,101 @@ export default function SelfPractice({ onStartTest }) {
     fetchSubjects();
   }, []);
 
-  const handleGeneratePractice = () => {
-    if (!subject || !difficulty) {
-      alert("Please select subject and difficulty level");
-      return;
+  const getSubjectId = (name) => {
+    return subjects.find((s) => s.label === name)?.value || null;
+  };
+
+  const validateForm = () => {
+    let tempErrors = {};
+
+    if (!subject) {
+      tempErrors.subject = "Please select a subject.";
     }
-    const practiceTestId =
-      "practice-" + Math.random().toString(36).substr(2, 9);
-    onStartTest(practiceTestId);
+
+    if (!difficulty) {
+      tempErrors.difficulty = "Please select difficulty level.";
+    }
+
+    if (!numQuestions || numQuestions < 5) {
+      tempErrors.numQuestions = "Enter at least 5 questions.";
+    }
+
+    if (!examTime || examTime < 5) {
+      tempErrors.examTime = "Exam time must be at least 5 minutes.";
+    }
+
+    setErrors(tempErrors);
+
+    return Object.keys(tempErrors).length === 0;
+  };
+
+  const handleGeneratePractice = async () => {
+    if (!validateForm()) return; //  stop if validation fails
+
+    try {
+      // Get studentId from localStorage
+      const stored = JSON.parse(localStorage.getItem("user"));
+      const studentId = stored?.userData?.id;
+
+      if (!studentId) {
+        alert("No student data found. Please login again.");
+        return;
+      }
+
+      const payload = {
+        studentId: studentId,
+        subjectId: subject, // comes from dropdown
+        questions: Number(numQuestions), // InputNumber
+        timeLimit: Number(examTime),
+        difficulty: difficulty, // dropdown difficulty
+      };
+
+      console.log("Practice Payload:", payload);
+
+      const json = await ApiService(POST_APIS.generatetest, {
+        method: "POST",
+        body: payload,
+      });
+
+      if (json.isSuccess) {
+        // SUCCESS TOAST
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Practice test generated successfully!",
+          life: 2000,
+        });
+
+        // RESET INPUTS
+        setSubject(null);
+        setDifficulty(null);
+        setNumQuestions(null);
+        setExamTime(null);
+
+        // RESET ERRORS
+        setErrors({});
+
+        // If you want to auto-start test:
+        // onStartTest("practice-" + Math.random().toString(36).substring(2, 9));
+      }
+    } catch (error) {
+      console.error("Generate Practice Error:", error);
+
+      // ERROR TOAST
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to generate practice test.",
+        life: 2000,
+      });
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Toast must be here */}
+      <Toast ref={toast} />
+
       <div>
         <h2 className="text-blue-900 text-xl font-medium mb-2">
           Self Practice
@@ -77,7 +169,7 @@ export default function SelfPractice({ onStartTest }) {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Practice Generator */}
         <Card className="lg:col-span-2 p-6 border-2 border-gray-200">
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-4">
             <Shuffle className="size-5 text-blue-600" />
             <h3 className="text-blue-900">Create Practice Session</h3>
           </div>
@@ -91,7 +183,10 @@ export default function SelfPractice({ onStartTest }) {
 
               <Dropdown
                 value={subject}
-                onChange={(e) => setSubject(e.value)}
+                onChange={(e) => {
+                  setSubject(e.value);
+                  setErrors((prev) => ({ ...prev, subject: "" }));
+                }}
                 options={subjects}
                 optionLabel="label"
                 placeholder={
@@ -99,17 +194,15 @@ export default function SelfPractice({ onStartTest }) {
                 }
                 filter
                 filterBy="label"
-                className="w-full"
+                className={`w-full ${errors.subject ? "p-invalid" : ""}`}
                 showClear
                 disabled={loadingSubjects}
+                appendTo="self"
               />
 
-              {/* {subject && (
-                <p className="text-sm text-gray-600">
-                  {subjects.find((s) => s.value === subject)?.topics} topics
-                  available
-                </p>
-              )} */}
+              {errors.subject && (
+                <p className="text-red-500 text-xs mt-1">{errors.subject}</p>
+              )}
               {subject && (
                 <p className="text-sm text-gray-600">
                   Selected: {subjects.find((s) => s.value === subject)?.label}
@@ -125,15 +218,54 @@ export default function SelfPractice({ onStartTest }) {
 
               <Dropdown
                 value={difficulty}
-                onChange={(e) => setDifficulty(e.value)}
+                onChange={(e) => {
+                  setDifficulty(e.value);
+                  setErrors((prev) => ({ ...prev, difficulty: "" }));
+                }}
                 options={difficulties}
                 optionLabel="label"
                 placeholder="Choose Difficulty"
                 filter
                 filterBy="label"
-                className="w-full"
+                className={`w-full ${errors.difficulty ? "p-invalid" : ""}`}
                 showClear
+                appendTo="self"
               />
+              {errors.difficulty && (
+                <p className="text-red-500 text-xs mt-1">{errors.difficulty}</p>
+              )}
+            </div>
+
+            {/* EXAM TIME */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Exam Time (Minutes)
+              </label>
+
+              <InputNumber
+                value={examTime}
+                onValueChange={(e) => {
+                  setExamTime(e.value);
+                  setErrors((prev) => ({ ...prev, examTime: null }));
+                }}
+                min={5}
+                max={60}
+                step={1}
+                showButtons
+                placeholder="Select time in minutes"
+                className="w-full"
+                inputClassName={`text-sm ${
+                  errors.examTime ? "border-red-500 bg-red-50" : ""
+                }`}
+              />
+
+              {errors.examTime && (
+                <p className="text-red-500 text-xs mt-1">{errors.examTime}</p>
+              )}
+
+              <p className="text-xs text-gray-600">
+                Recommended: 20–30 minutes
+              </p>
             </div>
 
             {/* NUMBER OF QUESTIONS */}
@@ -143,18 +275,27 @@ export default function SelfPractice({ onStartTest }) {
               </label>
 
               <InputNumber
-                value={Number(numQuestions)}
-                onValueChange={(e) =>
-                  setNumQuestions(e.value?.toString() || "10")
-                }
+                value={numQuestions}
+                onValueChange={(e) => {
+                  setNumQuestions(e.value);
+                  setErrors((prev) => ({ ...prev, numQuestions: null }));
+                }}
                 min={5}
                 max={50}
                 showButtons
                 step={1}
                 placeholder="Enter questions"
-                inputClassName="text-sm"
+                inputClassName={`text-sm ${
+                  errors.numQuestions ? "border-red-500 bg-red-50" : ""
+                }`}
                 className="w-full"
               />
+
+              {errors.numQuestions && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.numQuestions}
+                </p>
+              )}
 
               <p className="text-xs text-gray-600">
                 Recommended: 10–20 questions per session
@@ -192,7 +333,7 @@ export default function SelfPractice({ onStartTest }) {
         </Card>
 
         {/* Right Column */}
-        <div className="space-y-4">
+        <div className="space-y-4 flex flex-col">
           {/* Stats */}
           <Card className="p-6 border-2 border-gray-200">
             <div className="flex items-center gap-2 mb-4">
@@ -253,13 +394,14 @@ export default function SelfPractice({ onStartTest }) {
             </div>
           </Card>
           {/* Quick Start Presets */}
-          <Card className="p-6 border-2 border-gray-200">
+          <Card className="p-6 border-2 border-gray-200 grow">
             <h3 className="text-blue-900 mb-4">Quick Start</h3>
             <div className="space-y-2">
+              {/* EASY MATH */}
               <button
                 className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
-                  setSubject("imo");
+                  setSubject(getSubjectId("Mathematics"));
                   setDifficulty("easy");
                   setNumQuestions("10");
                 }}
@@ -268,10 +410,11 @@ export default function SelfPractice({ onStartTest }) {
                 Easy Math - 10Q
               </button>
 
+              {/* MEDIUM SCIENCE */}
               <button
                 className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
-                  setSubject("nso");
+                  setSubject(getSubjectId("Science"));
                   setDifficulty("medium");
                   setNumQuestions("15");
                 }}
@@ -280,10 +423,11 @@ export default function SelfPractice({ onStartTest }) {
                 Medium Science - 15Q
               </button>
 
+              {/* HARD ENGLISH */}
               <button
                 className="w-full cursor-pointer flex items-center gap-2 justify-start border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-100"
                 onClick={() => {
-                  setSubject("ieo");
+                  setSubject(getSubjectId("English"));
                   setDifficulty("hard");
                   setNumQuestions("20");
                 }}

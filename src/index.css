@@ -129,3 +129,8 @@
     background-color: #f3f4f6;
     border-radius: 0.6rem;/* bg-gray-100 */
 }
+
+.p-invalid {
+  border: 1px solid #ef4444 !important; /* red-500 */
+  background-color: #fef2f2 !important; /* red-50 */
+}
