@@ -5,6 +5,7 @@ import LoginModal from '../modal/LoginModal';
 import RegistrationModal from '../modal/RegistrationModal';
 import ConfirmLogoutModal from '../modal/ConfirmLogoutModal';
 import AddChildModal from '../modal/AddChildModal';
+import { UserProvider } from '../helper/UserContext';
 
 function Modals() {
     const { modalState } = useAuth();
@@ -18,11 +19,13 @@ function Modals() {
 function Layout({ children }) {
     return (
         <AuthProvider>
-            <div className='w-full h-screen flex flex-col'>
-                <Header />
-                <main className='w-full grow bg-[#EFFBF6] h-full overflow-y-auto'>{children}</main>
-                <Modals />
-            </div>
+            <UserProvider>
+                <div className='w-full h-screen flex flex-col'>
+                    <Header />
+                    <main className='w-full grow bg-[#EFFBF6] h-full overflow-y-auto'>{children}</main>
+                    <Modals />
+                </div>
+            </UserProvider>
         </AuthProvider>
     )
 }

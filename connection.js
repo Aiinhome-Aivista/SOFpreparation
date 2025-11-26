@@ -11,6 +11,7 @@ export const POST_APIS = {
   testresult: `${BASE_URL}ChildMicroservices/test_result`,
   childdetails: `${BASE_URL}ParentsMicroservices/get_child_details`,
   generatetest: `${BASE_URL}ChildMicroservices/generate_test`,
+  assigntest: `${BASE_URL}ParentsMicroservices/assign_test`,
   updatechilddetails: `${BASE_URL}ParentsMicroservices/update_child_details`,
   startassessment: `${BASE_URL}AssessmentMicroservices/start_assessment`,
   saveanswer: `${BASE_URL}AssessmentMicroservices/save_answer`,
