@@ -1,17 +1,18 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { User, Mail, GraduationCap, MoreVertical, Loader, AlertCircle, Pencil, Trash2, School } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
 import EditChildModal from "../../../../common/modal/EditChildModal";
+import { UserContext } from "../../../../common/helper/UserContext";
 
 const ManageChild = () => {
-  const [children, setChildren] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState(null);
   const menuRef = useRef(null);
+  const {childdetails, setChilddetails} = useContext(UserContext)
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -33,13 +34,13 @@ const ManageChild = () => {
         parentId = parsedUser?.userData?.id;
       }
     } catch (e) {
-      setError("Failed to parse user data from local storage.");
+      setError("User not found. Please log in again..");
       setIsLoading(false);
       return;
     }
 
     if (!parentId) {
-      setError("Parent user not found. Please log in again.");
+      setError("User not found. Please log in again.");
       setIsLoading(false);
       return;
     }
@@ -54,7 +55,7 @@ const ManageChild = () => {
           ...child, name: child.student_full_name, class: `Class ${child.class_grade}`, email: child.student_email,
           school: child.school_name,
           stats: { tests:child.total_tests, avgScore:child.avg_score, completed: child.completed_tests ,pending:child.pending_tests } }));
-        setChildren(formattedChildren);
+        setChilddetails(formattedChildren);
         setError(null); 
       } else {
         setError(response.message || "Received invalid data from server.");
@@ -106,14 +107,14 @@ const ManageChild = () => {
         </div>
       )}
 
-      {!isLoading && !error && children.length === 0 && (
+      {!isLoading && !error && childdetails.length === 0 && (
         <div className="text-center py-10 bg-gray-50 rounded-lg">
           <p className="text-gray-600">No children have been added yet.</p>
         </div>
       )}
 
       <div className="flex flex-wrap gap-6">
-        {!isLoading && !error && children.map((child, index) => (
+        {!isLoading && !error && childdetails.map((child, index) => (
           <div
             key={index}
             className="w-[380px] h-[250px] bg-white p-6 rounded-2xl shadow-md border border-gray-100 relative hover:shadow-lg transition-shadow duration-200"
@@ -177,7 +178,7 @@ const ManageChild = () => {
                 </div>
                  <div>
                   <p className="text-blue-600 font-bold text-base">{child.stats.completed}</p>
-                  <p className="text-gray-500 text-xs"> Completed Tests</p>
+                  <p className="text-gray-500 text-xs"> Completed</p>
                 </div>
                  <div>
                   <p className="text-orange-600 font-bold text-base">{child.stats.pending}</p>
