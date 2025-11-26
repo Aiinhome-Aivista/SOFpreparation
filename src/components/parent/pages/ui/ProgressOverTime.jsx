@@ -49,7 +49,7 @@ function ProgressOverTime() {
         Weekly performance trend based on recent tests
       </p>
 
-      <div className="h-64 md:h-72">
+      <div className="h-full">
         <Chart type="line" data={data} options={options} />
       </div>
     </div>

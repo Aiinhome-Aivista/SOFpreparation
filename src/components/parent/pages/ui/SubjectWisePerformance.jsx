@@ -41,7 +41,7 @@ function SubjectWisePerformance() {
       </p>
 
       <div className="h-64 md:h-72">
-        <Chart type="bar" data={data} options={options} />
+        <Chart type="bar" data={data} options={options} className="h-full" />
       </div>
     </div>
   );
