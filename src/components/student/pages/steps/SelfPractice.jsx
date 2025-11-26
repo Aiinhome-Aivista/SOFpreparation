@@ -236,70 +236,72 @@ export default function SelfPractice({ onStartTest }) {
               )}
             </div>
 
-            {/* EXAM TIME */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Exam Time (Minutes)
-              </label>
+            <div className="grid grid-cols-2 gap-4">
+              {/* EXAM TIME */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Exam Time (Minutes)
+                </label>
 
-              <InputNumber
-                value={examTime}
-                onValueChange={(e) => {
-                  setExamTime(e.value);
-                  setErrors((prev) => ({ ...prev, examTime: null }));
-                }}
-                min={5}
-                max={60}
-                step={1}
-                showButtons
-                placeholder="Select time in minutes"
-                className="w-full"
-                inputClassName={`text-sm ${
-                  errors.examTime ? "border-red-500 bg-red-50" : ""
-                }`}
-              />
+                <InputNumber
+                  value={examTime}
+                  onValueChange={(e) => {
+                    setExamTime(e.value);
+                    setErrors((prev) => ({ ...prev, examTime: null }));
+                  }}
+                  min={5}
+                  max={60}
+                  step={1}
+                  showButtons
+                  placeholder="Select time in minutes"
+                  className="w-full"
+                  inputClassName={`text-sm ${
+                    errors.examTime ? "border-red-500 bg-red-50" : ""
+                  }`}
+                />
 
-              {errors.examTime && (
-                <p className="text-red-500 text-xs mt-1">{errors.examTime}</p>
-              )}
+                {errors.examTime && (
+                  <p className="text-red-500 text-xs mt-1">{errors.examTime}</p>
+                )}
 
-              <p className="text-xs text-gray-600">
-                Recommended: 20–30 minutes
-              </p>
-            </div>
-
-            {/* NUMBER OF QUESTIONS */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Number of Questions
-              </label>
-
-              <InputNumber
-                value={numQuestions}
-                onValueChange={(e) => {
-                  setNumQuestions(e.value);
-                  setErrors((prev) => ({ ...prev, numQuestions: null }));
-                }}
-                min={5}
-                max={50}
-                showButtons
-                step={1}
-                placeholder="Enter questions"
-                inputClassName={`text-sm ${
-                  errors.numQuestions ? "border-red-500 bg-red-50" : ""
-                }`}
-                className="w-full"
-              />
-
-              {errors.numQuestions && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.numQuestions}
+                <p className="text-xs text-gray-600">
+                  Recommended: 20–30 minutes
                 </p>
-              )}
+              </div>
 
-              <p className="text-xs text-gray-600">
-                Recommended: 10–20 questions per session
-              </p>
+              {/* NUMBER OF QUESTIONS */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Number of Questions
+                </label>
+
+                <InputNumber
+                  value={numQuestions}
+                  onValueChange={(e) => {
+                    setNumQuestions(e.value);
+                    setErrors((prev) => ({ ...prev, numQuestions: null }));
+                  }}
+                  min={5}
+                  max={50}
+                  showButtons
+                  step={1}
+                  placeholder="Enter questions"
+                  inputClassName={`text-sm ${
+                    errors.numQuestions ? "border-red-500 bg-red-50" : ""
+                  }`}
+                  className="w-full"
+                />
+
+                {errors.numQuestions && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.numQuestions}
+                  </p>
+                )}
+
+                <p className="text-xs text-gray-600">
+                  Recommended: 10–20 questions per session
+                </p>
+              </div>
             </div>
 
             {/* Benefits Box */}
@@ -327,7 +329,7 @@ export default function SelfPractice({ onStartTest }) {
               className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center justify-center gap-2"
             >
               <Shuffle className="size-5" />
-              Generate & Start Practice
+              Generate test
             </button>
           </div>
         </Card>
