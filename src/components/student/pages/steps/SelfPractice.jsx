@@ -18,12 +18,6 @@ export default function SelfPractice({ onStartTest }) {
   const [errors, setErrors] = useState({});
   const toast = useRef(null);
 
-  // const subjects = [
-  //   { value: "imo", label: "IMO - Mathematics", topics: 12 },
-  //   { value: "nso", label: "NSO - Science", topics: 15 },
-  //   { value: "ieo", label: "IEO - English", topics: 10 },
-  //   { value: "igko", label: "IGKO - General Knowledge", topics: 18 },
-  // ];
 
   const difficulties = [
     { label: "Easy - Build Foundation", value: "easy" },
@@ -329,7 +323,7 @@ export default function SelfPractice({ onStartTest }) {
               className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center justify-center gap-2"
             >
               <Shuffle className="size-5" />
-              Generate test
+              Generate Test
             </button>
           </div>
         </Card>
