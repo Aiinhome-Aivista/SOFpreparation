@@ -1,6 +1,8 @@
 
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../../../common/helper/UserContext'
+import ApiService from '../../../../service/ApiService';
+import { GET_APIS } from '../../../../../connection';
 import { Dropdown } from 'primereact/dropdown';
 import { Loader } from 'lucide-react'
 import TopCard from '../ui/TopCard'
@@ -11,10 +13,11 @@ import StrongAreas from '../ui/StrongAreas'
 import SubjectWisePerformance from '../ui/SubjectWisePerformance'
 
 function ChildPerformance() {
+  const { childdetails } = useContext(UserContext);
   const [selectedChild, setSelectedChild] = useState("")
   const [isLoading, setIsLoading] = useState(true);
-  const { childdetails } = useContext(UserContext);
-
+  const [performanceData, setPerformanceData] = useState(null);
+  
   // Set the first child as default when the component loads
   useEffect(() => {
     if (childdetails && childdetails.length > 0 && !selectedChild) {
@@ -22,18 +25,30 @@ function ChildPerformance() {
     }
   }, [childdetails, selectedChild]);
 
-  // Simulate data fetching
+  // Fetch performance data when a child is selected
   useEffect(() => {
     if (selectedChild) {
       setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500); // Simulate a 0.5 second loading time
-      return () => clearTimeout(timer);
+      setPerformanceData(null);
+
+      const fetchPerformanceData = async () => {
+        try {
+          const url = `${GET_APIS.child_performance_track}/${selectedChild}`;
+          const responseData = await ApiService(url);
+          setPerformanceData(responseData.data);
+          console.log("Fetched Data:", responseData.data); // Log data right after fetching
+        } catch (error) {
+          console.error("Error fetching performance data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchPerformanceData();
     } else {
-      setIsLoading(false); // If no child is selected, don't show loader
+      setIsLoading(false);
     }
-  }, [selectedChild]); // Re-trigger loading when child changes
+  }, [selectedChild]);
 
   return (
     <div className="w-full py-4">
@@ -66,28 +81,35 @@ function ChildPerformance() {
           <Loader className="animate-spin text-blue-600" size={40} />
           <p className="ml-4 text-gray-600">Loading Performance Data...</p>
         </div>
-      ) : (
+      ) : performanceData ? (
         <>
           {/* Top Stats Cards */}
-          <TopCard />
+          <TopCard stats={performanceData.stats} />
 
           {/* Progress Over Time */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-            <ProgressOverTime />
+          <div className="grid grid-cols-1 gap-6 mt-6">
+            <ProgressOverTime data={performanceData.graph} />
           </div>
 
           {/* Subject + Topic Chart */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-            <SubjectWisePerformance />
-            <TopicStrengthAnalysis />
+            <SubjectWisePerformance data={performanceData.subject_wise_performance} />
+            <TopicStrengthAnalysis data={performanceData.topic_strength_analysis} />
           </div>
 
           {/* Weak Areas + Strong Areas */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-            <AreasNeedingAttention />
-            <StrongAreas />
+            <AreasNeedingAttention data={performanceData.weak_areas} />
+            <StrongAreas data={performanceData.strong_areas} />
           </div>
         </>
+      ) : (
+        <div className="text-center text-gray-500">
+          {/* Avoid showing this message while the initial load for the first child is happening */}
+          {!isLoading && !performanceData && (
+            <p>No performance data available for the selected child.</p>
+          )}
+        </div>
       )}
     </div>
   )
