@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card } from "../ui-common/Cards";
 import { Progress } from "../ui-common/Progress";
 import { Badge } from "../ui-common/Badge";
-import { Clock, AlertCircle, CheckCircle } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
 
@@ -309,10 +309,12 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   if (questions.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center">
+        <Loader className="animate-spin text-blue-600" size={40} />
         <p className="text-blue-600 text-lg">Loading questions...</p>
       </div>
     );
   }
+
 
   // main test UI
   const currentQ = questions[currentQuestion];
