@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
 import { Shuffle, Target, BookOpen } from "lucide-react";
@@ -8,7 +8,7 @@ import { GET_APIS, POST_APIS } from "../../../../../connection";
 import ApiService from "../../../../service/ApiService";
 import { Toast } from "primereact/toast";
 
-export default function SelfPractice({ onStartTest }) {
+export default function SelfPractice() {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [numQuestions, setNumQuestions] = useState("10");
@@ -31,9 +31,6 @@ export default function SelfPractice({ onStartTest }) {
   // -------------------------------------------
   const fetchSubjects = async () => {
     try {
-      // const res = await fetch(GET_APIS.subjectsdataurl);
-      // const json = await res.json();
-
       const json = await ApiService(GET_APIS.subjectsdataurl, {
         method: "GET",
       });
@@ -93,7 +90,7 @@ export default function SelfPractice({ onStartTest }) {
       const studentId = stored?.userData?.id;
 
       if (!studentId) {
-        alert("No student data found. Please login again.");
+        console.error("No student data found. Please login again.");
         return;
       }
 
@@ -130,8 +127,6 @@ export default function SelfPractice({ onStartTest }) {
         // RESET ERRORS
         setErrors({});
 
-        // If you want to auto-start test:
-        // onStartTest("practice-" + Math.random().toString(36).substring(2, 9));
       }
     } catch (error) {
       console.error("Generate Practice Error:", error);

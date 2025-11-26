@@ -41,8 +41,6 @@ export default function TestInterface({ testId, onComplete, studentName }) {
           body: payload,
         });
 
-        console.log("start assessment resp:", json);
-
         if (json.isSuccess) {
           const apiData = json.data;
 
@@ -121,11 +119,8 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       timeSpent: timeSpent,
     };
 
-    // Simulate API call (replace with ApiService POST in real code)
-    // console.log(" Save answer payload:", payload);
-
     // -----------------------------------------
-    // REAL SAVE ANSWER API CALL
+    // SAVE ANSWER API CALL
     // -----------------------------------------
     try {
       const json = await ApiService(POST_APIS.saveanswer, {
@@ -167,18 +162,14 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       attemptId: attemptId, // Already stored in state earlier
     };
 
-    // console.log(" Final Submit Payload:", payload);
-
     try {
       // ----------------------------------------------
-      //  REAL FINAL SUBMIT API CALL
+      // FINAL SUBMIT API CALL
       // ----------------------------------------------
       const json = await ApiService(POST_APIS.submitassessment, {
         method: "POST",
         body: payload,
       });
-
-      console.log("📥 Final Submit Response:", json);
 
       if (json?.isSuccess) {
         // Save summary response

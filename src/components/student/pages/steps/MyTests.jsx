@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
 import {
@@ -19,7 +19,7 @@ export default function MyTests({ onStartTest }) {
   const [loading, setLoading] = useState(true);
 
   // -----------------------------
-  // 🔥 Fetch Tests from API
+  // Fetch Tests from API
   // -----------------------------
   const fetchTests = async () => {
     try {
@@ -110,7 +110,7 @@ export default function MyTests({ onStartTest }) {
   };
 
   if (loading) {
-    return (<div className="flex justify-center items-center h-64">
+    return (<div className="flex justify-center items-center h-80">
           <Loader className="animate-spin text-blue-600" size={40} />
           <p className="ml-4 text-gray-600">Loading Children...</p>
         </div>);
