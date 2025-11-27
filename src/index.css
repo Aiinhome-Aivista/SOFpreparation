@@ -134,3 +134,21 @@
   border: 1px solid #ef4444 !important; /* red-500 */
   background-color: #fef2f2 !important; /* red-50 */
 }
+
+.p-dialog {
+    border-radius: 18px !important;
+    overflow: hidden !important;     /* ensures content stays inside rounded corners */
+}
+
+/* ROUND THE TOP HEADER WRAPPER */
+.p-dialog-header {
+    border-top-left-radius: 16px !important;
+    border-top-right-radius: 16px !important;
+}
+
+/* ROUND THE CONTENT AREA */
+.p-dialog-content {
+    border-bottom-left-radius: 16px !important;
+    border-bottom-right-radius: 16px !important;
+    padding: 0 0.2rem 1.5rem 1.2rem !important; /* tighter padding like screenshot */
+}
