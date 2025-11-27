@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "../ui-common/Cards";
 import { Badge } from "../ui-common/Badge";
-import { Shuffle, Target, BookOpen } from "lucide-react";
+import { Shuffle, Target, Loader } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { GET_APIS, POST_APIS } from "../../../../../connection";
@@ -16,8 +16,12 @@ export default function SelfPractice() {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [examTime, setExamTime] = useState(20); // default 20 minutes
   const [errors, setErrors] = useState({});
-  const toast = useRef(null);
+  const [stats, setStats] = useState(null);
+  const [recommended, setRecommended] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
+  const toast = useRef(null);
 
   const difficulties = [
     { label: "Easy - Build Foundation", value: "easy" },
@@ -49,8 +53,44 @@ export default function SelfPractice() {
     }
   };
 
+  const fetchSelfPracticeDashboard = async () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("user"));
+      const studentId = stored?.userData?.id;
+
+      setLoading(true); // start loader
+      setError(false);
+
+      // Hit API
+      const json = await ApiService(
+        `${GET_APIS.selfpracticedashboardurl}/${studentId}`,
+        {
+          method: "GET",
+        }
+      );
+
+      // If API failed
+      if (!json.isSuccess || !json.data) {
+        setError(true);
+        return;
+      }
+
+      // SUCCESS
+      const data = json.data;
+
+      setStats(data.stats || {});
+      setRecommended(data.recommended || []);
+    } catch (err) {
+      console.error("SELF PRACTICE ERROR:", err);
+      setError(true);
+    } finally {
+      setLoading(false); // stop loader
+    }
+  };
+
   useEffect(() => {
     fetchSubjects();
+    fetchSelfPracticeDashboard();
   }, []);
 
   const getSubjectId = (name) => {
@@ -126,7 +166,6 @@ export default function SelfPractice() {
 
         // RESET ERRORS
         setErrors({});
-
       }
     } catch (error) {
       console.error("Generate Practice Error:", error);
@@ -140,6 +179,23 @@ export default function SelfPractice() {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="animate-spin text-blue-600" size={40} />
+        <p className="ml-4 text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-gray-500 py-10">
+        Failed to load dashboard data.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -335,17 +391,25 @@ export default function SelfPractice() {
             <div className="space-y-2 text-sm text-gray-700">
               <div className="flex justify-between">
                 <span>Sessions This Week</span>
-                <span className="text-blue-900">8</span>
+                <span className="text-blue-900">{stats.sessionsThisWeek}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>Questions Solved</span>
-                <span className="text-blue-900">142</span>
+                <span className="text-blue-900">{stats.questionsSolved}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>Average Accuracy</span>
-                <span className="text-green-600">78%</span>
+                <span
+                  className={
+                    Number(stats.averageAccuracy) > 50
+                      ? "text-green-600"
+                      : "text-orange-600"
+                  }
+                >
+                  {stats.averageAccuracy}%
+                </span>
               </div>
             </div>
           </Card>
@@ -357,31 +421,38 @@ export default function SelfPractice() {
             </div>
 
             <div className="space-y-3">
-              <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
-                <div className="flex justify-between mb-1">
-                  <h4 className="text-sm text-blue-900">Geometry</h4>
-
-                  <Badge className="text-xs bg-orange-100 text-orange-700 border border-orange-200">
-                    Priority
-                  </Badge>
-                </div>
-                <p className="text-xs text-gray-600">
-                  58% accuracy — needs practice
+              {recommended.length === 0 ? (
+                <p className="text-center text-gray-500 text-sm py-3">
+                  No recommendations available
                 </p>
-              </div>
+              ) : (
+                recommended.map((item, i) => (
+                  <div
+                    key={i}
+                    className={`p-3 rounded-lg border ${
+                      item.tag === "Priority"
+                        ? "bg-orange-50 border-orange-200"
+                        : "bg-blue-50 border-blue-200"
+                    }`}
+                  >
+                    <div className="flex justify-between mb-1">
+                      <h4 className="text-sm text-blue-900">{item.topic}</h4>
 
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="flex justify-between mb-1">
-                  <h4 className="text-sm text-blue-900">Chemistry</h4>
+                      <Badge
+                        className={`text-xs border ${
+                          item.tag === "Priority"
+                            ? "bg-orange-100 text-orange-700 border-orange-200"
+                            : "bg-blue-100 text-blue-700 border-blue-200"
+                        }`}
+                      >
+                        {item.tag}
+                      </Badge>
+                    </div>
 
-                  <Badge className="text-xs bg-blue-100 text-blue-700 border border-blue-200">
-                    Review
-                  </Badge>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Last practiced 3 days ago
-                </p>
-              </div>
+                    <p className="text-xs text-gray-600">{item.detail}</p>
+                  </div>
+                ))
+              )}
             </div>
           </Card>
           {/* Quick Start Presets */}
