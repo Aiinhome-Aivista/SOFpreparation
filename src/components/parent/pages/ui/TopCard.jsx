@@ -1,15 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Calendar, TrendingUp, Award, Target } from "lucide-react";
 
 function TopCard({ stats }) {
-  useEffect(() => {
-    console.log('stats', stats);
-  }, [stats]);
   const cardData = [
     {
       id: 1,
       label: "Total Tests",
-      value: stats?.total_tests_assigned || 0,
+      value: stats?.totalTests || 0,
       color: "#3B82F6",
       bg: "bg-[#E4EEFF]",
       icon: <Calendar className="w-5 h-5" />,
@@ -17,15 +14,15 @@ function TopCard({ stats }) {
     {
       id: 2,
       label: "Average Score",
-      value: stats?.average_score ? parseFloat(stats.average_score).toFixed(2) : "0.00",
+      value: stats?.averageScore ? parseFloat(stats.averageScore).toFixed(2) : "0.00",
       color: "#22C55E",
       bg: "bg-[#E9FCEB]",
       icon: <Award className="w-5 h-5" />,
     },
     {
       id: 3,
-      label: "Pending Tests",
-      value: stats?.pending_tests || 0,
+      label: "Improvement",
+      value: stats?.improvement ? `${parseFloat(stats.improvement).toFixed(2)}%` : "0.00%",
       color: "#FB923C",
       bg: "bg-[#FFF0E5]",
       icon: <TrendingUp className="w-5 h-5" />,
@@ -33,7 +30,7 @@ function TopCard({ stats }) {
     {
       id: 4,
       label: "Rank",
-      value: stats?.rank_position ? `#${stats.rank_position}` : "#-",
+      value: stats?.rank ? `#${stats.rank}` : "#-",
       color: "#A855F7",
       bg: "bg-[#F3E8FF]",
       icon: <Target className="w-5 h-5" />,

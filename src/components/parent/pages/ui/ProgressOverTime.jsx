@@ -2,13 +2,13 @@ import React from "react";
 import { Chart } from "primereact/chart";
 import "chart.js/auto";
 
-function ProgressOverTime() {
-  const data = {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"],
+function ProgressOverTime({ data }) {
+  const chartData = {
+    labels: data?.labels || [],
     datasets: [
       {
         label: "Score",
-        data: [65, 72, 68, 78, 82, 85],
+        data: data?.data || [],
         borderWidth: 3,
         fill: false,
         tension: 0.4,
@@ -50,7 +50,7 @@ function ProgressOverTime() {
       </p>
 
       <div className="h-full">
-        <Chart type="line" data={data} options={options} />
+        <Chart type="line" data={chartData} options={options} />
       </div>
     </div>
   );

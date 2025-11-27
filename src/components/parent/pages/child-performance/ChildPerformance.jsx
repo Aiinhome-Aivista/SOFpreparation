@@ -16,7 +16,7 @@ function ChildPerformance() {
   const { childdetails } = useContext(UserContext);
   const [selectedChild, setSelectedChild] = useState("")
   const [isLoading, setIsLoading] = useState(true);
-  const [performanceData, setPerformanceData] = useState(null);
+  const [performanceData, setPerformanceData] = useState();
   
   // Set the first child as default when the component loads
   useEffect(() => {
@@ -35,8 +35,16 @@ function ChildPerformance() {
         try {
           const url = `${GET_APIS.child_performance_track}/${selectedChild}`;
           const responseData = await ApiService(url);
-          setPerformanceData(responseData.data);
-          console.log("Fetched Data:", responseData.data); // Log data right after fetching
+          // Map new API structure to the one expected by components
+          const mappedData = {
+            stats: responseData.data.kpi,
+            graph: responseData.data.charts.progressLine,
+            subject_wise_performance: responseData.data.charts.subjectBar,
+            topic_strength_analysis: responseData.data.charts.topicRadar,
+            weak_areas: responseData.data.insights.weakAreas,
+            strong_areas: responseData.data.insights.strongAreas,
+          };
+          setPerformanceData(mappedData);
         } catch (error) {
           console.error("Error fetching performance data:", error);
         } finally {

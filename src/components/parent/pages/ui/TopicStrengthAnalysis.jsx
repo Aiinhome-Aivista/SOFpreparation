@@ -2,13 +2,13 @@ import React from "react";
 import { Chart } from "primereact/chart";
 import "chart.js/auto";
 
-function TopicStrengthAnalysis() {
-  const data = {
-    labels: ["Algebra", "Geometry", "Physics", "Chemistry", "Grammar", "Vocabulary"],
+function TopicStrengthAnalysis({ data }) {
+  const chartData = {
+    labels: data?.labels || [],
     datasets: [
       {
         label: "Score",
-        data: [90, 75, 70, 65, 88, 82],
+        data: data?.data || [],
         borderWidth: 1,
       },
     ],
@@ -38,7 +38,7 @@ function TopicStrengthAnalysis() {
       </p>
 
       <div className="h-64 md:h-72">
-        <Chart type="radar" data={data} options={options} />
+        <Chart type="radar" data={chartData} options={options} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://122.163.121.176:30
 
 export const GET_APIS = {
   subjectsdataurl: `${BASE_URL}CommonFeatuersMicroservices/subjects`,
-  child_performance_track: `${BASE_URL}ParentsMicroservices/dashboard`,
+  child_performance_track: `${BASE_URL}ParentsMicroservices/performance_monitor`,
   aiinsightsurl: `${BASE_URL}ChildMicroservices/ai_insights`,
 };
 
