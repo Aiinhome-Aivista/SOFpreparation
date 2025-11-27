@@ -107,10 +107,10 @@ export default function GenerateTestParent() {
           <p className="ml-4 text-gray-600">Loading Test Generator...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 w-full">
 
           {/* Form Card */}
-          <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
+          <div className="xl:col-span-2 p-8 space-y-6 border-gray-200 shadow-sm bg-white rounded-2xl border-2">
 
             {/* Child Select */}
             <div className="space-y-2">
@@ -210,13 +210,13 @@ export default function GenerateTestParent() {
           </div>
 
           {/* Summary Card */}
-          <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
+          <div className="xl:col-span-1 bg-white rounded-2xl p-8 space-y-4 border-2 border-gray-200">
             <div className="flex items-center gap-2">
-              <ClipboardList className="text-blue-600" size={20} />
-              <p className="font-semibold text-blue-900">Test Summary</p>
+              <ClipboardList className="text-blue-600" size={25} />
+              <p className="font-semibold text-blue-900 text-lg">Test Summary</p>
             </div>
 
-            <div className="text-sm space-y-3">
+            <div className="text-sm space-y-4">
               <div>
                 <span className="text-gray-800">Student:</span>
                 <p className="text-gray-600">
