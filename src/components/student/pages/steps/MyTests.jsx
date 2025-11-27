@@ -301,7 +301,7 @@ export default function MyTests({ onStartTest }) {
         {/* Custom Close Button */}
         <button
           onClick={() => setIsDetailsOpen(false)}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl cursor-pointer z-50"
+          className="absolute top-4 right-6 text-gray-500 hover:text-gray-700 text-xl cursor-pointer z-50"
         >
           ✕
         </button>
