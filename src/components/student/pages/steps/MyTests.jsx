@@ -74,8 +74,19 @@ export default function MyTests({ onStartTest }) {
             questions: t.total_questions,
             duration: t.duration_minutes,
             status: t.status,
-            completedDate: t.completed_at, // ✅ correct field
-            score: t.score_obtained ? Number(t.score_obtained) : 0, // ✅ correct number
+
+            completedDate: t.completed_at,
+
+            //  use correct accuracy field from API
+            score: t.score_obtained ? Number(t.score_obtained) : 0,
+            accuracypercentage: t.accuracy_percentage || 0,
+
+            //  new fields from API
+            correct: t.correct_answers,
+            incorrect: t.incorrect_answers,
+            timeTaken: t.time_taken_seconds,
+            timeManagement: t.performance_breakdown?.timeManagement || "Good",
+            timeManagementaccuracy: t.performance_breakdown?.accuracy || "Good",
           }))
         );
       }
@@ -335,6 +346,7 @@ export default function MyTests({ onStartTest }) {
                           Overall Score
                         </p>
                         <div className="flex items-baseline gap-2">
+                          {/* OVERALL SCORE */}
                           <span
                             className={`text-4xl ${
                               selectedTest.score >= 80
@@ -344,15 +356,11 @@ export default function MyTests({ onStartTest }) {
                                 : "text-orange-600"
                             }`}
                           >
-                            {selectedTest.score}%
+                            {selectedTest.score}% {/* accuracy_percentage */}
                           </span>
+
                           <span className="text-sm text-gray-600">
-                            (
-                            {Math.round(
-                              selectedTest.questions *
-                                (selectedTest.score / 100)
-                            )}{" "}
-                            / {selectedTest.questions})
+                            ({selectedTest.correct} / {selectedTest.questions})
                           </span>
                         </div>
                       </div>
@@ -408,10 +416,7 @@ export default function MyTests({ onStartTest }) {
                             Correct Answers
                           </p>
                           <p className="text-purple-900">
-                            {Math.round(
-                              selectedTest.questions *
-                                (selectedTest.score / 100)
-                            )}
+                            {selectedTest.correct}
                           </p>
                         </div>
                       </div>
@@ -427,11 +432,7 @@ export default function MyTests({ onStartTest }) {
                             Incorrect Answers
                           </p>
                           <p className="text-orange-900">
-                            {selectedTest.questions -
-                              Math.round(
-                                selectedTest.questions *
-                                  (selectedTest.score / 100)
-                              )}
+                            {selectedTest.incorrect}
                           </p>
                         </div>
                       </div>
@@ -451,11 +452,12 @@ export default function MyTests({ onStartTest }) {
                           <span className="text-sm text-gray-600">
                             Accuracy
                           </span>
-                          <span className="text-sm">{selectedTest.score}%</span>
+                          <span className="text-sm">{selectedTest.accuracypercentage}%</span>
                         </div>
 
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
+                            style={{ width: `${selectedTest.accuracypercentage}%` }}
                             className={`h-2 rounded-full ${
                               selectedTest.score >= 80
                                 ? "bg-green-600"
@@ -463,8 +465,7 @@ export default function MyTests({ onStartTest }) {
                                 ? "bg-blue-600"
                                 : "bg-orange-600"
                             }`}
-                            style={{ width: `${selectedTest.score}%` }}
-                          ></div>
+                          />
                         </div>
                       </div>
 
@@ -475,16 +476,8 @@ export default function MyTests({ onStartTest }) {
                             Time Management
                           </span>
                           <span className="text-sm">
-                            {(() => {
-                              const timeUsed =
-                                (selectedTest.time_taken_seconds /
-                                  (selectedTest.duration * 60)) *
-                                100;
-
-                              if (timeUsed < 40) return "Excellent";
-                              if (timeUsed < 80) return "Good";
-                              return "Needs Improvement";
-                            })()}
+                            {selectedTest.timeManagement}{" "}
+                            {/* Rushed / Good / Excellent */}
                           </span>
                         </div>
 
@@ -492,14 +485,7 @@ export default function MyTests({ onStartTest }) {
                           <div
                             className="bg-blue-600 h-2 rounded-full"
                             style={{
-                              width: `${Math.min(
-                                100,
-                                (
-                                  (selectedTest.time_taken_seconds /
-                                    (selectedTest.duration * 60)) *
-                                  100
-                                ).toFixed(1)
-                              )}%`,
+                              width: `${selectedTest.timeManagementaccuracy }%`,
                             }}
                           ></div>
                         </div>
