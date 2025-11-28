@@ -5,6 +5,7 @@ import { Badge } from "../../../ui/Badge";
 import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
+import { Dialog } from "primereact/dialog";
 
 export default function TestInterface({ testId, onComplete, studentName }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -516,63 +517,65 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </div>
 
       {/* Submit Modal */}
-      {showSubmitDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-xl max-w-2xl w-full p-6 z-10">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-blue-900 text-lg">Submit Test?</h3>
-                <p className="text-sm text-gray-600">
-                  Please review your answers before submitting
-                </p>
-              </div>
+      <Dialog
+        header="Submit Test?"
+        visible={showSubmitDialog}
+        onHide={() => setShowSubmitDialog(false)}
+        style={{ width: "35rem", height: "46%" }}
+        className="rounded-xl overflow-hidden"
+        breakpoints={{ "960px": "75vw", "640px": "90vw" }}
+      >
+        <div className="space-y-4 pr-4">
+          {/* Subtitle */}
+          <p className="text-sm text-gray-600 mt-1">
+            Please review your answers before submitting.
+          </p>
+
+          {/* Answered / Unanswered Boxes */}
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="p-3 bg-green-50 rounded-lg">
+              <p className="text-2xl text-green-600">{answered}</p>
+              <p className="text-xs text-gray-600">Answered</p>
             </div>
-
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-2xl text-green-600">{answered}</p>
-                  <p className="text-xs text-gray-600">Answered</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl text-gray-600">
-                    {questions.length - answered}
-                  </p>
-                  <p className="text-xs text-gray-600">Unanswered</p>
-                </div>
-              </div>
-
-              {questions.length - answered > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-                  <AlertCircle className="size-5 text-yellow-600 shrink-0 mt-0.5" />
-                  <p className="text-sm text-yellow-900">
-                    You have {questions.length - answered} unanswered
-                    question(s). Are you sure you want to submit?
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowSubmitDialog(false)}
-                  className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleFinalSubmit({ auto: false })}
-                  className="flex-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
-                >
-                  Submit Test
-                </button>
-              </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-2xl text-gray-600">
+                {questions.length - answered}
+              </p>
+              <p className="text-xs text-gray-600">Unanswered</p>
             </div>
           </div>
+
+          {/* Warning */}
+          {questions.length - answered > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+              <AlertCircle className="size-5 text-yellow-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-yellow-900">
+                You have {questions.length - answered} unanswered question(s).
+                Are you sure you want to submit?
+              </p>
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowSubmitDialog(false)}
+              className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleFinalSubmit({ auto: false })}
+              className="flex-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
+            >
+              Submit Test
+            </button>
+          </div>
         </div>
-      )}
+      </Dialog>
     </div>
   );
 }
