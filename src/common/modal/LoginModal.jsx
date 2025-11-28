@@ -165,6 +165,7 @@ export default function LoginModal() {
         </div>
 
         <div className="pt-4 mt-4 border-t border-gray-200">
+          {activeTab === 'parent'?(
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{' '}
             <button
@@ -178,6 +179,15 @@ export default function LoginModal() {
               Register as Parent
             </button>
           </p>
+          ) : (<p className="text-center text-sm text-gray-600 opacity-0">
+            null
+            <button
+              type="button"
+              className="text-blue-600 hover:underline font-medium cursor-pointer"
+            >
+              null
+            </button>
+          </p>)}
         </div>
       </div>
     </div>
