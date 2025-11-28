@@ -9,7 +9,7 @@ import {
   Pencil,
   Trash2,
   RefreshCw,
-  
+
   School,
 } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
@@ -21,6 +21,7 @@ import AddChildModal from "../../../../common/modal/AddChildModal";
 import DeleteChildModal from "../../../../common/modal/DeleteChildModal";
 
 const ManageChild = () => {
+  const { childdetails, setChilddetails, childAdded } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -31,7 +32,6 @@ const ManageChild = () => {
   const [childToDelete, setChildToDelete] = useState(null);
   const toast = useRef(null);
   const menuRef = useRef(null);
-  const { childdetails, setChilddetails } = useContext(UserContext);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -102,7 +102,7 @@ const ManageChild = () => {
 
   useEffect(() => {
     fetchChildren();
-  }, []);
+  }, [childAdded]);
 
   const handleEditClick = (child) => {
     setSelectedChild(child);
@@ -115,15 +115,8 @@ const ManageChild = () => {
     setSelectedChild(null);
   };
 
-  const handleUpdateSuccess = () => {
-    fetchChildren(); // Refetch children data to show updated info
-  };
-
- 
-
   const handleDeleteChild = async (childId, parentId) => {
     if (!childId) return;
-
 
     try {
       setIsLoading(true);
@@ -155,10 +148,6 @@ const ManageChild = () => {
     }
   };
 
-  const ReloadGridData = () => {
-    fetchChildren();
-  };
-
   const handleDeleteClick = (child) => {
     setChildToDelete(child);
     setIsDeleteModalOpen(true);
@@ -184,18 +173,6 @@ const ManageChild = () => {
           <p className="text-[#4A5565]">
             View and manage all your children's accounts
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-
-          <div
-            className={`relative text-center border border-[#7691ac] rounded-xl w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors ${isLoading ? "bg-gray-200" : ""
-              }`}
-            onClick={ReloadGridData}
-          >
-            <RefreshCw
-              className={`w-5 h-5 ${isLoading ? "animate-spin text-[#2C2E42]" : "text-[#1C398E]"} group-hover:text-[#2C2E42]`}
-            />
-          </div>
         </div>
       </div>
       {isLoading && (

@@ -1,11 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { User, Mail, Lock, GraduationCap, X, Building, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { Toast } from 'primereact/toast';
 import ApiService from '../../service/ApiService';
 import { POST_APIS } from '../../../connection';
+import { UserContext } from '../helper/UserContext';
 
 function AddChildModal({ onAddSuccess }) {
+    const {childAdded, setChildAdded} = useContext(UserContext);
     const { closeModal, user } = useAuth();
     const toast = useRef(null);
     const [formData, setFormData] = useState({
@@ -67,6 +69,7 @@ function AddChildModal({ onAddSuccess }) {
             const response = await ApiService(POST_APIS.addChild, { method: 'POST', body: payload });
             if (response.isSuccess) {
                 toast.current.show({ severity: 'success', summary: 'Success', detail: 'Child account created successfully!' });
+                setChildAdded(childAdded + 1);
                 setTimeout(() => {
                     closeModal();
                     onAddSuccess();
