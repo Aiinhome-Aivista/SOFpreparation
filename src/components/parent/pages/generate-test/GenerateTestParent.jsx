@@ -23,6 +23,9 @@ export default function GenerateTestParent() {
   const { childdetails } = useContext(UserContext);
   const { user } = useAuth();
   const toast = useRef(null);
+  const [isQuestionsTouched, setIsQuestionsTouched] = useState(false);
+  const [isTimeTouched, setIsTimeTouched] = useState(false);
+
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -94,15 +97,16 @@ export default function GenerateTestParent() {
 
 const calculateProgress = () => {
   let completed = 0;
-
   if (selectedChild) completed++;
   if (selectedSubject) completed++;
   if (difficulty) completed++;
   if (dueDate) completed++;
-  if (numQuestions && Number(numQuestions) !== 20) completed++;
-  if (timeLimit && Number(timeLimit) !== 30) completed++;
+  if (isQuestionsTouched) completed++;
+  if (isTimeTouched) completed++;
+
   return Math.floor((completed / 6) * 100);
 };
+
 
 
   const progress = calculateProgress();
@@ -173,22 +177,26 @@ const calculateProgress = () => {
                 <InputNumber
                   value={Number(numQuestions)}
                   onValueChange={(e) => setNumQuestions(e.value?.toString() || "20")}
+                  onFocus={() => setIsQuestionsTouched(true)}
                   min={10} max={50}
                   showButtons
                   inputClassName="text-sm w-full"
                   className="w-full"
                 />
+
               </div>
               <div className="space-y-2">
                 <label className="font-medium text-sm">Time Limit (minutes)<span className="text-red-600"> *</span></label>
                 <InputNumber
                   value={Number(timeLimit)}
                   onValueChange={(e) => setTimeLimit(e.value?.toString() || "30")}
+                  onFocus={() => setIsTimeTouched(true)}
                   min={10} max={120}
                   showButtons
                   inputClassName="text-sm w-full"
                   className="w-full"
                 />
+
               </div>
             </div>
 
@@ -227,28 +235,26 @@ const calculateProgress = () => {
               disabled={isLoading || progress !== 100}
               className={`w-full rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer 
     ${progress !== 100 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 text-white"}
-  `}
-            >
+  `}>
               {isLoading ? "Assigning..." : (<><Plus size={20} />Assign Test</>)}
             </button>
 
           </div>
 
           {/* Summary Card */}
-          <div className="xl:col-span-1 bg-white rounded-2xl p-8 space-y-4 border-2 border-gray-200">
+          <div className="xl:col-span-1 bg-white rounded-2xl p-8 border-2 border-gray-200 flex flex-col">
             <div className="flex items-center gap-2">
               <ClipboardList className="text-blue-600" size={25} />
               <p className="font-semibold text-blue-900 text-lg">Test Summary</p>
             </div>
 
-            <div className="text-sm space-y-4">
+            <div className="text-sm space-y-4 flex flex-col justify-between mt-4">
               <div>
                 <span className="text-gray-800">Student:</span>
                 <p className="text-gray-600">
                   {selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}
                 </p>
               </div>
-
               <div>
                 <span className="text-gray-800">Subject:</span>
                 <p className="text-gray-600">{selectedSubject ? subjects.find(s => s.subject_id === selectedSubject)?.subject_name : "Not selected"}</p>
@@ -274,37 +280,39 @@ const calculateProgress = () => {
                 <span className="text-gray-800">Due Date:</span>
                 <p className="text-gray-600">{dueDate ? new Date(dueDate).toLocaleDateString() : "Not selected"}</p>
               </div>
-              {/* Progress Bar */}
-              <div className="w-full mb-6">
-                <label className="text-sm font-medium text-gray-700">
-                  Progress
-                </label>
-                <div className="w-full h-4 bg-gray-200 rounded-full mt-1 overflow-hidden">
-                  <div
-                    className={`h-4 ${getProgressColor()} rounded-full transition-all duration-500 bg-[length:20px_20px] bg-[linear-gradient(45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent)]`}
-                    style={{ width: `${progress}%` }}
-                  >
-                    <span className="text-white text-xs font-semibold flex justify-center items-center h-full">
-                      {progress}%
-                    </span>
+              <div>
+                {/* Progress Bar */}
+                <div className="w-full mb-6">
+                  <label className="text-sm font-medium text-gray-700">
+                    Progress
+                  </label>
+                  <div className="w-full h-4 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                    <div
+                      className={`h-4 ${getProgressColor()} rounded-full transition-all duration-500 bg-size-[23px_23px] bg-[linear-gradient(45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent)]`}
+                      style={{ width: `${progress}%` }}
+                    >
+                      <span className="text-white text-xs font-semibold flex justify-center items-center h-full ml-4">
+                        {progress}%
+                      </span>
+                    </div>
                   </div>
+
+                  {progress === 100 && (
+                    <div className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
+                      <span>✓ Ready to assign!</span>
+                    </div>
+                  )}
                 </div>
 
-                {progress === 100 && (
-                  <div className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
-                    <span>✓ Ready to assign!</span>
+                {showSuccess && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
+                    <CheckCircle className="text-green-600 mt-1" size={18} />
+                    <span className="text-sm text-green-700">
+                      Test has been assigned to the student!
+                    </span>
                   </div>
                 )}
               </div>
-
-              {showSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
-                  <CheckCircle className="text-green-600 mt-1" size={18} />
-                  <span className="text-sm text-green-700">
-                    Test has been assigned to the student!
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>
