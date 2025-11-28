@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Card } from "../../../ui/Cards";
 import { Progress } from "../ui-common/Progress";
 import { Badge } from "../../../ui/Badge";
-import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
+import { Clock, Loader } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
-import { Dialog } from "primereact/dialog";
+import TestSummary from "./TestSummary";
+import SubmitDialog from "./SubmitDialog";
 
 export default function TestInterface({ testId, onComplete, studentName }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -20,6 +21,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   const [questionTimer, setQuestionTimer] = useState(0);
   const [testDurationSec, setTestDurationSec] = useState(0);
   const hasFetchedRef = useRef(false);
+  const [rawImageLinks, setRawImageLinks] = useState([]);
 
   // to avoid double final submit
   const finishingRef = useRef(false);
@@ -48,14 +50,28 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
           setAttemptId(apiData.attempt_id);
 
-          const formatted = apiData.questions.map((q) => ({
+          const allDiagramUrls = apiData.questions.map(q => {
+            try {
+              // diagram_url can be a JSON string array or null
+              return q.diagram_url ? JSON.parse(q.diagram_url) : null;
+            } catch (e) {
+              console.error("Failed to parse diagram_url:", q.diagram_url, e);
+              return null;
+            }
+          });
+          setRawImageLinks(allDiagramUrls);
+          console.log("All Diagram URLs:", allDiagramUrls);
+
+          const formatted = apiData.questions.map((q, index) => ({
             id: q.question_id,
             question: q.question_text,
             options: [q.option_a, q.option_b, q.option_c, q.option_d],
+            diagrams: allDiagramUrls[index] // Add parsed diagrams to each question
           }));
 
           setQuestions(formatted);
           setTimeLeft(apiData.test.duration_minutes * 60);
+          setTestDurationSec(apiData.test.duration_minutes * 60);
           setQuestionStartTime(Date.now());
         }
       } catch (e) {
@@ -307,91 +323,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   // If final submit has been done and submitResult exists, render summary OR navigate away (depending on flow)
   // The user asked for auto-submit to go back to dashboard; handleFinalSubmit({auto:true}) does that.
   if (isSubmitted && submitResult) {
-    const result = submitResult;
-    return (
-      <div className="h-full bg-linear-to-br from-blue-50 via-green-50 to-blue-50 p-4 flex items-center justify-center">
-        <Card className="max-w-2xl w-full p-8">
-          <div className="text-center mb-8">
-            <div
-              className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                result.score >= 80
-                  ? "bg-green-100"
-                  : result.score >= 60
-                  ? "bg-blue-100"
-                  : "bg-orange-100"
-              }`}
-            >
-              <CheckCircle
-                className={`size-12 ${
-                  result.score >= 80 ? "text-green-600" : "text-blue-600"
-                }`}
-              />
-            </div>
-
-            <h2 className="text-blue-900 mb-2">Test Completed!</h2>
-            <p className="text-gray-600">Great job, {result.studentName}!</p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Your Score</p>
-                <p
-                  className={`text-3xl ${
-                    result.score >= 80
-                      ? "text-green-600"
-                      : result.score >= 60
-                      ? "text-blue-600"
-                      : "text-orange-600"
-                  }`}
-                >
-                  {result.score}%
-                </p>
-              </div>
-
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Correct Answers</p>
-                <p className="text-3xl text-green-600">
-                  {result.correctAnswers}/{result.totalQuestions}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-blue-900 mb-3">Summary</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Questions Answered:</span>
-                  <span>
-                    {result.totalAnswered} / {result.totalQuestions}
-                  </span>
-                </div>
-
-                {/* <div className="flex justify-between">
-                  <span className="text-gray-600">Time Taken:</span>
-                  <span>
-                    {formatTime(
-                      hardcodedTestResponse.data.test.duration_minutes * 60 -
-                        timeLeft
-                    )}
-                  </span>
-                </div> */}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onComplete}
-                className="flex-1 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm"
-              >
-                Back to Dashboard
-              </button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <TestSummary result={submitResult} onComplete={onComplete} />;
   }
 
   // Loading / waiting for questions
@@ -414,7 +346,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40 shadow-sm">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
@@ -449,8 +381,8 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
+      <div className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-4 gap-1">
           {/* Question Card */}
           <Card className="lg:col-span-3 p-8">
             <div className="mb-6 flex items-center justify-between">
@@ -465,6 +397,20 @@ export default function TestInterface({ testId, onComplete, studentName }) {
             </div>
 
             <h3 className="text-xl text-blue-900 mt-4">{currentQ.question}</h3>
+
+            {/* Diagram Images */}
+            {currentQ.diagrams && currentQ.diagrams.length > 0 && (
+              <div className="flex flex-wrap gap-4 justify-start">
+                {currentQ.diagrams.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Question diagram ${currentQuestion + 1}-${i + 1}`}
+                    className="max-w-full h-auto rounded-md bg-white p-1"
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="space-y-3 mb-8">
               {currentQ.options.map((option, index) => (
@@ -495,7 +441,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               ))}
             </div>
 
-            <div className="flex items-center justify-end pt-6 border-t">
+            <div className="flex items-center justify-end">
               {isLastQuestion ? (
                 /*  LAST QUESTION → SUBMIT BUTTON */
                 <button
@@ -555,65 +501,13 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </div>
 
       {/* Submit Modal */}
-      <Dialog
-        header="Submit Test?"
+      <SubmitDialog
         visible={showSubmitDialog}
         onHide={() => setShowSubmitDialog(false)}
-        style={{ width: "35rem", height: "46%" }}
-        className="rounded-xl overflow-hidden"
-        breakpoints={{ "960px": "75vw", "640px": "90vw" }}
-      >
-        <div className="space-y-4 pr-4">
-          {/* Subtitle */}
-          <p className="text-sm text-gray-600 mt-1">
-            Please review your answers before submitting.
-          </p>
-
-          {/* Answered / Unanswered Boxes */}
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div className="p-3 bg-green-50 rounded-lg">
-              <p className="text-2xl text-green-600">{answered}</p>
-              <p className="text-xs text-gray-600">Answered</p>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-2xl text-gray-600">
-                {questions.length - answered}
-              </p>
-              <p className="text-xs text-gray-600">Unanswered</p>
-            </div>
-          </div>
-
-          {/* Warning */}
-          {questions.length - answered > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-              <AlertCircle className="size-5 text-yellow-600 shrink-0 mt-0.5" />
-              <p className="text-sm text-yellow-900">
-                You have {questions.length - answered} unanswered question(s).
-                Are you sure you want to submit?
-              </p>
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowSubmitDialog(false)}
-              className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleFinalSubmit({ auto: false })}
-              className="flex-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
-            >
-              Submit Test
-            </button>
-          </div>
-        </div>
-      </Dialog>
+        onSubmit={() => handleFinalSubmit({ auto: false })}
+        answeredCount={answered}
+        totalQuestions={questions.length}
+      />
     </div>
   );
 }

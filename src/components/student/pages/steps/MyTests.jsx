@@ -157,9 +157,19 @@ export default function MyTests({ onStartTest }) {
 
           <div className="space-y-3">
             {pendingTests.length === 0 ? (
-              <div className="text-center py-6 text-gray-500  ">
-                No pending tests found
-              </div>
+              <Card className="p-6 border-2 border-dashed border-gray-300 bg-gray-50">
+                <div className="flex items-center justify-center text-center gap-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center shrink-0">
+                    <CheckCircle className="size-5 text-gray-500" />
+                  </div>
+                  <div className="text-left flex-grow">
+                    <h3 className="text-blue-900 font-semibold">All Caught Up!</h3>
+                    <p className="text-sm text-gray-600">
+                      There are no pending tests at the moment.
+                    </p>
+                  </div>
+                </div>
+              </Card>
             ) : (
               pendingTests.map((test) => (
                 <Card
