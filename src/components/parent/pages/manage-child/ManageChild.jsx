@@ -119,9 +119,7 @@ const ManageChild = () => {
     fetchChildren(); // Refetch children data to show updated info
   };
 
-  const handleAddSuccess = () => {
-    fetchChildren();
-  };
+ 
 
   const handleDeleteChild = async (childId, parentId) => {
     if (!childId) return;
@@ -336,7 +334,7 @@ const ManageChild = () => {
       {isAddModalOpen && (
         <AddChildModal
           onClose={() => setIsAddModalOpen(false)}
-          onAddSuccess={handleAddSuccess}
+          onAddSuccess={fetchChildren}
         />
       )}
 

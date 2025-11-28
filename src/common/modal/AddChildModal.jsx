@@ -5,7 +5,7 @@ import { Toast } from 'primereact/toast';
 import ApiService from '../../service/ApiService';
 import { POST_APIS } from '../../../connection';
 
-function AddChildModal() {
+function AddChildModal({ onAddSuccess }) {
     const { closeModal, user } = useAuth();
     const toast = useRef(null);
     const [formData, setFormData] = useState({
@@ -67,7 +67,10 @@ function AddChildModal() {
             const response = await ApiService(POST_APIS.addChild, { method: 'POST', body: payload });
             if (response.isSuccess) {
                 toast.current.show({ severity: 'success', summary: 'Success', detail: 'Child account created successfully!' });
-                setTimeout(() => closeModal(), 1500);
+                setTimeout(() => {
+                    closeModal();
+                    onAddSuccess();
+                }, 1500);
             } else {
                 toast.current.show({ severity: 'error', summary: 'Creation Failed', detail: response.message || 'An error occurred.' });
             }
@@ -75,6 +78,7 @@ function AddChildModal() {
             toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'Something went wrong!' });
         } finally {
             setIsLoading(false);
+
         }
     };
 

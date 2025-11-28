@@ -131,18 +131,18 @@ function SmartAssistantChat() {
 
             <div className="pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
-                <button onClick={() => handleQuickQuestion("What is my child's overall performance?")} className="px-3 py-1.5 border border-[#1C398E] rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
+                <button onClick={() => handleQuickQuestion("What is my child's overall performance?")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
                   📈 Overall performance?
                 </button>
-                <button onClick={() => handleQuickQuestion("Which topics need more focus?")} className="px-3 py-1.5 border border-[#1C398E] rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
+                <button onClick={() => handleQuickQuestion("Which topics need more focus?")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
                   💡 Topics to focus on?
                 </button>
-                <button onClick={() => handleQuickQuestion("Suggest a study schedule for this week.")} className="px-3 py-1.5 border border-[#1C398E] rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
+                <button onClick={() => handleQuickQuestion("Suggest a study schedule for this week.")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
                   📘 Suggest a study schedule
                 </button>
               </div>
 
-              <form onSubmit={handleSendMessage} className="flex items-center gap-3 border bg-white rounded-xl px-2 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400">
+              <form onSubmit={handleSendMessage} className="flex items-center gap-3 border border-gray-400 bg-white rounded-xl px-2 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400">
                 <input
                   type="text"
                   value={inputValue}
@@ -150,7 +150,7 @@ function SmartAssistantChat() {
                   placeholder="Ask anything about learning performance…"
                   className="flex-1 focus:outline-none text-sm bg-transparent px-2"
                 />
-                <button type="submit" className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-75" disabled={!inputValue.trim()}>
+                <button type="submit" className="bg-[#1C398E] text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-75">
                   
                   <Send className="w-5 h-5" />
                 </button>
