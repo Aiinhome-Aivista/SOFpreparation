@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card } from "../ui-common/Cards";
-import { Badge } from "../ui-common/Badge";
+import { Card } from "../../../ui/Cards";
+import { Badge } from "../../../ui/Badge";
 import {
   Clock,
   PlayCircle,

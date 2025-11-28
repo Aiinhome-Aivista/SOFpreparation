@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { Card } from "../ui-common/Cards"; 
-import { Badge } from "../ui-common/Badge"; 
+import { Card } from "../../../ui/Cards"; 
+import { Badge } from "../../../ui/Badge"; 
 import { Progress } from "../ui-common/Progress";
 import ApiService from "../../../../service/ApiService";
 import { GET_APIS } from "../../../../../connection";

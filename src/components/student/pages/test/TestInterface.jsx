@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Card } from "../ui-common/Cards";
+import { Card } from "../../../ui/Cards";
 import { Progress } from "../ui-common/Progress";
-import { Badge } from "../ui-common/Badge";
+import { Badge } from "../../../ui/Badge";
 import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
@@ -504,7 +504,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
                 <button
                   type="button"
                   onClick={() => handleFinalSubmit({ auto: false })}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
+                  className="flex-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
                 >
                   Submit Test
                 </button>

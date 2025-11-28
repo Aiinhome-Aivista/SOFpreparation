@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Card } from "../ui-common/Cards";
-import { Badge } from "../ui-common/Badge";
+import { Card } from "../../../ui/Cards";
+import { Badge } from "../../../ui/Badge";
 import { Shuffle, Target, Loader } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
