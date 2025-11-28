@@ -31,7 +31,7 @@ function StudentDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-8 py-8">
+    <div className="  mx-auto px-8 py-8">
       {/* Tabs */}
       <div className="flex gap-4 pb-6">
         {[

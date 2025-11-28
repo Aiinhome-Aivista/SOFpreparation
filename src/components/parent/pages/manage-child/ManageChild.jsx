@@ -8,21 +8,30 @@ import {
   AlertCircle,
   Pencil,
   Trash2,
+  RefreshCw,
+
   School,
 } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS, DELETE_APIS } from "../../../../../connection";
 import EditChildModal from "../../../../common/modal/EditChildModal";
 import { UserContext } from "../../../../common/helper/UserContext";
+import { Toast } from "primereact/toast";
+import AddChildModal from "../../../../common/modal/AddChildModal";
+import DeleteChildModal from "../../../../common/modal/DeleteChildModal";
 
 const ManageChild = () => {
+  const { childdetails, setChilddetails, childAdded } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [childToDelete, setChildToDelete] = useState(null);
+  const toast = useRef(null);
   const menuRef = useRef(null);
-  const { childdetails, setChilddetails } = useContext(UserContext);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -93,7 +102,7 @@ const ManageChild = () => {
 
   useEffect(() => {
     fetchChildren();
-  }, []);
+  }, [childAdded]);
 
   const handleEditClick = (child) => {
     setSelectedChild(child);
@@ -106,18 +115,13 @@ const ManageChild = () => {
     setSelectedChild(null);
   };
 
-  const handleUpdateSuccess = () => {
-    fetchChildren(); // Refetch children data to show updated info
-  };
-
   const handleDeleteChild = async (childId, parentId) => {
     if (!childId) return;
-
 
     try {
       setIsLoading(true);
 
-      const payload = { student_id: childId, parent_id: parentId};
+      const payload = { student_id: childId, parent_id: parentId };
 
       const response = await ApiService(DELETE_APIS.deletechild, {
         method: "DELETE",
@@ -129,6 +133,11 @@ const ManageChild = () => {
         setChilddetails((prev) =>
           prev.filter((child) => child.student_id !== childId)
         );
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Child deleted successfully",
+        });
       } else {
         setError(response?.message || "Failed to delete child.");
       }
@@ -139,13 +148,33 @@ const ManageChild = () => {
     }
   };
 
+  const handleDeleteClick = (child) => {
+    setChildToDelete(child);
+    setIsDeleteModalOpen(true);
+    setOpenMenuIndex(null); // Close the dropdown menu
+  };
+
+  const confirmDelete = () => {
+    if (childToDelete) {
+      handleDeleteChild(childToDelete.student_id, childToDelete.parent_id);
+    }
+    setIsDeleteModalOpen(false);
+    setChildToDelete(null);
+  };
+
   return (
     <div className="w-full">
-      <h2 className="text-[#1C398E] text-xl font-semibold">Manage Children</h2>
-      <p className="text-[#4A5565] mb-6">
-        View and manage all your children's accounts
-      </p>
-
+      <Toast ref={toast} />
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-[#1C398E] text-xl font-semibold">
+            Manage Children
+          </h2>
+          <p className="text-[#4A5565]">
+            View and manage all your children's accounts
+          </p>
+        </div>
+      </div>
       {isLoading && (
         <div className="flex justify-center items-center h-64">
           <Loader className="animate-spin text-blue-600" size={40} />
@@ -200,7 +229,10 @@ const ManageChild = () => {
                         </button>
                       </li>
                       <li>
-                        <button className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer" onClick={() => handleDeleteChild(child.student_id, child.parent_id)}>
+                        <button
+                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
+                          onClick={() => handleDeleteClick(child)}
+                        >
                           <Trash2 size={16} />
                           Delete
                         </button>
@@ -273,6 +305,20 @@ const ManageChild = () => {
           child={selectedChild}
           onClose={handleCloseModal}
           onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddChildModal
+          onClose={() => setIsAddModalOpen(false)}
+          onAddSuccess={fetchChildren}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteChildModal
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
         />
       )}
     </div>

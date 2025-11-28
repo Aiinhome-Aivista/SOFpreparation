@@ -33,7 +33,7 @@ function AdminDashboard() {
   ];
 
   return (
-    <div className="container h-full mx-auto px-4 py-8">
+    <div className="  h-full mx-auto px-4 py-8">
       {/* TABS (StudentDashboard Style) */}
       <div className="flex gap-4 pb-6">
         {tabs.map((tab) => {
