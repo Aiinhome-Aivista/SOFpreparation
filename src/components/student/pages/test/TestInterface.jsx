@@ -60,7 +60,6 @@ export default function TestInterface({ testId, onComplete, studentName }) {
         console.error("start assessment error:", e);
       }
     };
-
     fetchAssessment();
   }, [testId]);
 
@@ -119,6 +118,8 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       timeSpent: timeSpent,
     };
 
+    console.log("Save Answer Payload:", payload);
+
     // -----------------------------------------
     // SAVE ANSWER API CALL
     // -----------------------------------------
@@ -139,16 +140,17 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
     // mark last question saved when on last question
     const isLast = currentQuestion === questions.length - 1;
+
     if (isLast) {
-      setLastAnswerSaved(true);
-      // Keep user on last question but disable Next (Submit modal should be used)
-      // NOTE: you could also advance to a "summary" view if desired
-    } else {
-      // go to next question
-      setCurrentQuestion((prev) => prev + 1);
-      // reset question timer
-      setQuestionStartTime(Date.now());
+      // Save only once
+      if (!lastAnswerSaved) {
+        setLastAnswerSaved(true);
+      }
+      return; // DO NOT move to next question
     }
+
+    setCurrentQuestion((prev) => prev + 1);
+    setQuestionStartTime(Date.now());
   };
 
   // final submit handler.
@@ -161,6 +163,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     const payload = {
       attemptId: attemptId, // Already stored in state earlier
     };
+
 
     try {
       // ----------------------------------------------
@@ -231,7 +234,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
             </div>
 
             <h2 className="text-blue-900 mb-2">Test Completed!</h2>
-            <p className="text-gray-600">Great job, {studentName}!</p>
+            <p className="text-gray-600">Great job, {result.studentName}!</p>
           </div>
 
           <div className="space-y-6">
@@ -306,13 +309,12 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     );
   }
 
-
   // main test UI
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const answered = getAnsweredCount();
   const isLastQuestion = currentQuestion === questions.length - 1;
-  const disableNextButton = isLastQuestion && lastAnswerSaved;
+  // const disableNextButton = isLastQuestion && lastAnswerSaved;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -403,17 +405,28 @@ export default function TestInterface({ testId, onComplete, studentName }) {
             </div>
 
             <div className="flex items-center justify-end pt-6 border-t">
-              <button
-                onClick={!disableNextButton ? handleNext : undefined}
-                disabled={disableNextButton}
-                className={`rounded-md px-4 py-2 text-sm text-white ${
-                  disableNextButton
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                }`}
-              >
-                Next
-              </button>
+              {isLastQuestion ? (
+                /*  LAST QUESTION → SUBMIT BUTTON */
+                <button
+                  onClick={async () => {
+                    if (!lastAnswerSaved) {
+                      await handleNext(); //  save only once
+                    }
+                    setShowSubmitDialog(true); // always open modal
+                  }}
+                  className="rounded-md px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 cursor-pointer"
+                >
+                  Submit Test
+                </button>
+              ) : (
+                /*  NORMAL NEXT BUTTON */
+                <button
+                  onClick={handleNext}
+                  className={`rounded-md px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer`}
+                >
+                  Next
+                </button>
+              )}
             </div>
           </Card>
 
