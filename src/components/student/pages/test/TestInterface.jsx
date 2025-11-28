@@ -14,9 +14,10 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const [lastAnswerSaved, setLastAnswerSaved] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [questionTimer, setQuestionTimer] = useState(0);
+  const [testDurationSec, setTestDurationSec] = useState(0);
   const hasFetchedRef = useRef(false);
 
   // to avoid double final submit
@@ -60,6 +61,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
         console.error("start assessment error:", e);
       }
     };
+
     fetchAssessment();
   }, [testId]);
 
@@ -82,12 +84,34 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions]);
 
+  // Per-question timer (UI only)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const timeSpent = Math.floor((now - questionStartTime) / 1000);
+      setQuestionTimer(timeSpent);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [questionStartTime]);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
+  };
+
+  const getGlobalTimerColor = () => {
+    if (!testDurationSec) return "text-blue-600"; // default
+
+    const percentLeft = timeLeft / testDurationSec; // 0 to 1
+
+    if (percentLeft <= 0.2) return "text-red-600"; // last 20%
+    if (percentLeft <= 0.5) return "text-orange-500"; // last 50%
+
+    return "text-blue-600"; // more than 50% time left
   };
 
   // when user picks an option visually
@@ -143,9 +167,9 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
     if (isLast) {
       // Save only once
-      if (!lastAnswerSaved) {
-        setLastAnswerSaved(true);
-      }
+      // if (!lastAnswerSaved) {
+      //   setLastAnswerSaved(true);
+      // }
       return; // DO NOT move to next question
     }
 
@@ -153,55 +177,87 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     setQuestionStartTime(Date.now());
   };
 
+  const saveCurrentAnswer = async () => {
+    const q = questions[currentQuestion];
+
+    const selectedIndex = answers[currentQuestion];
+    const selectedOption =
+      selectedIndex === undefined || selectedIndex === null
+        ? ""
+        : ["A", "B", "C", "D"][selectedIndex];
+
+    const now = Date.now();
+    const timeSpent = Math.floor((now - questionStartTime) / 1000);
+
+    const payload = {
+      attemptId: attemptId,
+      questionId: q.id,
+      selectedOption: selectedOption,
+      timeSpent: timeSpent,
+    };
+
+    console.log("Save Before Final Submit:", payload);
+
+    // Call SAVE ANSWER API
+    try {
+      const json = await ApiService(POST_APIS.saveanswer, {
+        method: "POST",
+        body: payload,
+      });
+      if (json?.isSuccess) {
+        console.log("✔ Answer Saved:", json.data[0]?.message);
+      } else {
+        console.log("⚠ API responded but not success:", json);
+      }
+    } catch (e) {
+      console.error("Save answer error:", e);
+    }
+  };
+
   // final submit handler.
   // options: { auto: boolean } --> if auto === true, we'll perform final submit then navigate to dashboard (onComplete)
   // if auto === false or undefined, we'll store submit result and set isSubmitted (so summary can be shown)
   const handleFinalSubmit = async (opts = {}) => {
-    if (finishingRef.current) return; // prevent double submit
+    if (finishingRef.current) return;
     finishingRef.current = true;
 
-    const payload = {
-      attemptId: attemptId, // Already stored in state earlier
-    };
+    // STEP 1 → SAVE current answer ALWAYS
+    await saveCurrentAnswer();
 
+    // STEP 2 → THEN call final submit API
+    const payload = {
+      attemptId: attemptId,
+    };
+    console.log("Final Submit Payload:", payload);
 
     try {
-      // ----------------------------------------------
-      // FINAL SUBMIT API CALL
-      // ----------------------------------------------
       const json = await ApiService(POST_APIS.submitassessment, {
         method: "POST",
         body: payload,
       });
 
       if (json?.isSuccess) {
-        // Save summary response
         setSubmitResult(json.data);
-
-        // Close modal
         setShowSubmitDialog(false);
-
-        // Mark test as submitted
         setIsSubmitted(true);
 
-        // AUTOMATIC SUBMIT (timer expired)
-        if (opts.auto) {
-          if (typeof onComplete === "function") {
-            // Give slight delay to feel natural
-            setTimeout(() => {
-              onComplete();
-            }, 400);
-          }
+        if (opts.auto && typeof onComplete === "function") {
+          setTimeout(() => onComplete(), 400);
         }
-      } else {
-        console.error(" Final submit failed:", json);
       }
     } catch (error) {
-      console.error(" Final Submit API Error:", error);
+      console.error("Final submit error:", error);
     }
 
-    // unlock in case component reused
     finishingRef.current = false;
+  };
+
+  const formatQuestionTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const getAnsweredCount = () =>
@@ -331,20 +387,12 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                <Clock
-                  className={`size-5 ${
-                    timeLeft < 300 ? "text-red-600" : "text-blue-600"
-                  }`}
-                />
-                <span
-                  className={`text-sm ${
-                    timeLeft < 300 ? "text-red-600" : "text-blue-900"
-                  }`}
-                >
+                <Clock className={`size-5 ${getGlobalTimerColor()}`} />
+
+                <span className={`text-sm ${getGlobalTimerColor()}`}>
                   {formatTime(timeLeft)}
                 </span>
               </div>
-
               <button
                 type="button"
                 onClick={() => setShowSubmitDialog(true)}
@@ -366,14 +414,18 @@ export default function TestInterface({ testId, onComplete, studentName }) {
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Question Card */}
           <Card className="lg:col-span-3 p-8">
-            <div className="mb-6">
+            <div className="mb-6 flex items-center justify-between">
               <Badge className="bg-blue-600 text-white">
                 Question {currentQuestion + 1}
               </Badge>
-              <h3 className="text-xl text-blue-900 mt-4">
-                {currentQ.question}
-              </h3>
+
+              {/* Per-question timer */}
+              <div className="px-3 py-1 bg-gray-100 rounded-md text-sm text-gray-700 border border-gray-300">
+                {formatQuestionTime(questionTimer)}
+              </div>
             </div>
+
+            <h3 className="text-xl text-blue-900 mt-4">{currentQ.question}</h3>
 
             <div className="space-y-3 mb-8">
               {currentQ.options.map((option, index) => (
@@ -408,12 +460,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               {isLastQuestion ? (
                 /*  LAST QUESTION → SUBMIT BUTTON */
                 <button
-                  onClick={async () => {
-                    if (!lastAnswerSaved) {
-                      await handleNext(); //  save only once
-                    }
-                    setShowSubmitDialog(true); // always open modal
-                  }}
+                  onClick={() => setShowSubmitDialog(true)}
                   className="rounded-md px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 cursor-pointer"
                 >
                   Submit Test
