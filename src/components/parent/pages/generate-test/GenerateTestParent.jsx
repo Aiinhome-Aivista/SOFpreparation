@@ -87,6 +87,14 @@ export default function GenerateTestParent() {
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Test assigned successfully!', life: 3000 });
+        setSelectedChild("");
+        setSelectedSubject("");
+        setDifficulty("");
+        setDueDate(null);
+        setNumQuestions("20");
+        setTimeLimit("30");
+        setIsQuestionsTouched(false);
+        setIsTimeTouched(false);
       } else {
         toast.current.show({ severity: 'error', summary: 'Error', detail: response.message || 'Failed to assign test.', life: 3000 });
       }
@@ -288,7 +296,7 @@ export default function GenerateTestParent() {
                   <ProgressBar
                     value={progress}
                     showValue
-                    color={progress === 100 ? "#16a34a" : "#2563eb"} // green at 100%, blue otherwise
+                    color={progress === 100 ? "#16a34a" : "#2563eb"}
                     style={{ height: "20px", marginTop: "8px" }}
                     displayValueTemplate={(value) => `${value}%`}
                   />
@@ -299,9 +307,6 @@ export default function GenerateTestParent() {
                     </p>
                   )}
                 </div>
-
-
-
                 {showSuccess && (
                   <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
                     <CheckCircle className="text-green-600 mt-1" size={18} />
