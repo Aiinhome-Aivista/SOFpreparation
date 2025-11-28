@@ -92,6 +92,28 @@ export default function GenerateTestParent() {
     }
   };
 
+const calculateProgress = () => {
+  let completed = 0;
+
+  if (selectedChild) completed++;
+  if (selectedSubject) completed++;
+  if (difficulty) completed++;
+  if (dueDate) completed++;
+  if (numQuestions && Number(numQuestions) !== 20) completed++;
+  if (timeLimit && Number(timeLimit) !== 30) completed++;
+  return Math.floor((completed / 6) * 100);
+};
+
+
+  const progress = calculateProgress();
+  const getProgressColor = () => {
+    if (progress === 100) return "bg-green-600";
+    if (progress >= 50) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+
+
   return (
     <div className="flex flex-col h-full">
       <Toast ref={toast} />
@@ -202,11 +224,14 @@ export default function GenerateTestParent() {
             {/* Button */}
             <button
               onClick={createTest}
-              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer disabled:bg-gray-400"
-              disabled={isLoading}
+              disabled={isLoading || progress !== 100}
+              className={`w-full rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer 
+    ${progress !== 100 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 text-white"}
+  `}
             >
-              {isLoading ? "Assigning..." : <><Plus size={20} />Assign Test</>}
+              {isLoading ? "Assigning..." : (<><Plus size={20} />Assign Test</>)}
             </button>
+
           </div>
 
           {/* Summary Card */}
@@ -248,6 +273,28 @@ export default function GenerateTestParent() {
               <div>
                 <span className="text-gray-800">Due Date:</span>
                 <p className="text-gray-600">{dueDate ? new Date(dueDate).toLocaleDateString() : "Not selected"}</p>
+              </div>
+              {/* Progress Bar */}
+              <div className="w-full mb-6">
+                <label className="text-sm font-medium text-gray-700">
+                  Progress
+                </label>
+                <div className="w-full h-4 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                  <div
+                    className={`h-4 ${getProgressColor()} rounded-full transition-all duration-500 bg-[length:20px_20px] bg-[linear-gradient(45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent)]`}
+                    style={{ width: `${progress}%` }}
+                  >
+                    <span className="text-white text-xs font-semibold flex justify-center items-center h-full">
+                      {progress}%
+                    </span>
+                  </div>
+                </div>
+
+                {progress === 100 && (
+                  <div className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
+                    <span>✓ Ready to assign!</span>
+                  </div>
+                )}
               </div>
 
               {showSuccess && (

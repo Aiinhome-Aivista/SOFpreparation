@@ -62,7 +62,7 @@ function SmartAssistantChat() {
   };
 
   const handleQuickQuestion = (question) => {
-    const fakeEvent = { preventDefault: () => {} };
+    const fakeEvent = { preventDefault: () => { } };
     setInputValue(question);
     const newMessage = {
       id: messages.length + 1,
@@ -99,16 +99,17 @@ function SmartAssistantChat() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center">
-            <Loader className="animate-spin text-blue-600" size={40} />
-            <p className="mt-4 text-gray-600">Waking up Smart Assistant...</p>
+          <div className="flex justify-center items-center gap-3 py-6">
+             <Loader className="animate-spin text-blue-600" size={40} />
+            <p className="text-gray-600 text-sm">Waking up Smart Assistant...</p>
           </div>
+
         ) : (
           <>
             <div className="flex-1 overflow-y-scroll pr-2 space-y-6 py-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                
+
                   <div className={`w-fit max-w-md p-3 rounded-2xl shadow-sm ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-lg' : 'bg-gray-100 text-gray-800 rounded-bl-lg'}`}>
                     <p className="text-sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                   </div>
@@ -116,7 +117,7 @@ function SmartAssistantChat() {
               ))}
               {isTyping && (
                 <div className="flex items-end gap-2">
-                  
+
                   <div className="w-fit max-w-md p-3 rounded-2xl shadow-sm bg-gray-100 text-gray-500">
                     <div className="flex items-center gap-1">
                       <span className="h-2 w-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
@@ -142,20 +143,34 @@ function SmartAssistantChat() {
                 </button>
               </div>
 
-              <form onSubmit={handleSendMessage} className="flex items-center gap-3 border border-gray-400 bg-white rounded-xl px-2 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-blue-400">
+              <div className="flex items-center gap-3 border border-gray-400 bg-white rounded-xl px-2 py-1.5 shadow-sm focus-within:ring-blue-[#1C398E] focus-within:ring-opacity-50">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Ask anything about learning performance…"
                   className="flex-1 focus:outline-none text-sm bg-transparent px-2"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && inputValue.trim()) {
+                      handleSendMessage(e);
+                    }
+                  }}
                 />
-                <button type="submit" className="bg-[#1C398E] text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-75">
-                  
+
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim()}
+                  className={`p-2 rounded-lg transition-colors 
+      ${inputValue.trim()
+                      ? "bg-[#1C398E] hover:bg-blue-700 text-white cursor-pointer"
+                      : "bg-blue-300 cursor-not-allowed opacity-70 text-white"}`}
+                >
                   <Send className="w-5 h-5" />
                 </button>
-              </form>
-             
+              </div>
+
+
+
             </div>
           </>
         )}
