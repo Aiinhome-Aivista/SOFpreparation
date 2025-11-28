@@ -347,7 +347,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto px-4 py-3">
+        <div className="  mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-blue-900">Test in Progress</h1>
@@ -381,7 +381,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4">
+      <div className="  mx-auto px-4">
         <div className="grid lg:grid-cols-4 gap-1">
           {/* Question Card */}
           <Card className="lg:col-span-3 p-8">
