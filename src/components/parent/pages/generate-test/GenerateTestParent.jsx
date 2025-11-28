@@ -8,6 +8,8 @@ import ApiService from "../../../../service/ApiService";
 import { GET_APIS, POST_APIS } from "../../../../../connection";
 import { UserContext } from "../../../../common/helper/UserContext";
 import { useAuth } from "../../../../common/helper/AuthContext";
+import { ProgressBar } from 'primereact/progressbar';
+
 
 export default function GenerateTestParent() {
   const [selectedChild, setSelectedChild] = useState("");
@@ -23,6 +25,9 @@ export default function GenerateTestParent() {
   const { childdetails } = useContext(UserContext);
   const { user } = useAuth();
   const toast = useRef(null);
+  const [isQuestionsTouched, setIsQuestionsTouched] = useState(false);
+  const [isTimeTouched, setIsTimeTouched] = useState(false);
+
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -82,6 +87,14 @@ export default function GenerateTestParent() {
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
         toast.current.show({ severity: 'success', summary: 'Success', detail: 'Test assigned successfully!', life: 3000 });
+        setSelectedChild("");
+        setSelectedSubject("");
+        setDifficulty("");
+        setDueDate(null);
+        setNumQuestions("20");
+        setTimeLimit("30");
+        setIsQuestionsTouched(false);
+        setIsTimeTouched(false);
       } else {
         toast.current.show({ severity: 'error', summary: 'Error', detail: response.message || 'Failed to assign test.', life: 3000 });
       }
@@ -91,6 +104,25 @@ export default function GenerateTestParent() {
       setIsLoading(false);
     }
   };
+
+  const calculateProgress = () => {
+    let completed = 0;
+    if (selectedChild) completed++;
+    if (selectedSubject) completed++;
+    if (difficulty) completed++;
+    if (dueDate) completed++;
+    if (isQuestionsTouched) completed++;
+    if (isTimeTouched) completed++;
+
+    return Math.floor((completed / 6) * 100);
+  };
+
+
+
+  const progress = calculateProgress();
+
+
+
 
   return (
     <div className="flex flex-col h-full">
@@ -107,10 +139,10 @@ export default function GenerateTestParent() {
           <p className="ml-4 text-gray-600">Loading Test Generator...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 w-full">
 
           {/* Form Card */}
-          <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
+          <div className="xl:col-span-2 p-8 space-y-6 border-gray-200 shadow-sm bg-white rounded-2xl border-2">
 
             {/* Child Select */}
             <div className="space-y-2">
@@ -151,22 +183,26 @@ export default function GenerateTestParent() {
                 <InputNumber
                   value={Number(numQuestions)}
                   onValueChange={(e) => setNumQuestions(e.value?.toString() || "20")}
+                  onFocus={() => setIsQuestionsTouched(true)}
                   min={10} max={50}
                   showButtons
                   inputClassName="text-sm w-full"
                   className="w-full"
                 />
+
               </div>
               <div className="space-y-2">
                 <label className="font-medium text-sm">Time Limit (minutes)<span className="text-red-600"> *</span></label>
                 <InputNumber
                   value={Number(timeLimit)}
                   onValueChange={(e) => setTimeLimit(e.value?.toString() || "30")}
+                  onFocus={() => setIsTimeTouched(true)}
                   min={10} max={120}
                   showButtons
                   inputClassName="text-sm w-full"
                   className="w-full"
                 />
+
               </div>
             </div>
 
@@ -202,28 +238,29 @@ export default function GenerateTestParent() {
             {/* Button */}
             <button
               onClick={createTest}
-              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer disabled:bg-gray-400"
-              disabled={isLoading}
-            >
-              {isLoading ? "Assigning..." : <><Plus size={20} />Assign Test</>}
+              disabled={isLoading || progress !== 100}
+              className={`w-full rounded-lg py-3 flex justify-center items-center gap-2 font-medium cursor-pointer 
+    ${progress !== 100 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 text-white"}
+  `}>
+              {isLoading ? "Assigning..." : (<><Plus size={20} />Assign Test</>)}
             </button>
+
           </div>
 
           {/* Summary Card */}
-          <div className="bg-white rounded-2xl p-6 space-y-4 border-2 border-gray-200">
+          <div className="xl:col-span-1 bg-white rounded-2xl p-8 border-2 border-gray-200 flex flex-col">
             <div className="flex items-center gap-2">
-              <ClipboardList className="text-blue-600" size={20} />
-              <p className="font-semibold text-blue-900">Test Summary</p>
+              <ClipboardList className="text-blue-600" size={25} />
+              <p className="font-semibold text-blue-900 text-lg">Test Summary</p>
             </div>
 
-            <div className="text-sm space-y-3">
+            <div className="text-sm space-y-4 flex flex-col justify-between mt-4">
               <div>
                 <span className="text-gray-800">Student:</span>
                 <p className="text-gray-600">
                   {selectedChild ? children.find(c => c.id === selectedChild)?.fullName : "Not selected"}
                 </p>
               </div>
-
               <div>
                 <span className="text-gray-800">Subject:</span>
                 <p className="text-gray-600">{selectedSubject ? subjects.find(s => s.subject_id === selectedSubject)?.subject_name : "Not selected"}</p>
@@ -249,15 +286,36 @@ export default function GenerateTestParent() {
                 <span className="text-gray-800">Due Date:</span>
                 <p className="text-gray-600">{dueDate ? new Date(dueDate).toLocaleDateString() : "Not selected"}</p>
               </div>
+              <div>
+                {/* Progress Bar */}
+                <div className="w-full mb-6">
+                  <label className="text-sm font-medium text-gray-700">
+                    Progress
+                  </label>
 
-              {showSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
-                  <CheckCircle className="text-green-600 mt-1" size={18} />
-                  <span className="text-sm text-green-700">
-                    Test has been assigned to the student!
-                  </span>
+                  <ProgressBar
+                    value={progress}
+                    showValue
+                    color={progress === 100 ? "#16a34a" : "#2563eb"}
+                    style={{ height: "20px", marginTop: "8px" }}
+                    displayValueTemplate={(value) => `${value}%`}
+                  />
+
+                  {progress === 100 && (
+                    <p className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
+                      <CheckCircle size={18} /> Ready to assign!
+                    </p>
+                  )}
                 </div>
-              )}
+                {showSuccess && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
+                    <CheckCircle className="text-green-600 mt-1" size={18} />
+                    <span className="text-sm text-green-700">
+                      Test has been assigned to the student!
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

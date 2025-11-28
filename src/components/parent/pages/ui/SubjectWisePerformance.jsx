@@ -2,13 +2,13 @@ import React from "react";
 import { Chart } from "primereact/chart";
 import "chart.js/auto";
 
-function SubjectWisePerformance() {
-  const data = {
-    labels: ["Math", "Science", "English", "GK"],
+function SubjectWisePerformance({ data }) {
+  const chartData = {
+    labels: data?.labels || [],
     datasets: [
       {
         label: "Average Score",
-        data: [85, 78, 94, 70],
+        data: data?.data || [],
         borderWidth: 0,
       },
     ],
@@ -41,7 +41,7 @@ function SubjectWisePerformance() {
       </p>
 
       <div className="h-64 md:h-72">
-        <Chart type="bar" data={data} options={options} className="h-full" />
+        <Chart type="bar" data={chartData} options={options} className="h-full" />
       </div>
     </div>
   );
