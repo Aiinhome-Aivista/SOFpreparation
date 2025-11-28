@@ -8,6 +8,8 @@ import ApiService from "../../../../service/ApiService";
 import { GET_APIS, POST_APIS } from "../../../../../connection";
 import { UserContext } from "../../../../common/helper/UserContext";
 import { useAuth } from "../../../../common/helper/AuthContext";
+import { ProgressBar } from 'primereact/progressbar';
+
 
 export default function GenerateTestParent() {
   const [selectedChild, setSelectedChild] = useState("");
@@ -95,26 +97,22 @@ export default function GenerateTestParent() {
     }
   };
 
-const calculateProgress = () => {
-  let completed = 0;
-  if (selectedChild) completed++;
-  if (selectedSubject) completed++;
-  if (difficulty) completed++;
-  if (dueDate) completed++;
-  if (isQuestionsTouched) completed++;
-  if (isTimeTouched) completed++;
+  const calculateProgress = () => {
+    let completed = 0;
+    if (selectedChild) completed++;
+    if (selectedSubject) completed++;
+    if (difficulty) completed++;
+    if (dueDate) completed++;
+    if (isQuestionsTouched) completed++;
+    if (isTimeTouched) completed++;
 
-  return Math.floor((completed / 6) * 100);
-};
+    return Math.floor((completed / 6) * 100);
+  };
 
 
 
   const progress = calculateProgress();
-  const getProgressColor = () => {
-    if (progress === 100) return "bg-green-600";
-    if (progress >= 50) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+
 
 
 
@@ -286,23 +284,23 @@ const calculateProgress = () => {
                   <label className="text-sm font-medium text-gray-700">
                     Progress
                   </label>
-                  <div className="w-full h-4 bg-gray-200 rounded-full mt-1 overflow-hidden">
-                    <div
-                      className={`h-4 ${getProgressColor()} rounded-full transition-all duration-500 bg-size-[23px_23px] bg-[linear-gradient(45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent)]`}
-                      style={{ width: `${progress}%` }}
-                    >
-                      <span className="text-white text-xs font-semibold flex justify-center items-center h-full ml-4">
-                        {progress}%
-                      </span>
-                    </div>
-                  </div>
+
+                  <ProgressBar
+                    value={progress}
+                    showValue
+                    color={progress === 100 ? "#16a34a" : "#2563eb"} // green at 100%, blue otherwise
+                    style={{ height: "20px", marginTop: "8px" }}
+                    displayValueTemplate={(value) => `${value}%`}
+                  />
 
                   {progress === 100 && (
-                    <div className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
-                      <span>✓ Ready to assign!</span>
-                    </div>
+                    <p className="text-green-600 flex items-center gap-1 mt-2 text-sm font-medium">
+                      <CheckCircle size={18} /> Ready to assign!
+                    </p>
                   )}
                 </div>
+
+
 
                 {showSuccess && (
                   <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
