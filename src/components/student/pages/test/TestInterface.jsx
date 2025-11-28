@@ -73,10 +73,10 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          // auto-final submit and redirect to dashboard
-          handleFinalSubmit({ auto: true });
+          handleFinalSubmit({ timeout: true }); // custom flag
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
@@ -95,6 +95,52 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
     return () => clearInterval(interval);
   }, [questionStartTime]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      const q = questions[currentQuestion];
+
+      const selectedIndex = answers[currentQuestion];
+      const selectedOption =
+        selectedIndex === undefined || selectedIndex === null
+          ? ""
+          : ["A", "B", "C", "D"][selectedIndex];
+
+      const payload = {
+        attemptId,
+        questionId: q?.id,
+        selectedOption,
+        timeSpent: Math.floor((Date.now() - questionStartTime) / 1000),
+      };
+
+      // Save answer
+      fetch(POST_APIS.saveanswer, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Final submit
+      fetch(POST_APIS.submitassessment, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ attemptId }),
+      });
+
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [attemptId, currentQuestion, answers, questionStartTime, questions]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -166,14 +212,6 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     // mark last question saved when on last question
     const isLast = currentQuestion === questions.length - 1;
 
-    if (isLast) {
-      // Save only once
-      // if (!lastAnswerSaved) {
-      //   setLastAnswerSaved(true);
-      // }
-      return; // DO NOT move to next question
-    }
-
     setCurrentQuestion((prev) => prev + 1);
     setQuestionStartTime(Date.now());
   };
@@ -215,21 +253,15 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     }
   };
 
-  // final submit handler.
-  // options: { auto: boolean } --> if auto === true, we'll perform final submit then navigate to dashboard (onComplete)
-  // if auto === false or undefined, we'll store submit result and set isSubmitted (so summary can be shown)
-  const handleFinalSubmit = async (opts = {}) => {
+  const handleFinalSubmit = async ({ auto = false, timeout = false } = {}) => {
     if (finishingRef.current) return;
     finishingRef.current = true;
 
-    // STEP 1 → SAVE current answer ALWAYS
+    // STEP 1 → ALWAYS save current answer
     await saveCurrentAnswer();
 
-    // STEP 2 → THEN call final submit API
-    const payload = {
-      attemptId: attemptId,
-    };
-    console.log("Final Submit Payload:", payload);
+    // STEP 2 → call final submit API
+    const payload = { attemptId };
 
     try {
       const json = await ApiService(POST_APIS.submitassessment, {
@@ -239,15 +271,21 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
       if (json?.isSuccess) {
         setSubmitResult(json.data);
-        setShowSubmitDialog(false);
         setIsSubmitted(true);
+        setShowSubmitDialog(false);
 
-        if (opts.auto && typeof onComplete === "function") {
-          setTimeout(() => onComplete(), 400);
+        // TIMEOUT → show summary, DO NOT GO TO DASHBOARD
+        if (timeout) {
+          return; // stop here
+        }
+
+        // USER MANUAL SUBMIT → show summary screen
+        if (!auto) {
+          return;
         }
       }
-    } catch (error) {
-      console.error("Final submit error:", error);
+    } catch (e) {
+      console.error("Final submit error:", e);
     }
 
     finishingRef.current = false;
@@ -271,7 +309,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   if (isSubmitted && submitResult) {
     const result = submitResult;
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-green-50 to-blue-50 p-4 flex items-center justify-center">
+      <div className="h-full bg-linear-to-br from-blue-50 via-green-50 to-blue-50 p-4 flex items-center justify-center">
         <Card className="max-w-2xl w-full p-8">
           <div className="text-center mb-8">
             <div
