@@ -62,6 +62,7 @@ export default function MyTests({ onStartTest }) {
             duration: t.duration_minutes,
             status: t.status,
             dueDate: t.due_date, // can be null
+            time_taken_seconds: t.time_taken_seconds, // can be null
           }))
         );
 
@@ -73,7 +74,19 @@ export default function MyTests({ onStartTest }) {
             questions: t.total_questions,
             duration: t.duration_minutes,
             status: t.status,
-            completedDate: t.created_at,
+
+            completedDate: t.completed_at,
+
+            //  use correct accuracy field from API
+            score: t.score_obtained ? Number(t.score_obtained) : 0,
+            accuracypercentage: t.accuracy_percentage || 0,
+
+            //  new fields from API
+            correct: t.correct_answers,
+            incorrect: t.incorrect_answers,
+            timeTaken: t.time_taken_seconds,
+            timeManagement: t.performance_breakdown?.timeManagement || "Good",
+            timeManagementaccuracy: t.performance_breakdown?.accuracy || "Good",
           }))
         );
       }
@@ -274,7 +287,10 @@ export default function MyTests({ onStartTest }) {
                     {/* Replace Button component here too */}
                     <button
                       className="px-4 py-2 cursor-pointer rounded-md border bg-white text-blue-600 w-full sm:w-auto"
-                      
+                      onClick={() => {
+                        setSelectedTest({ ...test }); // ← ensures fresh object clone
+                        setIsDetailsOpen(true);
+                      }}
                     >
                       View Details
                     </button>
@@ -290,24 +306,24 @@ export default function MyTests({ onStartTest }) {
         onHide={() => setIsDetailsOpen(false)}
         header={null}
         closable={false}
-        className="w-full max-w-xl"
+        className="w-full max-w-xl rounded-lg"
         modal
       >
         {/* Custom Close Button */}
         <button
           onClick={() => setIsDetailsOpen(false)}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl cursor-pointer"
+          className="absolute top-4 right-6 text-gray-500 hover:text-gray-700 text-xl cursor-pointer z-50"
         >
           ✕
         </button>
 
         <div className="relative bg-white rounded-lg w-full p-2">
-          <div className="overflow-y-auto max-h-[70vh] w-full">
+          <div className="overflow-y-auto max-h-[70vh] w-full pr-2">
             {selectedTest && (
               <>
                 {/* Header */}
                 <div className="mb-4">
-                  <h2 className="text-blue-900 flex items-center gap-2 text-xl font-semibold">
+                  <h2 className="text-blue-900 flex items-center gap-2 text-xl font-semibold mb-2">
                     <Award className="size-6 text-blue-600" />
                     {selectedTest.title}
                   </h2>
@@ -330,6 +346,7 @@ export default function MyTests({ onStartTest }) {
                           Overall Score
                         </p>
                         <div className="flex items-baseline gap-2">
+                          {/* OVERALL SCORE */}
                           <span
                             className={`text-4xl ${
                               selectedTest.score >= 80
@@ -339,15 +356,11 @@ export default function MyTests({ onStartTest }) {
                                 : "text-orange-600"
                             }`}
                           >
-                            {selectedTest.score}%
+                            {selectedTest.score}% {/* accuracy_percentage */}
                           </span>
+
                           <span className="text-sm text-gray-600">
-                            (
-                            {Math.round(
-                              selectedTest.questions *
-                                (selectedTest.score / 100)
-                            )}
-                            / {selectedTest.questions})
+                            ({selectedTest.correct} / {selectedTest.questions})
                           </span>
                         </div>
                       </div>
@@ -391,9 +404,8 @@ export default function MyTests({ onStartTest }) {
                     </Card>
                   </div>
 
-                  {/* CORRECT & INCORRECT ANSWERS */}
+                  {/* Correct & Incorrect */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    {/* Correct */}
                     <Card className="p-4 bg-purple-50 border-purple-200 border">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-purple-600 rounded-lg">
@@ -404,16 +416,12 @@ export default function MyTests({ onStartTest }) {
                             Correct Answers
                           </p>
                           <p className="text-purple-900">
-                            {Math.round(
-                              selectedTest.questions *
-                                (selectedTest.score / 100)
-                            )}
+                            {selectedTest.correct}
                           </p>
                         </div>
                       </div>
                     </Card>
 
-                    {/* Incorrect */}
                     <Card className="p-4 bg-orange-50 border-orange-200 border">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-orange-600 rounded-lg">
@@ -424,19 +432,15 @@ export default function MyTests({ onStartTest }) {
                             Incorrect Answers
                           </p>
                           <p className="text-orange-900">
-                            {selectedTest.questions -
-                              Math.round(
-                                selectedTest.questions *
-                                  (selectedTest.score / 100)
-                              )}
+                            {selectedTest.incorrect}
                           </p>
                         </div>
                       </div>
                     </Card>
                   </div>
 
-                  {/* PERFORMANCE BREAKDOWN */}
-                  <Card className="p-6">
+                  {/* Performance Breakdown */}
+                  <Card className="p-6 border-2 border-gray-200">
                     <h4 className="text-blue-900 mb-4">
                       Performance Breakdown
                     </h4>
@@ -448,11 +452,12 @@ export default function MyTests({ onStartTest }) {
                           <span className="text-sm text-gray-600">
                             Accuracy
                           </span>
-                          <span className="text-sm">{selectedTest.score}%</span>
+                          <span className="text-sm">{selectedTest.accuracypercentage}%</span>
                         </div>
 
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
+                            style={{ width: `${selectedTest.accuracypercentage}%` }}
                             className={`h-2 rounded-full ${
                               selectedTest.score >= 80
                                 ? "bg-green-600"
@@ -460,24 +465,28 @@ export default function MyTests({ onStartTest }) {
                                 ? "bg-blue-600"
                                 : "bg-orange-600"
                             }`}
-                            style={{ width: `${selectedTest.score}%` }}
-                          ></div>
+                          />
                         </div>
                       </div>
 
-                      {/* Time Management (Hardcoded) */}
+                      {/* TIME MANAGEMENT */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-gray-600">
                             Time Management
                           </span>
-                          <span className="text-sm">Good</span>
+                          <span className="text-sm">
+                            {selectedTest.timeManagement}{" "}
+                            {/* Rushed / Good / Excellent */}
+                          </span>
                         </div>
 
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: "75%" }}
+                            style={{
+                              width: `${selectedTest.timeManagementaccuracy }%`,
+                            }}
                           ></div>
                         </div>
                       </div>

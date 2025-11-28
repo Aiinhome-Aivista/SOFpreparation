@@ -4,6 +4,7 @@ export const GET_APIS = {
   subjectsdataurl: `${BASE_URL}CommonFeatuersMicroservices/subjects`,
   child_performance_track: `${BASE_URL}ParentsMicroservices/performance_monitor`,
   aiinsightsurl: `${BASE_URL}ChildMicroservices/ai_insights`,
+  selfpracticedashboardurl: `${BASE_URL}ChildMicroservices/self_practice_dashboard`,
 };
 
 export const POST_APIS = {
@@ -18,4 +19,10 @@ export const POST_APIS = {
   startassessment: `${BASE_URL}AssessmentMicroservices/start_assessment`,
   saveanswer: `${BASE_URL}AssessmentMicroservices/save_answer`,
   submitassessment: `${BASE_URL}AssessmentMicroservices/submit`,
+  
+
+};
+
+export const DELETE_APIS = {
+  deletechild: `${BASE_URL}ParentsMicroservices/delete_child`,
 };
