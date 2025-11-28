@@ -8,12 +8,17 @@ import {
   AlertCircle,
   Pencil,
   Trash2,
+  RefreshCw,
+  
   School,
 } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS, DELETE_APIS } from "../../../../../connection";
 import EditChildModal from "../../../../common/modal/EditChildModal";
 import { UserContext } from "../../../../common/helper/UserContext";
+import { Toast } from "primereact/toast";
+import AddChildModal from "../../../../common/modal/AddChildModal";
+import DeleteChildModal from "../../../../common/modal/DeleteChildModal";
 
 const ManageChild = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +26,10 @@ const ManageChild = () => {
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [childToDelete, setChildToDelete] = useState(null);
+  const toast = useRef(null);
   const menuRef = useRef(null);
   const { childdetails, setChilddetails } = useContext(UserContext);
 
@@ -110,6 +119,10 @@ const ManageChild = () => {
     fetchChildren(); // Refetch children data to show updated info
   };
 
+  const handleAddSuccess = () => {
+    fetchChildren();
+  };
+
   const handleDeleteChild = async (childId, parentId) => {
     if (!childId) return;
 
@@ -117,7 +130,7 @@ const ManageChild = () => {
     try {
       setIsLoading(true);
 
-      const payload = { student_id: childId, parent_id: parentId};
+      const payload = { student_id: childId, parent_id: parentId };
 
       const response = await ApiService(DELETE_APIS.deletechild, {
         method: "DELETE",
@@ -129,6 +142,11 @@ const ManageChild = () => {
         setChilddetails((prev) =>
           prev.filter((child) => child.student_id !== childId)
         );
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Child deleted successfully",
+        });
       } else {
         setError(response?.message || "Failed to delete child.");
       }
@@ -139,13 +157,49 @@ const ManageChild = () => {
     }
   };
 
+  const ReloadGridData = () => {
+    fetchChildren();
+  };
+
+  const handleDeleteClick = (child) => {
+    setChildToDelete(child);
+    setIsDeleteModalOpen(true);
+    setOpenMenuIndex(null); // Close the dropdown menu
+  };
+
+  const confirmDelete = () => {
+    if (childToDelete) {
+      handleDeleteChild(childToDelete.student_id, childToDelete.parent_id);
+    }
+    setIsDeleteModalOpen(false);
+    setChildToDelete(null);
+  };
+
   return (
     <div className="w-full">
-      <h2 className="text-[#1C398E] text-xl font-semibold">Manage Children</h2>
-      <p className="text-[#4A5565] mb-6">
-        View and manage all your children's accounts
-      </p>
+      <Toast ref={toast} />
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-[#1C398E] text-xl font-semibold">
+            Manage Children
+          </h2>
+          <p className="text-[#4A5565]">
+            View and manage all your children's accounts
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
 
+          <div
+            className={`relative text-center border border-[#7691ac] rounded-xl w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors ${isLoading ? "bg-gray-200" : ""
+              }`}
+            onClick={ReloadGridData}
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${isLoading ? "animate-spin text-[#2C2E42]" : "text-[#1C398E]"} group-hover:text-[#2C2E42]`}
+            />
+          </div>
+        </div>
+      </div>
       {isLoading && (
         <div className="flex justify-center items-center h-64">
           <Loader className="animate-spin text-blue-600" size={40} />
@@ -200,7 +254,10 @@ const ManageChild = () => {
                         </button>
                       </li>
                       <li>
-                        <button className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer" onClick={() => handleDeleteChild(child.student_id, child.parent_id)}>
+                        <button
+                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
+                          onClick={() => handleDeleteClick(child)}
+                        >
                           <Trash2 size={16} />
                           Delete
                         </button>
@@ -273,6 +330,20 @@ const ManageChild = () => {
           child={selectedChild}
           onClose={handleCloseModal}
           onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddChildModal
+          onClose={() => setIsAddModalOpen(false)}
+          onAddSuccess={handleAddSuccess}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteChildModal
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
         />
       )}
     </div>
