@@ -115,6 +115,12 @@ const ManageChild = () => {
     setSelectedChild(null);
   };
 
+  const handleUpdateSuccess = () => {
+    handleCloseModal();
+    fetchChildren();
+  };
+  
+
   const handleDeleteChild = async (childId, parentId) => {
     if (!childId) return;
 
