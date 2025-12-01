@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -33,11 +33,16 @@ import {
   Unlock,
   Key,
   UserPlus,
+  AlertCircle,
 } from "lucide-react";
+import ApiService from "../../../service/ApiService";
+import { GET_APIS } from "../../../../connection";
 
 export default function ParentsManager() {
   const toast = useRef(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [subscriptionFilter, setSubscriptionFilter] = useState(null);
 
@@ -47,53 +52,40 @@ export default function ParentsManager() {
     { label: "Premium", value: "premium" },
   ];
 
-  const [parents, setParents] = useState([
-    {
-      id: "1",
-      name: "Rajesh Kumar",
-      email: "rajesh@example.com",
-      phone: "+91 98765 43210",
-      registeredDate: "2024-01-15",
-      childrenCount: 2,
-      status: "active",
-      subscription: "premium",
-    },
-    {
-      id: "2",
-      name: "Priya Sharma",
-      email: "priya@example.com",
-      phone: "+91 98765 43211",
-      registeredDate: "2024-02-20",
-      childrenCount: 1,
-      status: "active",
-      subscription: "basic",
-    },
-    {
-      id: "3",
-      name: "Amit Patel",
-      email: "amit@example.com",
-      phone: "+91 98765 43212",
-      registeredDate: "2024-03-10",
-      childrenCount: 3,
-      status: "active",
-      subscription: "premium",
-    },
-    {
-      id: "4",
-      name: "Sneha Gupta",
-      email: "sneha@example.com",
-      phone: "+91 98765 43213",
-      registeredDate: "2024-03-25",
-      childrenCount: 1,
-      status: "suspended",
-      subscription: "free",
-    },
-  ]);
+  const [parents, setParents] = useState([]);
+  const [kpis, setKpis] = useState({
+    active: 0,
+    premiumUsers: 0,
+    suspended: 0,
+    totalParents: 0,
+  });
+
+  useEffect(() => {
+    const fetchParentsData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await ApiService(GET_APIS.adminparentdashboardurl);
+        if (response && response.isSuccess) {
+          setParents(response.data.parents);
+          setKpis(response.data.kpi);
+        } else {
+          setError(response.message || "Failed to fetch parent data.");
+        }
+      } catch (error) {
+        setError(error.message || "An unexpected error occurred.");
+        toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch parent data." });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchParentsData();
+  }, []);
 
   const filteredParents = parents.filter((parent) => {
     const matchesSearch =
-      parent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      parent.email.toLowerCase().includes(searchQuery.toLowerCase());
+      parent.parent_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      parent.parent_email.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSearch;
   });
@@ -206,7 +198,7 @@ export default function ParentsManager() {
             <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Parents</p>
               <p className="text-xl font-semibold text-blue-900">
-                {parents.length}
+                {kpis.totalParents}
               </p>
             </div>
 
@@ -214,7 +206,7 @@ export default function ParentsManager() {
             <div className="p-4 rounded-lg border bg-green-50 border-green-100">
               <p className="text-sm text-gray-600">Active</p>
               <p className="text-xl font-semibold text-green-900">
-                {parents.filter((p) => p.status === "active").length}
+                {kpis.active}
               </p>
             </div>
 
@@ -222,7 +214,7 @@ export default function ParentsManager() {
             <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Suspended</p>
               <p className="text-xl font-semibold text-orange-900">
-                {parents.filter((p) => p.status === "suspended").length}
+                {kpis.suspended}
               </p>
             </div>
 
@@ -230,15 +222,16 @@ export default function ParentsManager() {
             <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
               <p className="text-sm text-gray-600">Premium Users</p>
               <p className="text-xl font-semibold text-purple-900">
-                {parents.filter((p) => p.subscription === "premium").length}
+                {kpis.premiumUsers}
               </p>
             </div>
           </div>
 
           {/* TABLE */}
-          <div className="border-2 border-gray-300 border-bottom-1 rounded-lg overflow-hidden">
+          <div className="border-2 border-gray-300 rounded-lg">
+            <div className="max-h-[210px] overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
                 <TableRow className="border-bottom-2 border-gray-300">
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
@@ -251,55 +244,71 @@ export default function ParentsManager() {
               </TableHeader>
 
               <TableBody>
-                {filteredParents.map((parent) => (
-                  <TableRow key={parent.id} className="cursor-pointer border-bottom-2 border-gray-300">
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan="7" className="h-24 text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan="7" className="h-24">
+                      <div className="flex flex-col items-center gap-2 text-red-500">
+                        <AlertCircle className="size-7 text-red-300" />
+                        Error fetching data: {error}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredParents.map((parent) => (
+                  <TableRow key={parent.user_id} className="cursor-pointer border-bottom-2 border-gray-300">
                     <TableCell>
                       <div>
-                        <p>{parent.name}</p>
-                        <p className="text-sm text-gray-500">{parent.email}</p>
+                        <p>{parent.parent_name}</p>
+                        <p className="text-sm text-gray-500">{parent.parent_email}</p>
                       </div>
                     </TableCell>
 
                     <TableCell>
                       <div className="flex flex-col gap-1 text-sm text-gray-700">
                         <span className="flex items-center gap-2">
-                          <Mail className="size-3" /> {parent.email}
+                          <Mail className="size-3" /> {parent.parent_email}
                         </span>
                         <span className="flex items-center gap-2">
-                          <Phone className="size-3" /> {parent.phone}
+                          <Phone className="size-3" /> {parent.contact}
                         </span>
                       </div>
                     </TableCell>
 
                     <TableCell>
                       <Badge className="bg-blue-50 border-2 border-blue-100 text-black">
-                        {parent.childrenCount} {parent.childrenCount === 1 ? 'child' : 'children'}
+                        {parent.children_count} {parent.children_count === 1 ? 'child' : 'children'}
                       </Badge>
                     </TableCell>
 
                     <TableCell>
                       <Badge
                         className={
-                          parent.subscription === "premium"
+                          parent.subscription_plan === "premium"
                             ? "bg-purple-100 border-0 text-purple-800"
-                            : parent.subscription === "basic"
+                            : parent.subscription_plan === "basic"
                             ? "bg-blue-100 border-0 text-blue-800"
                             : "bg-gray-100 border-0 text-gray-800"
                         }
                       >
-                        {parent.subscription}
+                        {parent.subscription_plan}
                       </Badge>
                     </TableCell>
 
                     <TableCell>
                       <Badge
                         className={
-                          parent.status === "active"
+                          parent.is_active === 1
                             ? "bg-green-100 border-0 text-green-800"
                             : "bg-red-100 border-0 text-red-800"
                         }
                       >
-                        {parent.status}
+                        {parent.is_active === 1 ? "active" : "suspended"}
                       </Badge>
                     </TableCell>
 
@@ -322,9 +331,10 @@ export default function ParentsManager() {
                       </button>
                     </TableCell>
                   </TableRow>
-                ))}
+                )))}
               </TableBody>
             </Table>
+          </div>
           </div>
         </CardContent>
       </Card>

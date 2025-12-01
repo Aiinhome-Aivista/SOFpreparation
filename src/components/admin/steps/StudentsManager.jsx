@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -29,87 +29,57 @@ import {
   TrendingUp,
   Trash2,
   GraduationCap,
+  ClipboardList,
+  AlertCircle,
 } from "lucide-react";
+import ApiService from "../../../service/ApiService";
+import { GET_APIS } from "../../../../connection";
 
 export default function StudentsManager() {
   const toast = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [kpis, setKpis] = useState({
+    active: 0,
+    avgPlatformScore: "0",
+    totalStudents: 0,
+    totalTestsCompleted: 0,
+  });
 
-  const [students, setStudents] = useState([
-    {
-      id: "1",
-      name: "Aarav Kumar",
-      email: "aarav@example.com",
-      grade: "7",
-      parentName: "Rajesh Kumar",
-      parentEmail: "rajesh@example.com",
-      testsCompleted: 12,
-      averageScore: 85,
-      status: "active",
-    },
-    {
-      id: "2",
-      name: "Diya Sharma",
-      email: "diya@example.com",
-      grade: "5",
-      parentName: "Priya Sharma",
-      parentEmail: "priya@example.com",
-      testsCompleted: 8,
-      averageScore: 92,
-      status: "active",
-    },
-    {
-      id: "3",
-      name: "Arjun Patel",
-      email: "arjun@example.com",
-      grade: "6",
-      parentName: "Amit Patel",
-      parentEmail: "amit@example.com",
-      testsCompleted: 15,
-      averageScore: 78,
-      status: "active",
-    },
-    {
-      id: "4",
-      name: "Ananya Patel",
-      email: "ananya@example.com",
-      grade: "8",
-      parentName: "Amit Patel",
-      parentEmail: "amit@example.com",
-      testsCompleted: 20,
-      averageScore: 88,
-      status: "active",
-    },
-    {
-      id: "5",
-      name: "Ishaan Patel",
-      email: "ishaan@example.com",
-      grade: "4",
-      parentName: "Amit Patel",
-      parentEmail: "amit@example.com",
-      testsCompleted: 5,
-      averageScore: 70,
-      status: "active",
-    },
-    {
-      id: "6",
-      name: "Riya Gupta",
-      email: "riya@example.com",
-      grade: "6",
-      parentName: "Sneha Gupta",
-      parentEmail: "sneha@example.com",
-      testsCompleted: 3,
-      averageScore: 65,
-      status: "suspended",
-    },
-  ]);
+  useEffect(() => {
+    const fetchStudentsData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await ApiService(GET_APIS.adminstudentdashboardurl);
+        if (response && response.isSuccess) {
+          setStudents(response.data.students);
+          setKpis(response.data.kpi);
+        } else {
+          setError(response.message || "Failed to fetch student data.");
+        }
+      } catch (error) {
+        setError(error.message || "An unexpected error occurred.");
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to fetch student data.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStudentsData();
+  }, []);
 
   const filteredStudents = students.filter(
     (student) =>
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.parentName.toLowerCase().includes(searchQuery.toLowerCase())
+      student.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.student_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.parent_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Delete Dialog
@@ -117,7 +87,7 @@ export default function StudentsManager() {
   const [confirmVisible, setConfirmVisible] = useState(false);
 
   const deleteStudent = (studentId) => {
-    const student = students.find((s) => s.id === studentId);
+    const student = students.find((s) => s.user_id === studentId);
     setStudents(students.filter((s) => s.id !== studentId));
     toast.current.show({
       severity: "success",
@@ -127,6 +97,7 @@ export default function StudentsManager() {
   };
 
   // Color for grade badges
+  // Note: The API provides grades like 1, 3, 9. You might want to expand this color map.
   const gradeColors = {
     4: "bg-blue-100 text-blue-800 border-0",
     5: "bg-green-100 text-green-800 border-0",
@@ -169,39 +140,30 @@ export default function StudentsManager() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Students</p>
-              <p className="text-xl font-semibold text-blue-900">
-                {students.length}
-              </p>
+              <p className="text-xl font-semibold text-blue-900">{kpis.totalStudents}</p>
             </div>
 
             <div className="p-4 rounded-lg border bg-green-50 border-green-100">
               <p className="text-sm text-gray-600">Active</p>
-              <p className="text-xl font-semibold text-green-900">
-                {students.filter((s) => s.status === "active").length}
-              </p>
+              <p className="text-xl font-semibold text-green-900">{kpis.active}</p>
             </div>
 
             <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
               <p className="text-sm text-gray-600">Total Tests Completed</p>
-              <p className="text-xl font-semibold text-purple-900">
-                {students.reduce((acc, s) => acc + s.testsCompleted, 0)}
-              </p>
+              <p className="text-xl font-semibold text-purple-900">{kpis.totalTestsCompleted}</p>
             </div>
 
             <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Avg Platform Score</p>
               <p className="text-xl font-semibold text-orange-900">
-                {Math.round(
-                  students.reduce((acc, s) => acc + s.averageScore, 0) /
-                    students.length
-                )}
-                %
+                {parseFloat(kpis.avgPlatformScore).toFixed(1)}%
               </p>
             </div>
           </div>
 
           {/* TABLE */}
-          <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+        <div className="border-2 border-gray-300 rounded-lg">
+          <div className="max-h-[210px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-bottom-2 border-gray-300">
@@ -216,107 +178,136 @@ export default function StudentsManager() {
               </TableHeader>
 
               <TableBody>
-                {filteredStudents.map((student) => (
-                  <TableRow
-                    key={student.id}
-                    className="border-b border-bottom-2 border-gray-300"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-blue-100 rounded-full p-2">
-                          <GraduationCap className="size-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <p>{student.name}</p>
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
-                            <Mail className="size-3" />
-                            {student.email}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        className={
-                          gradeColors[student.grade] ||
-                          "bg-gray-100 text-gray-800 border-0"
-                        }
-                      >
-                        Grade {student.grade}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="size-3 text-gray-400" />
-                        <div>
-                          <p className="text-sm">{student.parentName}</p>
-                          <p className="text-xs text-gray-500">
-                            {student.parentEmail}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge className="bg-gray-50 text-black border-2 border-gray-300">
-                        {student.testsCompleted} completed
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp
-                          className={`size-4 ${
-                            student.averageScore >= 80
-                              ? "text-green-600"
-                              : student.averageScore >= 60
-                              ? "text-orange-600"
-                              : "text-red-600"
-                          }`}
-                        />
-                        <span
-                          className={`${
-                            student.averageScore >= 80
-                              ? "text-green-600"
-                              : student.averageScore >= 60
-                              ? "text-orange-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {student.averageScore}%
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        className={
-                          student.status === "active"
-                            ? "bg-green-100 text-green-800 border-0"
-                            : "bg-red-100 text-red-800 border-0"
-                        }
-                      >
-                        {student.status}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedStudent(student);
-                          setConfirmVisible(true);
-                        }}
-                        className="p-2 hover:bg-gray-200 rounded-md"
-                      >
-                        <Trash2 className="size-4 text-red-600" />
-                      </button>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan="7" className="h-24 text-center">
+                      Loading...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan="7" className="h-24">
+                      <div className="flex flex-col items-center gap-2 text-red-500">
+                        <AlertCircle className="size-7 text-red-300" />
+                        Error fetching data: {error}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredStudents.length > 0 ? (
+                  filteredStudents.map((student) => (
+                    <TableRow
+                      key={student.user_id}
+                      className="border-b border-bottom-2 border-gray-300"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="bg-blue-100 rounded-full p-2">
+                            <GraduationCap className="size-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p>{student.student_name}</p>
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Mail className="size-3" />
+                              {student.student_email}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge
+                          className={
+                            gradeColors[student.class_grade] ||
+                            "bg-gray-100 text-gray-800 border-0"
+                          }
+                        >
+                          Grade {student.class_grade}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="size-3 text-gray-400" />
+                          <div>
+                            <p className="text-sm">{student.parent_name}</p>
+                            <p className="text-xs text-gray-500">
+                              {student.parent_email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge className="bg-gray-50 text-black border-2 border-gray-300">
+                          {student.tests_completed} completed
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp
+                            className={`size-4 ${
+                              parseInt(student.avg_score) >= 80
+                                ? "text-green-600"
+                                : parseInt(student.avg_score) >= 60
+                                ? "text-orange-600"
+                                : "text-red-600"
+                            }`}
+                          />
+                          <span
+                            className={`${
+                              parseInt(student.avg_score) >= 80
+                                ? "text-green-600"
+                                : parseInt(student.avg_score) >= 60
+                                ? "text-orange-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {student.avg_score}%
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge
+                          className={
+                            student.account_status === 1
+                              ? "bg-green-100 text-green-800 border-0"
+                              : "bg-red-100 text-red-800 border-0"
+                          }
+                        >
+                          {student.account_status === 1
+                            ? "active"
+                            : "suspended"}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <button
+                          onClick={() => {
+                            setSelectedStudent(student);
+                            setConfirmVisible(true);
+                          }}
+                          className="p-2 hover:bg-gray-200 rounded-md"
+                        >
+                          <Trash2 className="size-4 text-red-600" />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan="7" className="h-24 text-center">
+                      <div className="flex flex-col items-center justify-center gap-2 text-gray-500">
+                        <ClipboardList className="size-10 text-gray-300" />
+                        No students found.
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
+          </div>
           </div>
         </CardContent>
       </Card>
@@ -331,7 +322,7 @@ export default function StudentsManager() {
         position="center"
         draggable={false}
         accept={() => {
-          if (selectedStudent) deleteStudent(selectedStudent.id);
+          if (selectedStudent) deleteStudent(selectedStudent.user_id);
           setConfirmVisible(false);
         }}
         reject={() => setConfirmVisible(false)}

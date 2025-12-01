@@ -5,6 +5,8 @@ export const GET_APIS = {
   child_performance_track: `${BASE_URL}ParentsMicroservices/performance_monitor`,
   aiinsightsurl: `${BASE_URL}ChildMicroservices/ai_insights`,
   selfpracticedashboardurl: `${BASE_URL}ChildMicroservices/self_practice_dashboard`,
+  adminstudentdashboardurl: `${BASE_URL}AdminMicroservices/admin_students_dashboard`,
+  adminparentdashboardurl: `${BASE_URL}AdminMicroservices/admin_parents_dashboard`
 };
 
 export const POST_APIS = {
