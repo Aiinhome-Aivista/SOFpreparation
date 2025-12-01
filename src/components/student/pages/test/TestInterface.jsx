@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Card } from "../ui-common/Cards";
+import { Card } from "../../../ui/Cards";
 import { Progress } from "../ui-common/Progress";
-import { Badge } from "../ui-common/Badge";
-import { Clock, AlertCircle, CheckCircle, Loader } from "lucide-react";
+import { Badge } from "../../../ui/Badge";
+import { Clock, Loader } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
+import TestSummary from "./TestSummary";
+import SubmitDialog from "./SubmitDialog";
 
 export default function TestInterface({ testId, onComplete, studentName }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -14,10 +16,12 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const [lastAnswerSaved, setLastAnswerSaved] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [questionTimer, setQuestionTimer] = useState(0);
+  const [testDurationSec, setTestDurationSec] = useState(0);
   const hasFetchedRef = useRef(false);
+  const [rawImageLinks, setRawImageLinks] = useState([]);
 
   // to avoid double final submit
   const finishingRef = useRef(false);
@@ -46,14 +50,28 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
           setAttemptId(apiData.attempt_id);
 
-          const formatted = apiData.questions.map((q) => ({
+          const allDiagramUrls = apiData.questions.map(q => {
+            try {
+              // diagram_url can be a JSON string array or null
+              return q.diagram_url ? JSON.parse(q.diagram_url) : null;
+            } catch (e) {
+              console.error("Failed to parse diagram_url:", q.diagram_url, e);
+              return null;
+            }
+          });
+          setRawImageLinks(allDiagramUrls);
+          console.log("All Diagram URLs:", allDiagramUrls);
+
+          const formatted = apiData.questions.map((q, index) => ({
             id: q.question_id,
             question: q.question_text,
             options: [q.option_a, q.option_b, q.option_c, q.option_d],
+            diagrams: allDiagramUrls[index] // Add parsed diagrams to each question
           }));
 
           setQuestions(formatted);
           setTimeLeft(apiData.test.duration_minutes * 60);
+          setTestDurationSec(apiData.test.duration_minutes * 60);
           setQuestionStartTime(Date.now());
         }
       } catch (e) {
@@ -71,10 +89,10 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          // auto-final submit and redirect to dashboard
-          handleFinalSubmit({ auto: true });
+          handleFinalSubmit({ timeout: true }); // custom flag
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
@@ -83,12 +101,80 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions]);
 
+  // Per-question timer (UI only)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const timeSpent = Math.floor((now - questionStartTime) / 1000);
+      setQuestionTimer(timeSpent);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [questionStartTime]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      const q = questions[currentQuestion];
+
+      const selectedIndex = answers[currentQuestion];
+      const selectedOption =
+        selectedIndex === undefined || selectedIndex === null
+          ? ""
+          : ["A", "B", "C", "D"][selectedIndex];
+
+      const payload = {
+        attemptId,
+        questionId: q?.id,
+        selectedOption,
+        timeSpent: Math.floor((Date.now() - questionStartTime) / 1000),
+      };
+
+      // Save answer
+      fetch(POST_APIS.saveanswer, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Final submit
+      fetch(POST_APIS.submitassessment, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ attemptId }),
+      });
+
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [attemptId, currentQuestion, answers, questionStartTime, questions]);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
+  };
+
+  const getGlobalTimerColor = () => {
+    if (!testDurationSec) return "text-blue-600"; // default
+
+    const percentLeft = timeLeft / testDurationSec; // 0 to 1
+
+    if (percentLeft <= 0.2) return "text-red-600"; // last 20%
+    if (percentLeft <= 0.5) return "text-orange-500"; // last 50%
+
+    return "text-blue-600"; // more than 50% time left
   };
 
   // when user picks an option visually
@@ -119,6 +205,8 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       timeSpent: timeSpent,
     };
 
+    console.log("Save Answer Payload:", payload);
+
     // -----------------------------------------
     // SAVE ANSWER API CALL
     // -----------------------------------------
@@ -139,66 +227,92 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
     // mark last question saved when on last question
     const isLast = currentQuestion === questions.length - 1;
-    if (isLast) {
-      setLastAnswerSaved(true);
-      // Keep user on last question but disable Next (Submit modal should be used)
-      // NOTE: you could also advance to a "summary" view if desired
-    } else {
-      // go to next question
-      setCurrentQuestion((prev) => prev + 1);
-      // reset question timer
-      setQuestionStartTime(Date.now());
+
+    setCurrentQuestion((prev) => prev + 1);
+    setQuestionStartTime(Date.now());
+  };
+
+  const saveCurrentAnswer = async () => {
+    const q = questions[currentQuestion];
+
+    const selectedIndex = answers[currentQuestion];
+    const selectedOption =
+      selectedIndex === undefined || selectedIndex === null
+        ? ""
+        : ["A", "B", "C", "D"][selectedIndex];
+
+    const now = Date.now();
+    const timeSpent = Math.floor((now - questionStartTime) / 1000);
+
+    const payload = {
+      attemptId: attemptId,
+      questionId: q.id,
+      selectedOption: selectedOption,
+      timeSpent: timeSpent,
+    };
+
+    console.log("Save Before Final Submit:", payload);
+
+    // Call SAVE ANSWER API
+    try {
+      const json = await ApiService(POST_APIS.saveanswer, {
+        method: "POST",
+        body: payload,
+      });
+      if (json?.isSuccess) {
+        console.log("✔ Answer Saved:", json.data[0]?.message);
+      } else {
+        console.log("⚠ API responded but not success:", json);
+      }
+    } catch (e) {
+      console.error("Save answer error:", e);
     }
   };
 
-  // final submit handler.
-  // options: { auto: boolean } --> if auto === true, we'll perform final submit then navigate to dashboard (onComplete)
-  // if auto === false or undefined, we'll store submit result and set isSubmitted (so summary can be shown)
-  const handleFinalSubmit = async (opts = {}) => {
-    if (finishingRef.current) return; // prevent double submit
+  const handleFinalSubmit = async ({ auto = false, timeout = false } = {}) => {
+    if (finishingRef.current) return;
     finishingRef.current = true;
 
-    const payload = {
-      attemptId: attemptId, // Already stored in state earlier
-    };
+    // STEP 1 → ALWAYS save current answer
+    await saveCurrentAnswer();
+
+    // STEP 2 → call final submit API
+    const payload = { attemptId };
 
     try {
-      // ----------------------------------------------
-      // FINAL SUBMIT API CALL
-      // ----------------------------------------------
       const json = await ApiService(POST_APIS.submitassessment, {
         method: "POST",
         body: payload,
       });
 
       if (json?.isSuccess) {
-        // Save summary response
         setSubmitResult(json.data);
-
-        // Close modal
+        setIsSubmitted(true);
         setShowSubmitDialog(false);
 
-        // Mark test as submitted
-        setIsSubmitted(true);
-
-        // AUTOMATIC SUBMIT (timer expired)
-        if (opts.auto) {
-          if (typeof onComplete === "function") {
-            // Give slight delay to feel natural
-            setTimeout(() => {
-              onComplete();
-            }, 400);
-          }
+        // TIMEOUT → show summary, DO NOT GO TO DASHBOARD
+        if (timeout) {
+          return; // stop here
         }
-      } else {
-        console.error(" Final submit failed:", json);
+
+        // USER MANUAL SUBMIT → show summary screen
+        if (!auto) {
+          return;
+        }
       }
-    } catch (error) {
-      console.error(" Final Submit API Error:", error);
+    } catch (e) {
+      console.error("Final submit error:", e);
     }
 
-    // unlock in case component reused
     finishingRef.current = false;
+  };
+
+  const formatQuestionTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const getAnsweredCount = () =>
@@ -209,91 +323,7 @@ export default function TestInterface({ testId, onComplete, studentName }) {
   // If final submit has been done and submitResult exists, render summary OR navigate away (depending on flow)
   // The user asked for auto-submit to go back to dashboard; handleFinalSubmit({auto:true}) does that.
   if (isSubmitted && submitResult) {
-    const result = submitResult;
-    return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-green-50 to-blue-50 p-4 flex items-center justify-center">
-        <Card className="max-w-2xl w-full p-8">
-          <div className="text-center mb-8">
-            <div
-              className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                result.score >= 80
-                  ? "bg-green-100"
-                  : result.score >= 60
-                  ? "bg-blue-100"
-                  : "bg-orange-100"
-              }`}
-            >
-              <CheckCircle
-                className={`size-12 ${
-                  result.score >= 80 ? "text-green-600" : "text-blue-600"
-                }`}
-              />
-            </div>
-
-            <h2 className="text-blue-900 mb-2">Test Completed!</h2>
-            <p className="text-gray-600">Great job, {studentName}!</p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Your Score</p>
-                <p
-                  className={`text-3xl ${
-                    result.score >= 80
-                      ? "text-green-600"
-                      : result.score >= 60
-                      ? "text-blue-600"
-                      : "text-orange-600"
-                  }`}
-                >
-                  {result.score}%
-                </p>
-              </div>
-
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Correct Answers</p>
-                <p className="text-3xl text-green-600">
-                  {result.correctAnswers}/{result.totalQuestions}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-blue-900 mb-3">Summary</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Questions Answered:</span>
-                  <span>
-                    {result.totalAnswered} / {result.totalQuestions}
-                  </span>
-                </div>
-
-                {/* <div className="flex justify-between">
-                  <span className="text-gray-600">Time Taken:</span>
-                  <span>
-                    {formatTime(
-                      hardcodedTestResponse.data.test.duration_minutes * 60 -
-                        timeLeft
-                    )}
-                  </span>
-                </div> */}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onComplete}
-                className="flex-1 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm"
-              >
-                Back to Dashboard
-              </button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <TestSummary result={submitResult} onComplete={onComplete} />;
   }
 
   // Loading / waiting for questions
@@ -306,19 +336,18 @@ export default function TestInterface({ testId, onComplete, studentName }) {
     );
   }
 
-
   // main test UI
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const answered = getAnsweredCount();
   const isLastQuestion = currentQuestion === questions.length - 1;
-  const disableNextButton = isLastQuestion && lastAnswerSaved;
+  // const disableNextButton = isLastQuestion && lastAnswerSaved;
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto px-4 py-3">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="  mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-blue-900">Test in Progress</h1>
@@ -329,20 +358,12 @@ export default function TestInterface({ testId, onComplete, studentName }) {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                <Clock
-                  className={`size-5 ${
-                    timeLeft < 300 ? "text-red-600" : "text-blue-600"
-                  }`}
-                />
-                <span
-                  className={`text-sm ${
-                    timeLeft < 300 ? "text-red-600" : "text-blue-900"
-                  }`}
-                >
+                <Clock className={`size-5 ${getGlobalTimerColor()}`} />
+
+                <span className={`text-sm ${getGlobalTimerColor()}`}>
                   {formatTime(timeLeft)}
                 </span>
               </div>
-
               <button
                 type="button"
                 onClick={() => setShowSubmitDialog(true)}
@@ -360,18 +381,36 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6">
+      <div className="  mx-auto px-4">
+        <div className="grid lg:grid-cols-4 gap-1">
           {/* Question Card */}
           <Card className="lg:col-span-3 p-8">
-            <div className="mb-6">
+            <div className="mb-6 flex items-center justify-between">
               <Badge className="bg-blue-600 text-white">
                 Question {currentQuestion + 1}
               </Badge>
-              <h3 className="text-xl text-blue-900 mt-4">
-                {currentQ.question}
-              </h3>
+
+              {/* Per-question timer */}
+              <div className="px-3 py-1 bg-gray-100 rounded-md text-sm text-gray-700 border border-gray-300">
+                {formatQuestionTime(questionTimer)}
+              </div>
             </div>
+
+            <h3 className="text-xl text-blue-900 mt-4">{currentQ.question}</h3>
+
+            {/* Diagram Images */}
+            {currentQ.diagrams && currentQ.diagrams.length > 0 && (
+              <div className="flex flex-wrap gap-4 justify-start">
+                {currentQ.diagrams.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Question diagram ${currentQuestion + 1}-${i + 1}`}
+                    className="max-w-full h-auto rounded-md bg-white p-1"
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="space-y-3 mb-8">
               {currentQ.options.map((option, index) => (
@@ -402,18 +441,24 @@ export default function TestInterface({ testId, onComplete, studentName }) {
               ))}
             </div>
 
-            <div className="flex items-center justify-end pt-6 border-t">
-              <button
-                onClick={!disableNextButton ? handleNext : undefined}
-                disabled={disableNextButton}
-                className={`rounded-md px-4 py-2 text-sm text-white ${
-                  disableNextButton
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                }`}
-              >
-                Next
-              </button>
+            <div className="flex items-center justify-end">
+              {isLastQuestion ? (
+                /*  LAST QUESTION → SUBMIT BUTTON */
+                <button
+                  onClick={() => setShowSubmitDialog(true)}
+                  className="rounded-md px-4 py-2 text-sm text-white bg-green-600 hover:bg-green-700 cursor-pointer"
+                >
+                  Submit Test
+                </button>
+              ) : (
+                /*  NORMAL NEXT BUTTON */
+                <button
+                  onClick={handleNext}
+                  className={`rounded-md px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer`}
+                >
+                  Next
+                </button>
+              )}
             </div>
           </Card>
 
@@ -456,63 +501,13 @@ export default function TestInterface({ testId, onComplete, studentName }) {
       </div>
 
       {/* Submit Modal */}
-      {showSubmitDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-xl max-w-2xl w-full p-6 z-10">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-blue-900 text-lg">Submit Test?</h3>
-                <p className="text-sm text-gray-600">
-                  Please review your answers before submitting
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-2xl text-green-600">{answered}</p>
-                  <p className="text-xs text-gray-600">Answered</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl text-gray-600">
-                    {questions.length - answered}
-                  </p>
-                  <p className="text-xs text-gray-600">Unanswered</p>
-                </div>
-              </div>
-
-              {questions.length - answered > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-                  <AlertCircle className="size-5 text-yellow-600 shrink-0 mt-0.5" />
-                  <p className="text-sm text-yellow-900">
-                    You have {questions.length - answered} unanswered
-                    question(s). Are you sure you want to submit?
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowSubmitDialog(false)}
-                  className="flex-1 border rounded-md cursor-pointer px-4 py-2 text-sm"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleFinalSubmit({ auto: false })}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-md px-4 py-2 text-sm"
-                >
-                  Submit Test
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SubmitDialog
+        visible={showSubmitDialog}
+        onHide={() => setShowSubmitDialog(false)}
+        onSubmit={() => handleFinalSubmit({ auto: false })}
+        answeredCount={answered}
+        totalQuestions={questions.length}
+      />
     </div>
   );
 }

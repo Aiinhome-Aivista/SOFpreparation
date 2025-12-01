@@ -18,14 +18,24 @@ export function Tabs({ defaultValue, children, className = "" }) {
 }
 
 /* TAB LIST */
-export function TabsList({ children, className = "", activeTab, setActiveTab }) {
+export function TabsList({
+  children,
+  className = "",
+  activeTab,
+  setActiveTab,
+}) {
   const enhance = (child) => {
     if (!child) return null;
     return React.cloneElement(child, { activeTab, setActiveTab });
   };
 
   return (
-    <div className={"inline-flex bg-white border rounded-xl p-1 gap-1 " + className}>
+    <div
+      className={
+        "inline-flex items-center bg-gray-100 text-black font-semibold rounded-full p-2 gap-1 w-fit" +
+        className
+      }
+    >
       {React.Children.map(children, enhance)}
     </div>
   );
@@ -46,9 +56,9 @@ export function TabsTrigger({
       onClick={() => setActiveTab(value)}
       className={
         (isActive
-          ? "bg-blue-600 text-white shadow "
-          : "text-gray-600 hover:bg-gray-100 ") +
-        "px-3 py-1 cursor-pointer rounded-xl text-sm flex items-center gap-2 transition-all " +
+          ? "bg-blue-600 text-white "
+          : "text-gray-700 hover:bg-gray-200 ") +
+        "px-3 py-1.5 rounded-full text-sm transition-all " +
         className
       }
     >

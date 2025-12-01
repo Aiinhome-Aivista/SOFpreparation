@@ -16,6 +16,8 @@ function Index() {
       <Route path="parent/generate-test" element={<ProtectedRoute element={<Layout><GenerateTestParent /></Layout>} />} />
       <Route path="student/dashboard" element={<ProtectedRoute element={<Layout><StudentDashboard /></Layout>} />} />
       <Route path="admin/dashboard"  element={<Layout><AdminDashboard /></Layout>} />
+      <Route path="admin/dashboard" element={<ProtectedRoute element={<Layout><AdminDashboard /></Layout>} />} />
+      {/* <Route path="admin/dashboard" element={<Layout><AdminDashboard /></Layout>} /> */}
     </Routes >
   )
 }

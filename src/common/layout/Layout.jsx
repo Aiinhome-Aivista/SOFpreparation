@@ -22,7 +22,7 @@ function Layout({ children }) {
             <UserProvider>
                 <div className='w-full h-screen flex flex-col'>
                     <Header />
-                    <main className='w-full grow bg-[#EFFBF6] h-full overflow-y-auto'>{children}</main>
+                    <main className='w-screen grow bg-[#EFFBF6] h-full overflow-y-auto'>{children}</main>
                     <Modals />
                 </div>
             </UserProvider>
