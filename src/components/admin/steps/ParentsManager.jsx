@@ -335,6 +335,8 @@ export default function ParentsManager() {
         onHide={() => setShowAddParent(false)}
         header="Add Parent"
         className="w-[90%] md:w-[35%] "
+        position="center"
+        draggable={false}
       >
         <div className="space-y-4 pl-3 pr-6">
           {/* Name */}
@@ -417,6 +419,8 @@ export default function ParentsManager() {
         icon="pi pi-exclamation-triangle"
         accept={confirmDelete}
         reject={() => setConfirmVisible(false)}
+        position="center"
+        draggable={false}
       />
     </div>
   );

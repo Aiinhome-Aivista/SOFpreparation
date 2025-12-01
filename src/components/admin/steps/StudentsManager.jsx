@@ -328,6 +328,8 @@ export default function StudentsManager() {
         message="Are you sure you want to delete this student?"
         header="Confirm Delete"
         icon="pi pi-exclamation-triangle"
+        position="center"
+        draggable={false}
         accept={() => {
           if (selectedStudent) deleteStudent(selectedStudent.id);
           setConfirmVisible(false);

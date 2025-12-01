@@ -423,6 +423,8 @@ export default function AdminResourceLibrary() {
         onHide={() => setShowUpload(false)}
         header="Upload Resource"
         className="w-[90%] md:w-[35%]"
+        position="center"
+        draggable={false}
       >
         <div className="p-4">
           {/* File Input */}
