@@ -117,12 +117,7 @@ export default function GenerateTestParent() {
     return Math.floor((completed / 6) * 100);
   };
 
-
-
   const progress = calculateProgress();
-
-
-
 
   return (
     <div className="flex flex-col h-full">

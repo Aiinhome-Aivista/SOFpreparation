@@ -46,7 +46,9 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         // Remove user data from localStorage and state
-        localStorage.removeItem('user');
+        localStorage.clear();
+        sessionStorage.clear();
+
         setUser(null);
         // Redirect to home page after logout for a clean state
         window.location.href = '/';

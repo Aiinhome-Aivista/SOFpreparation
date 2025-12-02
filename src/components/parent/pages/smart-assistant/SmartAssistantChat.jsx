@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Sparkles, Loader, CornerDownLeft } from "lucide-react";
-
-const initialMessage = {
-  id: 1,
-  sender: "bot",
-  text: "Hello! I'm your Smart Assistant. I can help you understand your child's performance, suggest study strategies, and answer questions about their learning journey. How can I assist you today?",
-  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-};
+import ApiService from "../../../../service/ApiService";
+import { POST_APIS } from "../../../../../connection";
 
 function SmartAssistantChat() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,75 +10,107 @@ function SmartAssistantChat() {
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Scroll to the latest message
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMessages([initialMessage]);
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchInitialMessage = async () => {
+      setIsLoading(true);
+      try {
+        const parentId = JSON.parse(localStorage.getItem("user"))?.userData?.id;
+        if (!parentId) {
+          throw new Error("Parent ID not found. Please log in again.");
+        }
+        const sessionId = sessionStorage.getItem("sessionId");
+        const payload = {
+          parentId,
+          message:"",
+          ...(sessionId && { sessionId }),
+        };
+        const result = await ApiService(POST_APIS.smartassistantchat, { method: 'POST', body: payload });
+        if (result?.isSuccess && result.data) {
+          const initialBotMessage = {
+            id: 1,
+            sender: "bot",
+            text: result.data.reply,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          };
+          setMessages([initialBotMessage]);
+          if (result.data.sessionId) {
+            sessionStorage.setItem("sessionId", result.data.sessionId);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial message:", error);
+        const errorMessage = {
+          id: 1,
+          sender: 'bot',
+          text: 'Sorry, I could not connect to the Smart Assistant. Please try again later.',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages([errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    // sessionStorage.removeItem("sessionId"); // Clear session on component mount
+    fetchInitialMessage();
   }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     const trimmedInput = inputValue.trim();
     if (!trimmedInput) return;
-
     const newMessage = {
       id: messages.length + 1,
       sender: "user",
       text: trimmedInput,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-
     setMessages((prev) => [...prev, newMessage]);
     setInputValue("");
     setIsTyping(true);
-
-    // Simulate a bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        sender: "bot",
-        text: `I've received your message: "${trimmedInput}". I'm still in training, but soon I'll be able to provide detailed insights!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    try {
+      const parentId = JSON.parse(localStorage.getItem("user"))?.userData?.id;
+      if (!parentId) {
+        throw new Error("Parent ID not found. Please log in again.");
+      }
+      const sessionId = sessionStorage.getItem("sessionId");
+      const payload = {
+        parentId,
+        message: trimmedInput,
+        ...(sessionId && { sessionId }),
       };
-      setMessages((prev) => [...prev, botResponse]);
+
+      const result = await ApiService(POST_APIS.smartassistantchat, { method: 'POST', body: payload });
+
+      if (result?.isSuccess && result.data) {
+        const botResponse = {
+          id: messages.length + 2,
+          text: result.data.reply,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages((prev) => [...prev, botResponse]);
+        if (result.data.sessionId && !sessionStorage.getItem("sessionId")) {
+          sessionStorage.setItem("sessionId", result.data.sessionId);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
       setIsTyping(false);
-    }, 2000);
+    }
   };
 
-  const handleQuickQuestion = (question) => {
-    const fakeEvent = { preventDefault: () => { } };
-    setInputValue(question);
-    const newMessage = {
-      id: messages.length + 1,
-      sender: "user",
-      text: question,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages((prev) => [...prev, newMessage]);
-    setInputValue("");
-    setIsTyping(true);
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        sender: "bot",
-        text: `Regarding "${question}", I am analyzing the data and will provide a summary shortly.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 2000);
-  };
+  // const handleQuickQuestion = (question) => {
+  //   setInputValue(question);
+
+  // };
 
   return (
     <div className="flex flex-col items-center h-[calc(100vh-200px)]">
@@ -100,7 +127,7 @@ function SmartAssistantChat() {
 
         {isLoading ? (
           <div className="flex justify-center items-center gap-3 py-6">
-             <Loader className="animate-spin text-blue-600" size={40} />
+            <Loader className="animate-spin text-blue-600" size={40} />
             <p className="text-gray-600 text-sm">Waking up Smart Assistant...</p>
           </div>
 
@@ -131,18 +158,6 @@ function SmartAssistantChat() {
             </div>
 
             <div className="pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
-                <button onClick={() => handleQuickQuestion("What is my child's overall performance?")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
-                  📈 Overall performance?
-                </button>
-                <button onClick={() => handleQuickQuestion("Which topics need more focus?")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
-                  💡 Topics to focus on?
-                </button>
-                <button onClick={() => handleQuickQuestion("Suggest a study schedule for this week.")} className="px-3 py-1.5 border border-gray-400 rounded-full text-xs hover:bg-blue-50 transition whitespace-nowrap">
-                  📘 Suggest a study schedule
-                </button>
-              </div>
-
               <div className="flex items-center gap-3 border border-gray-400 bg-white rounded-xl px-2 py-1.5 shadow-sm focus-within:ring-blue-[#1C398E] focus-within:ring-opacity-50">
                 <input
                   type="text"
@@ -156,7 +171,6 @@ function SmartAssistantChat() {
                     }
                   }}
                 />
-
                 <button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim()}
@@ -168,9 +182,6 @@ function SmartAssistantChat() {
                   <Send className="w-5 h-5" />
                 </button>
               </div>
-
-
-
             </div>
           </>
         )}
