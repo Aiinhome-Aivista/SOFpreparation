@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Send, Sparkles, Loader, CornerDownLeft } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
+import { UserContext } from "../../../../common/helper/UserContext";
 
 function SmartAssistantChat() {
   const [isLoading, setIsLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
+  const { chatMessages: messages, setChatMessages: setMessages, addChatMessage } = useContext(UserContext);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
@@ -15,6 +16,12 @@ function SmartAssistantChat() {
   };
 
   useEffect(() => {
+    // If messages already exist in context, don't fetch initial message
+    if (messages.length > 0) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchInitialMessage = async () => {
       setIsLoading(true);
       try {
@@ -56,7 +63,7 @@ function SmartAssistantChat() {
     };
     // sessionStorage.removeItem("sessionId"); // Clear session on component mount
     fetchInitialMessage();
-  }, []);
+  }, [messages.length, setMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -72,7 +79,7 @@ function SmartAssistantChat() {
       text: trimmedInput,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-    setMessages((prev) => [...prev, newMessage]);
+    addChatMessage(newMessage);
     setInputValue("");
     setIsTyping(true);
     try {
@@ -95,7 +102,7 @@ function SmartAssistantChat() {
           text: result.data.reply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
-        setMessages((prev) => [...prev, botResponse]);
+        addChatMessage(botResponse);
         if (result.data.sessionId && !sessionStorage.getItem("sessionId")) {
           sessionStorage.setItem("sessionId", result.data.sessionId);
         }
