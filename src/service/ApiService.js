@@ -5,35 +5,38 @@
  * @returns {Promise<any>} A promise that resolves with the JSON response.
  */
 const ApiService = async (url, options = {}) => {
-    const defaultHeaders = {
-        'Content-Type': 'application/json',
-    };
+  let headers = options.headers || {};
 
-    const config = {
-        ...options,
-        headers: {
-            ...defaultHeaders,
-            ...options.headers,
-        },
-    };
+  // Detect if body is NOT FormData → keep JSON
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
-    if (config.body) {
-        config.body = JSON.stringify(config.body);
+  const config = {
+    ...options,
+    headers,
+  };
+
+  // Convert normal body to JSON
+  if (config.body && !(config.body instanceof FormData)) {
+    config.body = JSON.stringify(config.body);
+  }
+
+  try {
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({
+        message: "An unknown API error occurred.",
+      }));
+      throw new Error(errorData.message || response.statusText);
     }
 
-    try {
-        const response = await fetch(url, config);
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'An unknown API error occurred.' }));
-            throw new Error(errorData.message || response.statusText);
-        }
-
-        return response.status === 204 ? null : response.json();
-    } catch (error) {
-        console.error('ApiService Error:', error.message);
-        throw error; // Re-throw the error to be handled by the calling function
-    }
+    return response.status === 204 ? null : response.json();
+  } catch (error) {
+    console.error("ApiService Error:", error.message);
+    throw error;
+  }
 };
 
 export default ApiService;

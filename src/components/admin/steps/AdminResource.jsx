@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -15,6 +15,9 @@ import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui-common/Tab";
+import ApiService from "../../../service/ApiService";
+import { GET_APIS } from "../../../../connection";
+import UploadResourceDialog from "../../../common/modal/UploadResourceDialog";
 
 import {
   Upload,
@@ -78,23 +81,47 @@ export default function AdminResourceLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterGrade, setFilterGrade] = useState(null);
   const [filterSubject, setFilterSubject] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
 
   const gradeOptions = [
     { label: "All Grades", value: null },
-    { label: "4", value: "4" },
-    { label: "5", value: "5" },
-    { label: "6", value: "6" },
-    { label: "7", value: "7" },
-    { label: "8", value: "8" },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      label: `Class ${i + 1}`,
+      value: `${i + 1}`,
+    })),
   ];
 
-  const subjectOptions = [
-    { label: "All Subjects", value: null },
-    { label: "Science", value: "Science" },
-    { label: "Mathematics", value: "Mathematics" },
-    { label: "English", value: "English" },
-    { label: "General Knowledge", value: "General Knowledge" },
-  ];
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
+
+  const fetchSubjects = async () => {
+    try {
+      setLoadingSubjects(true);
+
+      const json = await ApiService(GET_APIS.subjectsdataurl, {
+        method: "GET",
+      });
+
+      if (json.isSuccess && Array.isArray(json.data)) {
+        const loadedSubjects = json.data.map((s) => ({
+          label: s.subject_name,
+          value: s.subject_name, // use NAME for filtering match
+        }));
+
+        setSubjects([
+          { label: "All Subjects", value: null },
+          ...loadedSubjects,
+        ]);
+      }
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
+    } finally {
+      setLoadingSubjects(false);
+    }
+  };
+
 
   const filteredResources = resources.filter((r) => {
     const matchSearch =
@@ -111,77 +138,13 @@ export default function AdminResourceLibrary() {
   // Upload Dialog
   // ========================
   const [showUpload, setShowUpload] = useState(false);
-  const [newResource, setNewResource] = useState({
-    title: "",
-    type: "pdf",
-    category: "",
-    grade: null,
-    subject: null,
-    file: null,
-  });
 
-  const fileInputRef = useRef(null);
-
-  const handleFilePick = (e) => {
-    if (e.target.files?.[0]) {
-      setNewResource({ ...newResource, file: e.target.files[0] });
-      toast.current.show({
-        severity: "success",
-        summary: "File Selected",
-        detail: e.target.files[0].name,
-      });
-    }
+  const refreshResources = () => {
+    console.log("Refresh list after upload (optional).");
+    // Place your API call here if needed:
+    // fetchResources();
   };
 
-  const handleUploadResource = () => {
-    if (
-      !newResource.title ||
-      !newResource.category ||
-      !newResource.subject ||
-      !newResource.grade ||
-      !newResource.file
-    ) {
-      toast.current.show({
-        severity: "error",
-        summary: "Missing Fields",
-        detail: "All fields are required",
-      });
-      return;
-    }
-
-    const fileSizeMB = (newResource.file.size / (1024 * 1024)).toFixed(1);
-
-    const resource = {
-      id: Math.random().toString(36).slice(2),
-      title: newResource.title,
-      type: newResource.type,
-      category: newResource.category,
-      grade: newResource.grade,
-      subject: newResource.subject,
-      uploadedDate: new Date().toISOString().split("T")[0],
-      size: `${fileSizeMB} MB`,
-      uploadedBy: "Admin",
-      downloads: 0,
-    };
-
-    setResources([resource, ...resources]);
-    setShowUpload(false);
-
-    setNewResource({
-      title: "",
-      type: "pdf",
-      category: "",
-      grade: null,
-      subject: null,
-      file: null,
-    });
-
-    toast.current.show({
-      severity: "success",
-      summary: "Uploaded",
-      detail: `${resource.title} added.`,
-    });
-  };
 
   // ========================
   // Delete
@@ -225,7 +188,7 @@ export default function AdminResourceLibrary() {
 
             <div className="flex flex-wrap gap-2 mt-2">
               <Badge className="bg-blue-50 border-2 border-blue-200">
-                Grade {r.grade}
+                Class {r.grade}
               </Badge>
               <Badge className="bg-green-50 border-2 border-green-200">
                 {r.subject}
@@ -292,7 +255,7 @@ export default function AdminResourceLibrary() {
 
             <button
               onClick={() => setShowUpload(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer"
             >
               <Upload className="size-4" />
               Upload Resource
@@ -318,8 +281,10 @@ export default function AdminResourceLibrary() {
             </div>
 
             {/* Grade */}
+            {/* Grade Filter */}
             <div className="space-y-1">
               <label className="text-sm font-medium">Grade</label>
+
               <Dropdown
                 value={filterGrade}
                 onChange={(e) => setFilterGrade(e.value)}
@@ -334,14 +299,16 @@ export default function AdminResourceLibrary() {
             {/* Subject */}
             <div className="space-y-1">
               <label className="text-sm font-medium">Subject</label>
+
               <Dropdown
                 value={filterSubject}
                 onChange={(e) => setFilterSubject(e.value)}
-                options={subjectOptions}
                 optionLabel="label"
                 placeholder="All Subjects"
                 className="w-full"
                 showClear
+                loading={loadingSubjects}
+                options={subjects || []}
               />
             </div>
           </div>
@@ -375,7 +342,7 @@ export default function AdminResourceLibrary() {
           </div>
 
           {/* TABS + RESOURCE LIST */}
-          
+
           <Tabs defaultValue="all" className="mt-4">
             <TabsList>
               {tabsData.map((tab) => {
@@ -418,140 +385,11 @@ export default function AdminResourceLibrary() {
       </Card>
 
       {/* Upload Dialog */}
-      <Dialog
+      <UploadResourceDialog
         visible={showUpload}
-        onHide={() => setShowUpload(false)}
-        header="Upload Resource"
-        className="w-[90%] md:w-[35%]"
-        position="center"
-        draggable={false}
-      >
-        <div className="p-4">
-          {/* File Input */}
-          <div className="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFilePick}
-              accept=".pdf,.doc,.png,.jpg,.jpeg,.mp4"
-            />
-
-            <Upload className="size-12 mx-auto mb-2 text-gray-400" />
-            <p className="text-gray-600 mb-2">
-              Drag & drop file or click to browse
-            </p>
-
-            <button
-              className="px-4 py-2 border rounded-md border-gray-300 hover:bg-gray-100"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Browse Files
-            </button>
-
-            {newResource.file && (
-              <div className="flex items-center justify-center gap-2 mt-3">
-                <FileText className="size-4 text-green-600" />
-                <p className="text-green-600">{newResource.file.name}</p>
-                <button
-                  className="p-1"
-                  onClick={() => setNewResource({ ...newResource, file: null })}
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Form */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="col-span-2 space-y-1">
-              <label className="text-sm font-medium">Title *</label>
-              <InputText
-                className="w-full"
-                value={newResource.title}
-                onChange={(e) =>
-                  setNewResource({ ...newResource, title: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Type *</label>
-              <Dropdown
-                value={newResource.type}
-                onChange={(e) =>
-                  setNewResource({ ...newResource, type: e.value })
-                }
-                options={[
-                  { label: "PDF", value: "pdf" },
-                  { label: "Document", value: "document" },
-                  { label: "Video", value: "video" },
-                  { label: "Image", value: "image" },
-                ]}
-                optionLabel="label"
-                placeholder="Select Type"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Category *</label>
-              <InputText
-                className="w-full"
-                value={newResource.category}
-                onChange={(e) =>
-                  setNewResource({ ...newResource, category: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Grade *</label>
-              <Dropdown
-                value={newResource.grade}
-                onChange={(e) =>
-                  setNewResource({ ...newResource, grade: e.value })
-                }
-                options={gradeOptions.slice(1)}
-                optionLabel="label"
-                placeholder="Select Grade"
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Subject *</label>
-              <Dropdown
-                value={newResource.subject}
-                onChange={(e) =>
-                  setNewResource({ ...newResource, subject: e.value })
-                }
-                options={subjectOptions.slice(1)}
-                optionLabel="label"
-                placeholder="Select Subject"
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3">
-            <button
-              onClick={() => setShowUpload(false)}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleUploadResource}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              Upload Resource
-            </button>
-          </div>
-        </div>
-      </Dialog>
+        onClose={() => setShowUpload(false)}
+        onSuccess={refreshResources}
+      />
 
       {/* Delete Confirm */}
       <ConfirmDialog
