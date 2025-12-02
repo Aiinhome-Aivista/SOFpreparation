@@ -26,6 +26,18 @@ export default function LoginModal() {
     e.preventDefault();
     setIsLoading(true);
 
+    const sessionDataString = localStorage.getItem('user');
+    if (sessionDataString) {
+      try {
+        const sessionData = JSON.parse(sessionDataString);
+        if (new Date().getTime() < sessionData.expiry) {
+          toast.current.show({ severity: 'warn', summary: 'Already Logged In', detail: 'You are already logged in.' });
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) { /* Corrupted data, proceed with login */ }
+    }
+
     let email, password;
     if (activeTab === 'parent') {
       email = parentEmail;
@@ -43,11 +55,15 @@ export default function LoginModal() {
       if (response.isSuccess && response.data) {
         const role = response.data.role;
         if (role === activeTab) {
-          login(response.data); // Update context with user data
-          toast.current.show({ severity: 'success', summary: 'Login Successful', detail: response.message || 'You have successfully logged in!' });
-          if (role === 'parent') navigate('parent/dashboard');
-          else if (role === 'student') navigate('student/dashboard');
-          else if (role === 'admin') navigate('admin/dashboard');
+          const loginSuccess = login(response.data); // Update context with user data
+          if (loginSuccess) {
+            toast.current.show({ severity: 'success', summary: 'Login Successful', detail: response.message || 'You have successfully logged in!' });
+            if (role === 'parent') navigate('parent/dashboard');
+            else if (role === 'student') navigate('student/dashboard');
+            else if (role === 'admin') navigate('admin/dashboard');
+          } else {
+            toast.current.show({ severity: 'warn', summary: 'Already Logged In', detail: 'You are already logged in.' });
+          }
         } else {
           toast.current.show({ severity: 'error', summary: 'Login Failed', detail: `Please use the ${role.charAt(0).toUpperCase() + role.slice(1)} tab to log in.` });
         }
@@ -165,20 +181,20 @@ export default function LoginModal() {
         </div>
 
         <div className="pt-4 mt-4 border-t border-gray-200">
-          {activeTab === 'parent'?(
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <button
-              type="button"
-              onClick={() => {
-                closeModal();
-                openRegisterModal();
-              }}
-              className="text-blue-600 hover:underline font-medium cursor-pointer"
-            >
-              Register as Parent
-            </button>
-          </p>
+          {activeTab === 'parent' ? (
+            <p className="text-center text-sm text-gray-600">
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  closeModal();
+                  openRegisterModal();
+                }}
+                className="text-blue-600 hover:underline font-medium cursor-pointer"
+              >
+                Register as Parent
+              </button>
+            </p>
           ) : (<p className="text-center text-sm text-gray-600 opacity-0">
             null
             <button

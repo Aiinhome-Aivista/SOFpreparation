@@ -36,12 +36,13 @@ import {
   AlertCircle,
 } from "lucide-react";
 import ApiService from "../../../service/ApiService";
-import { GET_APIS } from "../../../../connection";
+import { GET_APIS, POST_APIS } from "../../../../connection";
 
 export default function ParentsManager() {
   const toast = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isdialogLoading, setIsdialogLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [subscriptionFilter, setSubscriptionFilter] = useState(null);
@@ -60,27 +61,58 @@ export default function ParentsManager() {
     totalParents: 0,
   });
 
+  // useEffect(() => {
+  //   const fetchParentsData = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       setError(null);
+  //       const response = await ApiService(GET_APIS.adminparentdashboardurl);
+  //       if (response && response.isSuccess) {
+  //         setParents(response.data.parents);
+  //         setKpis(response.data.kpi);
+  //       } else {
+  //         setError(response.message || "Failed to fetch parent data.");
+  //       }
+  //     } catch (error) {
+  //       setError(error.message || "An unexpected error occurred.");
+  //       toast.current.show({
+  //         severity: "error",
+  //         summary: "Error",
+  //         detail: "Failed to fetch parent data.",
+  //       });
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchParentsData();
+  // }, []);
+
   useEffect(() => {
-    const fetchParentsData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await ApiService(GET_APIS.adminparentdashboardurl);
-        if (response && response.isSuccess) {
-          setParents(response.data.parents);
-          setKpis(response.data.kpi);
-        } else {
-          setError(response.message || "Failed to fetch parent data.");
-        }
-      } catch (error) {
-        setError(error.message || "An unexpected error occurred.");
-        toast.current.show({ severity: "error", summary: "Error", detail: "Failed to fetch parent data." });
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchParentsData();
   }, []);
+
+  const fetchParentsData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await ApiService(GET_APIS.adminparentdashboardurl);
+      if (response && response.isSuccess) {
+        setParents(response.data.parents);
+        setKpis(response.data.kpi);
+      } else {
+        setError(response.message || "Failed to fetch parent data.");
+      }
+    } catch (error) {
+      setError(error.message || "Unexpected error.");
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to fetch parent data.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredParents = parents.filter((parent) => {
     const matchesSearch =
@@ -102,7 +134,7 @@ export default function ParentsManager() {
     status: "active",
   });
 
-  const handleAddParent = () => {
+  const handleAddParent = async () => {
     if (!newParent.name || !newParent.email) {
       toast.current.show({
         severity: "error",
@@ -112,22 +144,51 @@ export default function ParentsManager() {
       return;
     }
 
-    const parent = {
-      ...newParent,
-      id: Math.random().toString(36).slice(2),
-      registeredDate: new Date().toISOString().split("T")[0],
-      childrenCount: 0,
-    };
+    try {
+      setIsdialogLoading(true);
 
-    setParents([...parents, parent]);
-    setShowAddParent(false);
-    setNewParent({ name: "", email: "", phone: "", subscription: "free" });
+      const jsonbody = {
+        parent_name: newParent.name,
+        email: newParent.email,
+        phone_number: newParent.phone,
+      };
 
-    toast.current.show({
-      severity: "success",
-      summary: "Added",
-      detail: `Parent ${parent.name} added.`,
-    });
+      const response = await ApiService(POST_APIS.adminaddparent, {
+        method: "POST",
+        body: jsonbody,
+      });
+
+      if (response?.isSuccess) {
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: response.message,
+        });
+
+        // Close dialog
+        setShowAddParent(false);
+
+        // Reset form
+        setNewParent({ name: "", email: "", phone: "" });
+
+        // Refresh parent list
+        fetchParentsData();
+      } else {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: response.message || "Failed to add parent",
+        });
+      }
+    } catch (err) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "API error",
+      });
+    } finally {
+      setIsdialogLoading(false);
+    }
   };
 
   // ================================
@@ -193,7 +254,7 @@ export default function ParentsManager() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Total Parents */}
             <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Parents</p>
@@ -219,74 +280,80 @@ export default function ParentsManager() {
             </div>
 
             {/* Premium Users */}
-            <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
+            {/* <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
               <p className="text-sm text-gray-600">Premium Users</p>
               <p className="text-xl font-semibold text-purple-900">
                 {kpis.premiumUsers}
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* TABLE */}
           <div className="border-2 border-gray-300 rounded-lg">
             <div className="max-h-[210px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
-                <TableRow className="border-bottom-2 border-gray-300">
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Children</TableHead>
-                  <TableHead>Subscription</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Registered</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan="7" className="h-24 text-center">
-                      Loading...
-                    </TableCell>
+              <Table>
+                <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+                  <TableRow className="border-bottom-2 border-gray-300">
+                    <TableHead>Name</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Children</TableHead>
+                    {/* <TableHead>Subscription</TableHead> */}
+                    <TableHead>Status</TableHead>
+                    <TableHead>Registered</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : error ? (
-                  <TableRow>
-                    <TableCell colSpan="7" className="h-24">
-                      <div className="flex flex-col items-center gap-2 text-red-500">
-                        <AlertCircle className="size-7 text-red-300" />
-                        Error fetching data: {error}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredParents.map((parent) => (
-                  <TableRow key={parent.user_id} className="cursor-pointer border-bottom-2 border-gray-300">
-                    <TableCell>
-                      <div>
-                        <p>{parent.parent_name}</p>
-                        <p className="text-sm text-gray-500">{parent.parent_email}</p>
-                      </div>
-                    </TableCell>
+                </TableHeader>
 
-                    <TableCell>
-                      <div className="flex flex-col gap-1 text-sm text-gray-700">
-                        <span className="flex items-center gap-2">
-                          <Mail className="size-3" /> {parent.parent_email}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <Phone className="size-3" /> {parent.contact}
-                        </span>
-                      </div>
-                    </TableCell>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan="7" className="h-24 text-center">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell colSpan="7" className="h-24">
+                        <div className="flex flex-col items-center gap-2 text-red-500">
+                          <AlertCircle className="size-7 text-red-300" />
+                          Error fetching data: {error}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredParents.map((parent) => (
+                      <TableRow
+                        key={parent.user_id}
+                        className="cursor-pointer border-bottom-2 border-gray-300"
+                      >
+                        <TableCell>
+                          <div>
+                            <p>{parent.parent_name}</p>
+                            <p className="text-sm text-gray-500">
+                              {parent.parent_email}
+                            </p>
+                          </div>
+                        </TableCell>
 
-                    <TableCell>
-                      <Badge className="bg-blue-50 border-2 border-blue-100 text-black">
-                        {parent.children_count} {parent.children_count === 1 ? 'child' : 'children'}
-                      </Badge>
-                    </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1 text-sm text-gray-700">
+                            <span className="flex items-center gap-2">
+                              <Mail className="size-3" /> {parent.parent_email}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <Phone className="size-3" /> {parent.contact}
+                            </span>
+                          </div>
+                        </TableCell>
 
-                    <TableCell>
+                        <TableCell>
+                          <Badge className="bg-blue-50 border-2 border-blue-100 text-black">
+                            {parent.children_count}{" "}
+                            {parent.children_count === 1 ? "child" : "children"}
+                          </Badge>
+                        </TableCell>
+
+                        {/* <TableCell>
                       <Badge
                         className={
                           parent.subscription_plan === "premium"
@@ -298,43 +365,46 @@ export default function ParentsManager() {
                       >
                         {parent.subscription_plan}
                       </Badge>
-                    </TableCell>
+                    </TableCell> */}
 
-                    <TableCell>
-                      <Badge
-                        className={
-                          parent.is_active === 1
-                            ? "bg-green-100 border-0 text-green-800"
-                            : "bg-red-100 border-0 text-red-800"
-                        }
-                      >
-                        {parent.is_active === 1 ? "active" : "suspended"}
-                      </Badge>
-                    </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              parent.is_active === 1
+                                ? "bg-green-100 border-0 text-green-800"
+                                : "bg-red-100 border-0 text-red-800"
+                            }
+                          >
+                            {parent.is_active === 1 ? "active" : "suspended"}
+                          </Badge>
+                        </TableCell>
 
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="size-3" />
-                        {new Date(parent.registeredDate).toLocaleDateString()}
-                      </div>
-                    </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="size-3" />
+                            {new Date(
+                              parent.registered_date
+                            ).toLocaleDateString()}
+                          </div>
+                        </TableCell>
 
-                    <TableCell className="text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedParent(parent);
-                          setConfirmVisible(true);
-                        }}
-                        className="p-2 hover:bg-gray-200 rounded-md cursor-pointer"
-                      >
-                        <Trash2 className="size-4 text-red-600" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                )))}
-              </TableBody>
-            </Table>
-          </div>
+                        <TableCell className="text-right">
+                          <button
+                            onClick={() => {
+                              setSelectedParent(parent);
+                              setConfirmVisible(true);
+                            }}
+                            className="p-2 hover:bg-gray-200 rounded-md cursor-pointer"
+                          >
+                            <Trash2 className="size-4 text-red-600" />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -385,23 +455,6 @@ export default function ParentsManager() {
             />
           </div>
 
-          {/* Subscription */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Subscription</label>
-
-            <Dropdown
-              value={newParent.subscription}
-              onChange={(e) =>
-                setNewParent({ ...newParent, subscription: e.value })
-              }
-              options={subscriptionOptions}
-              optionLabel="label"
-              placeholder="Choose Subscription"
-              className="w-full"
-              
-            />
-          </div>
-
           <div className="flex justify-end gap-3 pt-3">
             <button
               onClick={() => setShowAddParent(false)}
@@ -412,9 +465,22 @@ export default function ParentsManager() {
 
             <button
               onClick={handleAddParent}
-              className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              disabled={isdialogLoading}
+              className={`px-4 py-2 cursor-pointer rounded-md text-white 
+                   ${
+                     isdialogLoading
+                       ? "bg-blue-400 cursor-not-allowed"
+                       : "bg-blue-600 hover:bg-blue-700"
+                   }`}
             >
-              Add Parent
+              {isdialogLoading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
+                  Saving...
+                </span>
+              ) : (
+                "Add Parent"
+              )}
             </button>
           </div>
         </div>

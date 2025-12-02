@@ -32,6 +32,12 @@ export const AuthProvider = ({ children }) => {
     const closeModal = () => setModalState(null);
 
     const login = (userData) => {
+        const sessionDataString = localStorage.getItem('user');
+        if (sessionDataString) {
+            // User is already logged in.
+            // You might want to show a toast message here.
+            return false;
+        }
         // Store user data in localStorage and update state
         const sessionDuration = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
         const expiry = new Date().getTime() + sessionDuration;
@@ -42,6 +48,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(sessionData));
         setUser(userData);
         closeModal();
+        return true;
     };
 
     const logout = () => {

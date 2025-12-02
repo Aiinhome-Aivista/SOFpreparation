@@ -1,3 +1,6 @@
+import { POST_APIS } from '../../connection';
+
+const PUBLIC_APIS = [POST_APIS.login, POST_APIS.register];
 /**
  * A global API service function to handle all fetch requests.
  * @param {string} url - The endpoint URL for the API call.
@@ -21,18 +24,27 @@ const ApiService = async (url, options = {}) => {
         config.body = JSON.stringify(config.body);
     }
 
-    try {
-        const response = await fetch(url, config);
+    const sessionDataString = localStorage.getItem('user');
+    const isPublicApi = PUBLIC_APIS.includes(url);
+    if (sessionDataString || isPublicApi) {
+        try {
+            const response = await fetch(url, config);
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'An unknown API error occurred.' }));
-            throw new Error(errorData.message || response.statusText);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'An unknown API error occurred.' }));
+                throw new Error(errorData.message || response.statusText);
+            }
+
+            return response.status === 204 ? null : response.json();
+        } catch (error) {
+            console.error('ApiService Error:', error.message);
+            throw error; // Re-throw the error to be handled by the calling function
         }
-
-        return response.status === 204 ? null : response.json();
-    } catch (error) {
+    } else {
+        window.location.href = '/';
+        const error = new Error('Unauthorized: No user session found for a protected route.');
         console.error('ApiService Error:', error.message);
-        throw error; // Re-throw the error to be handled by the calling function
+        throw error;
     }
 };
 

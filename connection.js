@@ -21,7 +21,8 @@ export const POST_APIS = {
   startassessment: `${BASE_URL}AssessmentMicroservices/start_assessment`,
   saveanswer: `${BASE_URL}AssessmentMicroservices/save_answer`,
   submitassessment: `${BASE_URL}AssessmentMicroservices/submit`,
-  smartassistantchat: `${BASE_URL}ParentsMicroservices/smart_assistant`
+  smartassistantchat: `${BASE_URL}ParentsMicroservices/smart_assistant`,
+  adminaddparent: `${BASE_URL}AdminMicroservices/admin_add_parent`,
 };
 
 export const DELETE_APIS = {
