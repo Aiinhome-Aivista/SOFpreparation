@@ -24,8 +24,6 @@ import { Dialog } from "primereact/dialog";
 
 import {
   Mail,
-  Phone,
-  Calendar,
   User,
   TrendingUp,
   Trash2,
@@ -36,7 +34,7 @@ import {
 } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { GET_APIS } from "../../../../connection";
-import { Dropdown } from "primereact/dropdown";
+import AddAdminChildDialog from "../../../common/modal/AddAdminChildDialog.jsx";
 
 export default function StudentsManager() {
   const toast = useRef(null);
@@ -52,48 +50,33 @@ export default function StudentsManager() {
     totalStudents: 0,
     totalTestsCompleted: 0,
   });
-  const [newChild, setNewChild] = useState({
-      name: "",
-      email: "",
-      phone: "",
-      parentname: "",
-    });
-  const [isdialogLoading, setIsdialogLoading] = useState(false);
-
-  const parentsOptions = [
-    { label: "Free", value: "free" },
-    { label: "Basic", value: "basic" },
-    { label: "Premium", value: "premium" },
-  ];
-
-  const handleAddParent = async () => {
-    setIsdialogLoading(true); };
 
   useEffect(() => {
-    const fetchStudentsData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await ApiService(GET_APIS.adminstudentdashboardurl);
-        if (response && response.isSuccess) {
-          setStudents(response.data.students);
-          setKpis(response.data.kpi);
-        } else {
-          setError(response.message || "Failed to fetch student data.");
-        }
-      } catch (error) {
-        setError(error.message || "An unexpected error occurred.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to fetch student data.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchStudentsData();
   }, []);
+
+  const fetchStudentsData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await ApiService(GET_APIS.adminstudentdashboardurl);
+      if (response && response.isSuccess) {
+        setStudents(response.data.students);
+        setKpis(response.data.kpi);
+      } else {
+        setError(response.message || "Failed to fetch student data.");
+      }
+    } catch (error) {
+      setError(error.message || "An unexpected error occurred.");
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to fetch student data.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredStudents = students.filter(
     (student) =>
@@ -116,6 +99,18 @@ export default function StudentsManager() {
     });
   };
 
+  // Called when AddChildDialog successfully adds a child
+  const handleAddSuccess = () => {
+    toast.current.show({
+      severity: "success",
+      summary: "Added",
+      detail: "Child added successfully!",
+    });
+
+    fetchStudentsData(); // Refresh data
+    setShowAddChild(false); // Close modal
+  };
+
   // Color for grade badges
   // Note: The API provides grades like 1, 3, 9. You might want to expand this color map.
   const gradeColors = {
@@ -130,9 +125,9 @@ export default function StudentsManager() {
     <div className="space-y-6">
       <Toast ref={toast} />
 
-      <Card>
+      <Card className="gap-4!">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <CardTitle className="text-blue-900">
                 Students Management
@@ -140,6 +135,15 @@ export default function StudentsManager() {
               <CardDescription>
                 View and manage all student accounts across the platform
               </CardDescription>
+            </div>
+            {/* Search */}
+            <div className="flex-1">
+              <InputText
+                placeholder="Search by name, email, or parent..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
             </div>
             <button
               onClick={() => setShowAddChild(true)}
@@ -151,41 +155,30 @@ export default function StudentsManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Search */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Search</label>
-            <InputText
-              placeholder="Search by name, email, or parent..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
-
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
+            <div className="p-3 rounded-lg border bg-blue-50 border-blue-100 flex flex-col justify-between">
               <p className="text-sm text-gray-600">Total Students</p>
               <p className="text-xl font-semibold text-blue-900">
                 {kpis.totalStudents}
               </p>
             </div>
 
-            <div className="p-4 rounded-lg border bg-green-50 border-green-100">
+            <div className="p-3 rounded-lg border bg-green-50 border-green-100 flex flex-col justify-between">
               <p className="text-sm text-gray-600">Active</p>
               <p className="text-xl font-semibold text-green-900">
                 {kpis.active}
               </p>
             </div>
 
-            <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
+            <div className="p-3 rounded-lg border bg-purple-50 border-purple-100 flex flex-col justify-between">
               <p className="text-sm text-gray-600">Total Tests Completed</p>
               <p className="text-xl font-semibold text-purple-900">
                 {kpis.totalTestsCompleted}
               </p>
             </div>
 
-            <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
+            <div className="p-3 rounded-lg border bg-orange-50 border-orange-100 flex flex-col justify-between">
               <p className="text-sm text-gray-600">Avg Platform Score</p>
               <p className="text-xl font-semibold text-orange-900">
                 {parseFloat(kpis.avgPlatformScore).toFixed(1)}%
@@ -195,7 +188,7 @@ export default function StudentsManager() {
 
           {/* TABLE */}
           <div className="border-2 border-gray-300 rounded-lg">
-            <div className="max-h-[210px] overflow-y-auto">
+            <div className="overflow-y-auto max-h-[calc(75vh-240px)]">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-bottom-2 border-gray-300">
@@ -344,98 +337,11 @@ export default function StudentsManager() {
         </CardContent>
       </Card>
 
-      {/* ADD PARENT DIALOG */}
-      <Dialog
+      <AddAdminChildDialog
         visible={showAddChild}
-        onHide={() => setShowAddChild(false)}
-        header="Add child"
-        className="w-[90%] md:w-[35%] "
-        position="center"
-        draggable={false}
-      >
-        <div className="space-y-4 pl-3 pr-6">
-          {/* Name */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Child Name *</label>
-            <InputText
-              className="w-full"
-              value={newChild.name}
-              onChange={(e) =>
-                setNewChild({ ...newChild, name: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Subscription</label>
-
-            <Dropdown
-              value={newChild.parentname}
-              onChange={(e) =>
-                setNewChild({ ...newChild, parentname: e.value })
-              }
-              options={parentsOptions}
-              optionLabel="label"
-              placeholder="Choose Parent"
-              className="w-full"
-              
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Email *</label>
-            <InputText
-              className="w-full"
-              value={newChild.email}
-              onChange={(e) =>
-                setNewChild({ ...newChild, email: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Phone */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Phone</label>
-            <InputText
-              className="w-full"
-              value={newChild.phone}
-              onChange={(e) =>
-                setNewChild({ ...newChild, phone: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3">
-            <button
-              onClick={() => setShowAddParent(false)}
-              className="px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-200"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleAddParent}
-              disabled={isdialogLoading}
-              className={`px-4 py-2 cursor-pointer rounded-md text-white 
-                         ${
-                           isdialogLoading
-                             ? "bg-blue-400 cursor-not-allowed"
-                             : "bg-blue-600 hover:bg-blue-700"
-                         }`}
-            >
-              {isdialogLoading ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
-                  Saving...
-                </span>
-              ) : (
-                "Add Child"
-              )}
-            </button>
-          </div>
-        </div>
-      </Dialog>
+        onClose={() => setShowAddChild(false)}
+        onSuccess={handleAddSuccess}
+      />
 
       {/* DELETE CONFIRMATION */}
       <ConfirmDialog

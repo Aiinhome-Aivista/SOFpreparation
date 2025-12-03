@@ -7,6 +7,7 @@ export const GET_APIS = {
   selfpracticedashboardurl: `${BASE_URL}ChildMicroservices/self_practice_dashboard`,
   adminstudentdashboardurl: `${BASE_URL}AdminMicroservices/admin_students_dashboard`,
   adminparentdashboardurl: `${BASE_URL}AdminMicroservices/admin_parents_dashboard`,
+  fetchparents: `${BASE_URL}AdminMicroservices/fetch_parents`,
 };
 
 export const POST_APIS = {
@@ -25,6 +26,7 @@ export const POST_APIS = {
   adminaddparent: `${BASE_URL}AdminMicroservices/admin_add_parent`,
   studymetadatadashboardurl: `${BASE_URL}AdminMicroservices/study_metadata`,
   adminuploadprocess: `${BASE_URL}AdminMicroservices/upload_process`,
+  adminaddchild: `${BASE_URL}AdminMicroservices/admin_add_child`,
 };
 
 export const DELETE_APIS = {

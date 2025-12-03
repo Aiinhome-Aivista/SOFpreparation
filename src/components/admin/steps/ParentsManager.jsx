@@ -115,9 +115,9 @@ export default function ParentsManager() {
     <div className="space-y-6">
       <Toast ref={toast} />
 
-      <Card>
+      <Card className="gap-4!">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <CardTitle className="text-blue-900">
                 Parents Management
@@ -125,6 +125,15 @@ export default function ParentsManager() {
               <CardDescription>
                 Manage parent accounts and subscriptions
               </CardDescription>
+            </div>
+            <div className="flex-1">
+
+              <InputText
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
             </div>
 
             <button
@@ -137,27 +146,10 @@ export default function ParentsManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Search + Filter */}
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {/* Search */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Search
-              </label>
-
-              <InputText
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Total Parents */}
-            <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
+            <div className="p-3 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Parents</p>
               <p className="text-xl font-semibold text-blue-900">
                 {kpis.totalParents}
@@ -165,7 +157,7 @@ export default function ParentsManager() {
             </div>
 
             {/* Active */}
-            <div className="p-4 rounded-lg border bg-green-50 border-green-100">
+            <div className="p-3 rounded-lg border bg-green-50 border-green-100">
               <p className="text-sm text-gray-600">Active</p>
               <p className="text-xl font-semibold text-green-900">
                 {kpis.active}
@@ -173,25 +165,18 @@ export default function ParentsManager() {
             </div>
 
             {/* Suspended */}
-            <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
+            <div className="p-3 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Suspended</p>
               <p className="text-xl font-semibold text-orange-900">
                 {kpis.suspended}
               </p>
             </div>
 
-            {/* Premium Users */}
-            {/* <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
-              <p className="text-sm text-gray-600">Premium Users</p>
-              <p className="text-xl font-semibold text-purple-900">
-                {kpis.premiumUsers}
-              </p>
-            </div> */}
           </div>
 
           {/* TABLE */}
           <div className="border-2 border-gray-300 rounded-lg">
-            <div className="max-h-[210px] overflow-y-auto">
+            <div className=" overflow-y-auto max-h-[calc(75vh-240px)]">
               <Table>
                 <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
                   <TableRow className="border-bottom-2 border-gray-300">
