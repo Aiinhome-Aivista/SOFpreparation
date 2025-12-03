@@ -27,6 +27,12 @@ export const POST_APIS = {
   studymetadatadashboardurl: `${BASE_URL}AdminMicroservices/study_metadata`,
   adminuploadprocess: `${BASE_URL}AdminMicroservices/upload_process`,
   adminaddchild: `${BASE_URL}AdminMicroservices/admin_add_child`,
+  assigntestadmin: `${BASE_URL}AdminMicroservices/assign_test_admin `,
+};
+
+export const PUT_APIS = {
+  adminupdateparent: `${BASE_URL}AdminMicroservices/edit_parent`,
+  admineditchild: `${BASE_URL}AdminMicroservices/edit_child`,
 };
 
 export const DELETE_APIS = {

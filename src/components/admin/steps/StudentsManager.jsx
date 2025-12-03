@@ -18,7 +18,6 @@ import {
 } from "../ui-common/Table";
 
 import { InputText } from "primereact/inputtext";
-import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 
@@ -26,7 +25,7 @@ import {
   Mail,
   User,
   TrendingUp,
-  Trash2,
+  Edit,
   GraduationCap,
   ClipboardList,
   AlertCircle,
@@ -34,6 +33,8 @@ import {
 } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { GET_APIS } from "../../../../connection";
+import { Dropdown } from "primereact/dropdown";
+import EditStudentAdminModal from "../../../common/modal/EditStudentAdminModal";
 import AddAdminChildDialog from "../../../common/modal/AddAdminChildDialog.jsx";
 
 export default function StudentsManager() {
@@ -44,12 +45,16 @@ export default function StudentsManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [showEditStudent, setShowEditStudent] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [kpis, setKpis] = useState({
     active: 0,
     avgPlatformScore: "0",
     totalStudents: 0,
     totalTestsCompleted: 0,
   });
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
 
   useEffect(() => {
     fetchStudentsData();
@@ -86,9 +91,6 @@ export default function StudentsManager() {
   );
 
   // Delete Dialog
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [confirmVisible, setConfirmVisible] = useState(false);
-
   const deleteStudent = (studentId) => {
     const student = students.find((s) => s.user_id === studentId);
     setStudents(students.filter((s) => s.id !== studentId));
@@ -188,7 +190,7 @@ export default function StudentsManager() {
 
           {/* TABLE */}
           <div className="border-2 border-gray-300 rounded-lg">
-            <div className="overflow-y-auto max-h-[calc(75vh-240px)]">
+            <div className="max-h-[290px] overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-bottom-2 border-gray-300">
@@ -246,7 +248,7 @@ export default function StudentsManager() {
                               "bg-gray-100 text-gray-800 border-0"
                             }
                           >
-                            Grade {student.class_grade}
+                            class {student.class_grade}
                           </Badge>
                         </TableCell>
 
@@ -271,22 +273,20 @@ export default function StudentsManager() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <TrendingUp
-                              className={`size-4 ${
-                                parseInt(student.avg_score) >= 80
+                              className={`size-4 ${parseInt(student.avg_score) >= 80
                                   ? "text-green-600"
                                   : parseInt(student.avg_score) >= 60
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                              }`}
+                                    ? "text-orange-600"
+                                    : "text-red-600"
+                                }`}
                             />
                             <span
-                              className={`${
-                                parseInt(student.avg_score) >= 80
+                              className={`${parseInt(student.avg_score) >= 80
                                   ? "text-green-600"
                                   : parseInt(student.avg_score) >= 60
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                              }`}
+                                    ? "text-orange-600"
+                                    : "text-red-600"
+                                }`}
                             >
                               {student.avg_score}%
                             </span>
@@ -311,11 +311,11 @@ export default function StudentsManager() {
                           <button
                             onClick={() => {
                               setSelectedStudent(student);
-                              setConfirmVisible(true);
+                              setShowEditStudent(true);
                             }}
                             className="p-2 hover:bg-gray-200 rounded-md"
                           >
-                            <Trash2 className="size-4 text-red-600" />
+                            <Edit className="size-4 text-blue-600" />
                           </button>
                         </TableCell>
                       </TableRow>
@@ -343,21 +343,15 @@ export default function StudentsManager() {
         onSuccess={handleAddSuccess}
       />
 
-      {/* DELETE CONFIRMATION */}
-      <ConfirmDialog
-        visible={confirmVisible}
-        onHide={() => setConfirmVisible(false)}
-        message="Are you sure you want to delete this student?"
-        header="Confirm Delete"
-        icon="pi pi-exclamation-triangle"
-        position="center"
-        draggable={false}
-        accept={() => {
-          if (selectedStudent) deleteStudent(selectedStudent.user_id);
-          setConfirmVisible(false);
-        }}
-        reject={() => setConfirmVisible(false)}
-      />
+      {showEditStudent && (
+        <EditStudentAdminModal
+          student={selectedStudent}
+          visible={showEditStudent}
+          onClose={() => setShowEditStudent(false)}
+          onSuccess={fetchStudentsData}
+        />
+      )}
+
     </div>
   );
 }

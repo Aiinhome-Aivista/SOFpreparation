@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ClipboardCheck,
   Calendar as CalendarIcon,
 } from 'lucide-react';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
-import { Checkbox } from 'primereact/checkbox';
-import { Badge } from '../../components/ui/Badge';
+import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar as PrimeCalendar } from "primereact/calendar";
+import { Checkbox } from "primereact/checkbox";
+import { Toast } from 'primereact/toast';
+import { Badge } from "../../components/ui/Badge";
+import ApiService from "../../service/ApiService";
+import { GET_APIS, POST_APIS } from "../../../connection";
 
-export default function TestAssignModal({ visible, onHide, students, onAssignTest }) {
+export default function TestAssignModal({ visible, onHide, onAssignTest }) {
+  const toast = useRef(null);
   const [newAssignment, setNewAssignment] = useState({
     testName: '',
     subject: '',
-    grade: '7',
+    grade: '',
     duration: 60,
     totalQuestions: 50,
     dueDate: new Date(),
@@ -22,27 +26,65 @@ export default function TestAssignModal({ visible, onHide, students, onAssignTes
     assignToAll: false,
   });
 
+  const [students, setStudents] = useState([]);
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filterGrade, setFilterGrade] = useState(null);
+  const [subjectOptions, setSubjectOptions] = useState([]);
+
+  useEffect(() => {
+    if (visible) {
+      fetchStudentsData();
+      fetchSubjects();
+    }
+  }, [visible]);
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await ApiService(GET_APIS.subjectsdataurl);
+      if (response && response.isSuccess && Array.isArray(response.data)) {
+        setAllSubjects(response.data);
+        const options = response.data.map((subject) => ({
+          label: subject.subject_name,
+          value: subject.subject_id,
+        }));
+        setSubjectOptions(options);
+      } else {
+        console.error(
+          response.message || "Failed to fetch subjects."
+        );
+      }
+    } catch (error) {
+      console.error("An error occurred while fetching subjects:", error);
+    }
+  };
+
+  const fetchStudentsData = async () => {
+    try {
+      setLoading(true);
+      const response = await ApiService(GET_APIS.adminstudentdashboardurl);
+      if (response && response.isSuccess) {
+        setStudents(response.data.students);
+      } else {
+        console.error(response.message || "Failed to fetch student data.");
+      }
+    } catch (error) {
+      console.error(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const gradeOptions = [
-    { label: 'All Grades', value: null },
-    { label: 'Grade 4', value: '4' },
-    { label: 'Grade 5', value: '5' },
-    { label: 'Grade 6', value: '6' },
-    { label: 'Grade 7', value: '7' },
-    { label: 'Grade 8', value: '8' },
+    { label: "All Grades", value: null },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      label: `Grade ${i + 1}`,
+      value: `${i + 1}`,
+    })),
   ];
-  const subjectOptions = [
-  { label: "Math", value: "Math" },
-  { label: "Science", value: "Science" },
-  { label: "English", value: "English" },
-  { label: "Social Studies", value: "Social Studies" },
-  { label: "Computer", value: "Computer" },
-];
-
 
   const filteredStudents = students.filter(
-    (student) => !filterGrade || student.grade === filterGrade
+    (student) => !filterGrade || String(student.class_grade) === filterGrade
   );
 
   const handleStudentToggle = (studentId) => {
@@ -58,16 +100,63 @@ export default function TestAssignModal({ visible, onHide, students, onAssignTes
     setNewAssignment((prev) => ({
       ...prev,
       assignToAll: checked,
-      selectedStudents: checked ? filteredStudents.map((s) => s.id) : [],
+      selectedStudents: checked ? filteredStudents.map((s) => s.user_id) : [],
     }));
   };
 
-  const handleAssign = () => {
-    onAssignTest(newAssignment);
+  const handleAssign = async () => {
+    // Validation
+    if (!newAssignment.testName.trim()) {
+      toast.current.show({ severity: 'warn', detail: 'Test Name is required.' });
+      return;
+    }
+    if (!newAssignment.subject) {
+      toast.current.show({ severity: 'warn', detail: 'Subject is required.' });
+      return;
+    }
+    if (newAssignment.selectedStudents.length === 0) {
+      toast.current.show({ severity: 'warn', detail: 'Please select at least one student.' });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
+      const adminId = user?.userData?.id;
+
+      if (!adminId) {
+        throw new Error("Admin ID not found. Please log in again.");
+      }
+
+      const payload = {
+        adminId: adminId,
+        testName: newAssignment.testName,
+        subjectId: newAssignment.subject, // This should be an integer ID
+        gradeLevel: newAssignment.grade ? parseInt(newAssignment.grade) : null,
+        duration: newAssignment.duration,
+        totalQuestions: newAssignment.totalQuestions,
+        dueDate: newAssignment.dueDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        studentIds: newAssignment.selectedStudents,
+      };
+
+      const response = await ApiService(POST_APIS.assigntestadmin, { method: 'POST', body: payload });
+
+      if (response?.isSuccess) {
+        toast.current.show({ severity: 'success', summary: 'Success', detail: response.message || 'Test assigned successfully!' });
+        setTimeout(onHide, 1500);
+      } else {
+        toast.current.show({ severity: 'error', summary: 'Error', detail: response?.message || 'Failed to assign test.' });
+      }
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog visible={visible} onHide={onHide} header="Assign Test to Students" className="w-[90%] md:w-[50%]" position="center" draggable={false}>
+      <Toast ref={toast} />
       <div className="space-y-4 p-4">
         <div className="space-y-4">
           <div className="space-y-1"><label className="text-sm font-medium">Test Name *</label><InputText id="testName" placeholder="e.g., Science Olympiad Mock Test" value={newAssignment.testName} onChange={(e) => setNewAssignment({ ...newAssignment, testName: e.target.value })} className="w-full" /></div>
@@ -89,8 +178,11 @@ export default function TestAssignModal({ visible, onHide, students, onAssignTes
               />
             </div>
 
-            <div className="space-y-1"><label className="text-sm font-medium">Grade Level</label><Dropdown value={newAssignment.grade} onChange={(e) => setNewAssignment({ ...newAssignment, grade: e.value })} options={gradeOptions.slice(1)} placeholder="Select Grade" className="w-full" 
-            showClear filter/></div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Grade Level</label>
+              <Dropdown value={filterGrade} onChange={(e) => { setNewAssignment({ ...newAssignment, grade: e.value }); setFilterGrade(e.value); }} options={gradeOptions.slice(1)} placeholder="Select Grade" className="w-full" 
+                showClear filter/>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1"><label className="text-sm font-medium">Duration (minutes)</label><InputText id="duration" type="number" value={String(newAssignment.duration)} onChange={(e) => setNewAssignment({ ...newAssignment, duration: parseInt(e.target.value) || 60 })} className="w-full" /></div>
@@ -105,17 +197,16 @@ export default function TestAssignModal({ visible, onHide, students, onAssignTes
             <label className="text-sm font-medium">Select Students *</label>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2"><Checkbox inputId="assignToAll" checked={newAssignment.assignToAll} onChange={(e) => handleAssignToAll(e.checked)} /><label htmlFor="assignToAll" className="cursor-pointer text-sm">Assign to all filtered students</label></div>
-              <Dropdown value={filterGrade} onChange={(e) => setFilterGrade(e.value)} options={gradeOptions} placeholder="Filter by Grade" className="w-full" showClear />
             </div>
           </div>
           <div className="border rounded-lg p-4 max-h-64 overflow-y-auto space-y-2 hide-scrollbar">
             {filteredStudents.map((student) => (
-              <div key={student.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                <Checkbox inputId={`student-${student.id}`} value={student.id} checked={newAssignment.selectedStudents.includes(student.id)} onChange={() => handleStudentToggle(student.id)} />
+              <div key={student.user_id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                <Checkbox inputId={`student-${student.user_id}`} value={student.user_id} checked={newAssignment.selectedStudents.includes(student.user_id)} onChange={() => handleStudentToggle(student.user_id)} />
 
-                <label htmlFor={`student-${student.id}`} className="flex-1 cursor-pointer flex items-center justify-between">
-                  <div><p>{student.name}</p><p className="text-sm text-gray-500">{student.email}</p></div>
-                  <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Grade {student.grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parentName}</Badge></div>
+                <label htmlFor={`student-${student.user_id}`} className="flex-1 cursor-pointer flex items-center justify-between">
+                  <div><p>{student.student_name}</p><p className="text-sm text-gray-500">{student.student_email}</p></div>
+                  <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Grade {student.class_grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parent_name}</Badge></div>
                 </label>
               </div>
             ))}
@@ -125,7 +216,10 @@ export default function TestAssignModal({ visible, onHide, students, onAssignTes
       </div>
       <div className="flex justify-end gap-2 p-4 bg-gray-50 border-t">
         <button onClick={onHide} className="px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-200">Cancel</button>
-        <button onClick={handleAssign} className="px-4 py-2 cursor-pointer bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"><ClipboardCheck className="size-4" />Assign Test</button>
+        <button onClick={handleAssign} disabled={loading} className="px-4 py-2 cursor-pointer bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2 disabled:bg-green-300 disabled:cursor-not-allowed">
+          {loading ? <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span> : <ClipboardCheck className="size-4" />}
+          {loading ? 'Assigning...' : 'Assign Test'}
+        </button>
       </div>
     </Dialog>
   );
