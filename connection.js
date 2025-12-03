@@ -31,6 +31,7 @@ export const POST_APIS = {
 
 export const PUT_APIS = {
   adminupdateparent: `${BASE_URL}AdminMicroservices/edit_parent`,
+  admineditchild: `${BASE_URL}AdminMicroservices/edit_child`,
 };
 
 export const DELETE_APIS = {
