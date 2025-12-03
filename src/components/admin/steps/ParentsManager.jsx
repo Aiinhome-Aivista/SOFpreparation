@@ -17,8 +17,6 @@ import {
   TableHead,
 } from "../ui-common/Table"; // your reusable table
 import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Dialog } from "primereact/dialog";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 
@@ -37,21 +35,14 @@ import {
 } from "lucide-react";
 import ApiService from "../../../service/ApiService";
 import { GET_APIS, POST_APIS } from "../../../../connection";
+import AddParentModal from "../../../common/modal/AddParentModal.jsx";
 
 export default function ParentsManager() {
   const toast = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isdialogLoading, setIsdialogLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [subscriptionFilter, setSubscriptionFilter] = useState(null);
-
-  const subscriptionOptions = [
-    { label: "Free", value: "free" },
-    { label: "Basic", value: "basic" },
-    { label: "Premium", value: "premium" },
-  ];
 
   const [parents, setParents] = useState([]);
   const [kpis, setKpis] = useState({
@@ -60,32 +51,6 @@ export default function ParentsManager() {
     suspended: 0,
     totalParents: 0,
   });
-
-  // useEffect(() => {
-  //   const fetchParentsData = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       setError(null);
-  //       const response = await ApiService(GET_APIS.adminparentdashboardurl);
-  //       if (response && response.isSuccess) {
-  //         setParents(response.data.parents);
-  //         setKpis(response.data.kpi);
-  //       } else {
-  //         setError(response.message || "Failed to fetch parent data.");
-  //       }
-  //     } catch (error) {
-  //       setError(error.message || "An unexpected error occurred.");
-  //       toast.current.show({
-  //         severity: "error",
-  //         summary: "Error",
-  //         detail: "Failed to fetch parent data.",
-  //       });
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   fetchParentsData();
-  // }, []);
 
   useEffect(() => {
     fetchParentsData();
@@ -126,70 +91,6 @@ export default function ParentsManager() {
   // Add Parent Dialog
   // ================================
   const [showAddParent, setShowAddParent] = useState(false);
-  const [newParent, setNewParent] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subscription: "free",
-    status: "active",
-  });
-
-  const handleAddParent = async () => {
-    if (!newParent.name || !newParent.email) {
-      toast.current.show({
-        severity: "error",
-        summary: "Missing fields",
-        detail: "Name and Email are required.",
-      });
-      return;
-    }
-
-    try {
-      setIsdialogLoading(true);
-
-      const jsonbody = {
-        parent_name: newParent.name,
-        email: newParent.email,
-        phone_number: newParent.phone,
-      };
-
-      const response = await ApiService(POST_APIS.adminaddparent, {
-        method: "POST",
-        body: jsonbody,
-      });
-
-      if (response?.isSuccess) {
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: response.message,
-        });
-
-        // Close dialog
-        setShowAddParent(false);
-
-        // Reset form
-        setNewParent({ name: "", email: "", phone: "" });
-
-        // Refresh parent list
-        fetchParentsData();
-      } else {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: response.message || "Failed to add parent",
-        });
-      }
-    } catch (err) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "API error",
-      });
-    } finally {
-      setIsdialogLoading(false);
-    }
-  };
 
   // ================================
   // Delete Confirmation
@@ -409,82 +310,13 @@ export default function ParentsManager() {
         </CardContent>
       </Card>
 
-      {/* ADD PARENT DIALOG */}
-      <Dialog
-        visible={showAddParent}
-        onHide={() => setShowAddParent(false)}
-        header="Add Parent"
-        className="w-[90%] md:w-[35%] "
-        position="center"
-        draggable={false}
-      >
-        <div className="space-y-4 pl-3 pr-6">
-          {/* Name */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Parent Name *</label>
-            <InputText
-              className="w-full"
-              value={newParent.name}
-              onChange={(e) =>
-                setNewParent({ ...newParent, name: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Email *</label>
-            <InputText
-              className="w-full"
-              value={newParent.email}
-              onChange={(e) =>
-                setNewParent({ ...newParent, email: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Phone */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Phone</label>
-            <InputText
-              className="w-full"
-              value={newParent.phone}
-              onChange={(e) =>
-                setNewParent({ ...newParent, phone: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3">
-            <button
-              onClick={() => setShowAddParent(false)}
-              className="px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-200"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleAddParent}
-              disabled={isdialogLoading}
-              className={`px-4 py-2 cursor-pointer rounded-md text-white 
-                   ${
-                     isdialogLoading
-                       ? "bg-blue-400 cursor-not-allowed"
-                       : "bg-blue-600 hover:bg-blue-700"
-                   }`}
-            >
-              {isdialogLoading ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>
-                  Saving...
-                </span>
-              ) : (
-                "Add Parent"
-              )}
-            </button>
-          </div>
-        </div>
-      </Dialog>
+      {showAddParent && (
+        <AddParentModal
+          visible={showAddParent}
+          onClose={() => setShowAddParent(false)}
+          onSuccess={fetchParentsData}
+        />
+      )}
 
       {/* DELETE CONFIRMATION */}
       <ConfirmDialog

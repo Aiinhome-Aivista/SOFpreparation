@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { User, Mail, Lock, GraduationCap, X, Building, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../helper/AuthContext';
 import { Toast } from 'primereact/toast';
