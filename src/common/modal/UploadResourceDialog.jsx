@@ -234,7 +234,7 @@ export default function UploadResourceDialog({ visible, onClose, onSuccess }) {
           </p>
 
           <button
-            className="px-4 py-2 border rounded-md hover:bg-gray-100"
+            className="px-4 py-2 border rounded-md hover:bg-gray-100 cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
             Browse Files
@@ -258,7 +258,7 @@ export default function UploadResourceDialog({ visible, onClose, onSuccess }) {
         <div className="grid grid-cols-2 gap-4 mt-4">
           {/* SUBJECT */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">Subject *</label>
+            <label className="text-sm font-medium">Subject <span className="text-red-500">*</span></label>
             <Dropdown
               value={form.subject_id}
               onChange={(e) => {
@@ -274,7 +274,7 @@ export default function UploadResourceDialog({ visible, onClose, onSuccess }) {
 
           {/* GRADE */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">Grade *</label>
+            <label className="text-sm font-medium">Grade <span className="text-red-500">*</span></label>
             <Dropdown
               value={form.class_grade}
               onChange={(e) => setForm({ ...form, class_grade: e.value })}
@@ -286,7 +286,7 @@ export default function UploadResourceDialog({ visible, onClose, onSuccess }) {
 
           {/* CATEGORY */}
           <div className="col-span-2 space-y-1">
-            <label className="text-sm font-medium">Category *</label>
+            <label className="text-sm font-medium">Category <span className="text-red-500">*</span></label>
             <Dropdown
               value={form.topic_id}
               onChange={(e) => setForm({ ...form, topic_id: e.value })}
@@ -305,7 +305,7 @@ export default function UploadResourceDialog({ visible, onClose, onSuccess }) {
               resetForm();
               onClose();
             }}
-            className="px-4 py-2 border rounded-md hover:bg-gray-100"
+            className="px-4 py-2 border rounded-md hover:bg-gray-100 cursor-pointer"
           >
             Cancel
           </button>
