@@ -116,6 +116,26 @@ function SmartAssistantChat() {
     }
   };
 
+  const handleDownload = async (e, url) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Network response was not ok.");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = url.split("/").pop() || "download.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Could not download the file:", error);
+      window.open(url, "_blank"); // Fallback to opening in a new tab
+    }
+  };
+
   // const handleQuickQuestion = (question) => {
   //   setInputValue(question);
 
@@ -158,7 +178,11 @@ function SmartAssistantChat() {
                         >
                           <Eye className="w-4 h-4" /> View
                         </a>
-                        <a href={msg.action.url} download className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline">
+                        <a
+                          href={msg.action.url}
+                          onClick={(e) => handleDownload(e, msg.action.url)}
+                          className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+                        >
                           <Download className="w-4 h-4" /> Download
                         </a>
                       </div>
