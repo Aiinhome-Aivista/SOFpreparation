@@ -27,6 +27,10 @@ export const POST_APIS = {
   adminuploadprocess: `${BASE_URL}AdminMicroservices/upload_process`,
 };
 
+export const PUT_APIS = {
+  adminupdateparent: `${BASE_URL}AdminMicroservices/edit_parent`,
+};
+
 export const DELETE_APIS = {
   deletechild: `${BASE_URL}ParentsMicroservices/delete_child`,
 };

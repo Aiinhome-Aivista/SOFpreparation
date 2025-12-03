@@ -18,17 +18,14 @@ import {
 } from "../ui-common/Table";
 
 import { InputText } from "primereact/inputtext";
-import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 
 import {
   Mail,
-  Phone,
-  Calendar,
   User,
   TrendingUp,
-  Trash2,
+  Edit,
   GraduationCap,
   ClipboardList,
   AlertCircle,
@@ -37,6 +34,7 @@ import {
 import ApiService from "../../../service/ApiService";
 import { GET_APIS } from "../../../../connection";
 import { Dropdown } from "primereact/dropdown";
+import EditStudentAdminModal from "../../../common/modal/EditStudentAdminModal";
 
 export default function StudentsManager() {
   const toast = useRef(null);
@@ -46,6 +44,8 @@ export default function StudentsManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [showEditStudent, setShowEditStudent] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [kpis, setKpis] = useState({
     active: 0,
     avgPlatformScore: "0",
@@ -53,11 +53,11 @@ export default function StudentsManager() {
     totalTestsCompleted: 0,
   });
   const [newChild, setNewChild] = useState({
-      name: "",
-      email: "",
-      phone: "",
-      parentname: "",
-    });
+    name: "",
+    email: "",
+    phone: "",
+    parentname: "",
+  });
   const [isdialogLoading, setIsdialogLoading] = useState(false);
 
   const parentsOptions = [
@@ -67,31 +67,33 @@ export default function StudentsManager() {
   ];
 
   const handleAddParent = async () => {
-    setIsdialogLoading(true); };
+    setIsdialogLoading(true);
+  };
+
+  const fetchStudentsData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await ApiService(GET_APIS.adminstudentdashboardurl);
+      if (response && response.isSuccess) {
+        setStudents(response.data.students);
+        setKpis(response.data.kpi);
+      } else {
+        setError(response.message || "Failed to fetch student data.");
+      }
+    } catch (error) {
+      setError(error.message || "An unexpected error occurred.");
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to fetch student data.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStudentsData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await ApiService(GET_APIS.adminstudentdashboardurl);
-        if (response && response.isSuccess) {
-          setStudents(response.data.students);
-          setKpis(response.data.kpi);
-        } else {
-          setError(response.message || "Failed to fetch student data.");
-        }
-      } catch (error) {
-        setError(error.message || "An unexpected error occurred.");
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to fetch student data.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchStudentsData();
   }, []);
 
@@ -101,20 +103,6 @@ export default function StudentsManager() {
       student.student_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.parent_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Delete Dialog
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [confirmVisible, setConfirmVisible] = useState(false);
-
-  const deleteStudent = (studentId) => {
-    const student = students.find((s) => s.user_id === studentId);
-    setStudents(students.filter((s) => s.id !== studentId));
-    toast.current.show({
-      severity: "success",
-      summary: "Deleted",
-      detail: `Student ${student?.name} deleted.`,
-    });
-  };
 
   // Color for grade badges
   // Note: The API provides grades like 1, 3, 9. You might want to expand this color map.
@@ -129,7 +117,6 @@ export default function StudentsManager() {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -141,26 +128,27 @@ export default function StudentsManager() {
                 View and manage all student accounts across the platform
               </CardDescription>
             </div>
-            <button
-              onClick={() => setShowAddChild(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-            >
-              <UserPlus className="size-4" /> Add Child
-            </button>
+            {/* Search */}
+            <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+              <div className="w-full md:w-80">
+                <InputText
+                  placeholder="Search by name, email, or parent..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <button
+                onClick={() => setShowAddChild(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+              >
+                <UserPlus className="size-4" /> Add Child
+              </button>
+            </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Search */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Search</label>
-            <InputText
-              placeholder="Search by name, email, or parent..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -195,7 +183,7 @@ export default function StudentsManager() {
 
           {/* TABLE */}
           <div className="border-2 border-gray-300 rounded-lg">
-            <div className="max-h-[210px] overflow-y-auto">
+            <div className="max-h-[290px] overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-bottom-2 border-gray-300">
@@ -253,7 +241,7 @@ export default function StudentsManager() {
                               "bg-gray-100 text-gray-800 border-0"
                             }
                           >
-                            Grade {student.class_grade}
+                            class {student.class_grade}
                           </Badge>
                         </TableCell>
 
@@ -278,22 +266,20 @@ export default function StudentsManager() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <TrendingUp
-                              className={`size-4 ${
-                                parseInt(student.avg_score) >= 80
+                              className={`size-4 ${parseInt(student.avg_score) >= 80
                                   ? "text-green-600"
                                   : parseInt(student.avg_score) >= 60
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                              }`}
+                                    ? "text-orange-600"
+                                    : "text-red-600"
+                                }`}
                             />
                             <span
-                              className={`${
-                                parseInt(student.avg_score) >= 80
+                              className={`${parseInt(student.avg_score) >= 80
                                   ? "text-green-600"
                                   : parseInt(student.avg_score) >= 60
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                              }`}
+                                    ? "text-orange-600"
+                                    : "text-red-600"
+                                }`}
                             >
                               {student.avg_score}%
                             </span>
@@ -318,11 +304,11 @@ export default function StudentsManager() {
                           <button
                             onClick={() => {
                               setSelectedStudent(student);
-                              setConfirmVisible(true);
+                              setShowEditStudent(true);
                             }}
                             className="p-2 hover:bg-gray-200 rounded-md"
                           >
-                            <Trash2 className="size-4 text-red-600" />
+                            <Edit className="size-4 text-blue-600" />
                           </button>
                         </TableCell>
                       </TableRow>
@@ -378,7 +364,7 @@ export default function StudentsManager() {
               optionLabel="label"
               placeholder="Choose Parent"
               className="w-full"
-              
+
             />
           </div>
 
@@ -418,11 +404,10 @@ export default function StudentsManager() {
               onClick={handleAddParent}
               disabled={isdialogLoading}
               className={`px-4 py-2 cursor-pointer rounded-md text-white 
-                         ${
-                           isdialogLoading
-                             ? "bg-blue-400 cursor-not-allowed"
-                             : "bg-blue-600 hover:bg-blue-700"
-                         }`}
+                         ${isdialogLoading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {isdialogLoading ? (
                 <span className="flex items-center gap-2">
@@ -437,21 +422,15 @@ export default function StudentsManager() {
         </div>
       </Dialog>
 
-      {/* DELETE CONFIRMATION */}
-      <ConfirmDialog
-        visible={confirmVisible}
-        onHide={() => setConfirmVisible(false)}
-        message="Are you sure you want to delete this student?"
-        header="Confirm Delete"
-        icon="pi pi-exclamation-triangle"
-        position="center"
-        draggable={false}
-        accept={() => {
-          if (selectedStudent) deleteStudent(selectedStudent.user_id);
-          setConfirmVisible(false);
-        }}
-        reject={() => setConfirmVisible(false)}
-      />
+      {showEditStudent && (
+        <EditStudentAdminModal
+          student={selectedStudent}
+          visible={showEditStudent}
+          onClose={() => setShowEditStudent(false)}
+          onSuccess={fetchStudentsData}
+        />
+      )}
+
     </div>
   );
 }

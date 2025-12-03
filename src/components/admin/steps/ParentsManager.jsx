@@ -36,6 +36,7 @@ import {
 import ApiService from "../../../service/ApiService";
 import { GET_APIS, POST_APIS } from "../../../../connection";
 import AddParentModal from "../../../common/modal/AddParentModal.jsx";
+import EditParentAdminModal from "../../../common/modal/EditParentAdminModal.jsx";
 
 export default function ParentsManager() {
   const toast = useRef(null);
@@ -93,20 +94,12 @@ export default function ParentsManager() {
   const [showAddParent, setShowAddParent] = useState(false);
 
   // ================================
-  // Delete Confirmation
+  // Edit Parent Dialog
   // ================================
-  const [selectedParent, setSelectedParent] = useState(null);
-  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [showEditParent, setShowEditParent] = useState(false);
+  const [selectedParentForEdit, setSelectedParentForEdit] = useState(null);
 
-  const confirmDelete = () => {
-    setParents(parents.filter((p) => p.id !== selectedParent.id));
-    setConfirmVisible(false);
-    toast.current.show({
-      severity: "success",
-      summary: "Deleted",
-      detail: `${selectedParent.name} removed.`,
-    });
-  };
+
 
   // ================================
   // UI
@@ -114,11 +107,10 @@ export default function ParentsManager() {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex-1">
               <CardTitle className="text-blue-900">
                 Parents Management
               </CardTitle>
@@ -126,34 +118,26 @@ export default function ParentsManager() {
                 Manage parent accounts and subscriptions
               </CardDescription>
             </div>
-
-            <button
-              onClick={() => setShowAddParent(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-            >
-              <UserPlus className="size-4" /> Add Parent
-            </button>
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="w-full md:w-72">
+                <InputText
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              <button
+                onClick={() => setShowAddParent(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer w-full md:w-auto"
+              >
+                <UserPlus className="size-4" /> Add Parent
+              </button>
+            </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Search + Filter */}
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            {/* Search */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Search
-              </label>
-
-              <InputText
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Total Parents */}
@@ -190,10 +174,9 @@ export default function ParentsManager() {
           </div>
 
           {/* TABLE */}
-          <div className="border-2 border-gray-300 rounded-lg">
-            <div className="max-h-[210px] overflow-y-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+          <div className="border-2 border-gray-300 rounded-lg max-h-[280px] overflow-y-auto">
+              <Table className="w-full">
+                <TableHeader className="sticky top-0 bg-white z-10">
                   <TableRow className="border-bottom-2 border-gray-300">
                     <TableHead>Name</TableHead>
                     <TableHead>Contact</TableHead>
@@ -291,13 +274,13 @@ export default function ParentsManager() {
 
                         <TableCell className="text-right">
                           <button
-                            onClick={() => {
-                              setSelectedParent(parent);
-                              setConfirmVisible(true);
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedParentForEdit(parent);
+                              setShowEditParent(true);
                             }}
-                            className="p-2 hover:bg-gray-200 rounded-md cursor-pointer"
-                          >
-                            <Trash2 className="size-4 text-red-600" />
+                            className="p-2 hover:bg-gray-200 rounded-md cursor-pointer">
+                            <Edit className="size-4 text-blue-600" />
                           </button>
                         </TableCell>
                       </TableRow>
@@ -306,7 +289,7 @@ export default function ParentsManager() {
                 </TableBody>
               </Table>
             </div>
-          </div>
+          
         </CardContent>
       </Card>
 
@@ -318,18 +301,15 @@ export default function ParentsManager() {
         />
       )}
 
-      {/* DELETE CONFIRMATION */}
-      <ConfirmDialog
-        visible={confirmVisible}
-        onHide={() => setConfirmVisible(false)}
-        message="Are you sure you want to delete this parent?"
-        header="Confirm Delete"
-        icon="pi pi-exclamation-triangle"
-        accept={confirmDelete}
-        reject={() => setConfirmVisible(false)}
-        position="center"
-        draggable={false}
-      />
+      {showEditParent && (
+        <EditParentAdminModal
+          parent={selectedParentForEdit}
+          visible={showEditParent}
+          onClose={() => setShowEditParent(false)}
+          onSuccess={fetchParentsData}
+        />
+      )}
+
     </div>
   );
 }
