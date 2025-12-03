@@ -107,10 +107,11 @@ export default function ParentsManager() {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-      <Card>
+
+      <Card className="gap-4!">
         <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1">
+          <div className="flex items-center justify-between gap-4">
+            <div>
               <CardTitle className="text-blue-900">
                 Parents Management
               </CardTitle>
@@ -118,22 +119,22 @@ export default function ParentsManager() {
                 Manage parent accounts and subscriptions
               </CardDescription>
             </div>
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="w-full md:w-72">
-                <InputText
-                  placeholder="Search by name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <button
-                onClick={() => setShowAddParent(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer w-full md:w-auto"
-              >
-                <UserPlus className="size-4" /> Add Parent
-              </button>
+            <div className="flex-1">
+
+              <InputText
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
             </div>
+
+            <button
+              onClick={() => setShowAddParent(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
+            >
+              <UserPlus className="size-4" /> Add Parent
+            </button>
           </div>
         </CardHeader>
 
@@ -141,7 +142,7 @@ export default function ParentsManager() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Total Parents */}
-            <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
+            <div className="p-3 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Parents</p>
               <p className="text-xl font-semibold text-blue-900">
                 {kpis.totalParents}
@@ -149,7 +150,7 @@ export default function ParentsManager() {
             </div>
 
             {/* Active */}
-            <div className="p-4 rounded-lg border bg-green-50 border-green-100">
+            <div className="p-3 rounded-lg border bg-green-50 border-green-100">
               <p className="text-sm text-gray-600">Active</p>
               <p className="text-xl font-semibold text-green-900">
                 {kpis.active}
@@ -157,20 +158,13 @@ export default function ParentsManager() {
             </div>
 
             {/* Suspended */}
-            <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
+            <div className="p-3 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Suspended</p>
               <p className="text-xl font-semibold text-orange-900">
                 {kpis.suspended}
               </p>
             </div>
 
-            {/* Premium Users */}
-            {/* <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
-              <p className="text-sm text-gray-600">Premium Users</p>
-              <p className="text-xl font-semibold text-purple-900">
-                {kpis.premiumUsers}
-              </p>
-            </div> */}
           </div>
 
           {/* TABLE */}
