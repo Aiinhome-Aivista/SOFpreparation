@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { Send, Sparkles, Loader, CornerDownLeft } from "lucide-react";
+import { Send, Sparkles, Loader, Download, Eye } from "lucide-react";
 import ApiService from "../../../../service/ApiService";
 import { POST_APIS } from "../../../../../connection";
 import { UserContext } from "../../../../common/helper/UserContext";
@@ -32,7 +32,7 @@ function SmartAssistantChat() {
         const sessionId = sessionStorage.getItem("sessionId");
         const payload = {
           parentId,
-          message:"",
+          message: "",
           ...(sessionId && { sessionId }),
         };
         const result = await ApiService(POST_APIS.smartassistantchat, { method: 'POST', body: payload });
@@ -98,9 +98,11 @@ function SmartAssistantChat() {
 
       if (result?.isSuccess && result.data) {
         const botResponse = {
-          id: messages.length + 2,
+          id: messages.length + 2, // Keeping original ID logic as requested
+          sender: 'bot', // Adding sender for consistency
           text: result.data.reply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          ...(result.data.action && { action: result.data.action }),
         };
         addChatMessage(botResponse);
         if (result.data.sessionId && !sessionStorage.getItem("sessionId")) {
@@ -146,6 +148,21 @@ function SmartAssistantChat() {
 
                   <div className={`w-fit max-w-md p-3 rounded-2xl shadow-sm ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-lg' : 'bg-gray-100 text-gray-800 rounded-bl-lg'}`}>
                     <p className="text-sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                    {msg.sender === 'bot' && msg.action?.type === 'pdf_download' && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <a
+                          href={msg.action.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+                        >
+                          <Eye className="w-4 h-4" /> View
+                        </a>
+                        <a href={msg.action.url} download className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline">
+                          <Download className="w-4 h-4" /> Download
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
