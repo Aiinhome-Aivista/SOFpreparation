@@ -7,7 +7,6 @@ import {
   CardContent,
 } from '../../ui/Cards';
 import { Badge } from '../../ui/Badge';
-import { Tabs, TabsTrigger, TabsContent, TabsList } from '../../admin/ui-common/Tab';
 import { Toast } from 'primereact/toast';
 import {
   ClipboardCheck,
@@ -157,7 +156,7 @@ export default function TestAssignment() {
               <p className="text-xl font-semibold text-blue-900">{kpis.total_assignments}</p>
             </div>
             <div className="p-4 rounded-lg border bg-green-50 border-green-100">
-              <p className="text-sm text-gray-600">Pending Tests</p>
+              <p className="text-sm text-gray-600">Pending</p>
               <p className="text-xl font-semibold text-green-900">{kpis.pending}</p>
             </div>
             <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
@@ -174,7 +173,7 @@ export default function TestAssignment() {
 
           <div className="">
               <div className="mt-4">
-                <div className="flex gap-3  p-2 rounded-xl w-fit shadow-inner">
+                <div className="flex gap-3 p-2 rounded-lg">
                   {[
                     { key: "all", label: "All" },
                     { key: "pending", label: "Pending" },
@@ -186,7 +185,7 @@ export default function TestAssignment() {
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`
-            rounded-xl px-5 py-2 text-sm font-medium transition-all cursor-pointer
+            rounded-lg px-5 py-2 text-sm font-medium transition-all cursor-pointer
             ${isActive
                             ? "bg-[#1C398E] text-white shadow-md"
                             : "bg-[#E8F0FF] text-[#1C398E] hover:bg-[#bcd2ff]"
@@ -213,7 +212,7 @@ export default function TestAssignment() {
                         groupedAssignments[tab].map((assignment) => (
                           <Card
                             key={assignment.id}
-                            className="hover:shadow-md mb-4 border border-gray-200 rounded-xl"
+                            className="hover:shadow-md mb-4 border border-gray-200"
                           >
                             <CardContent className="p-5 space-y-3">
 
