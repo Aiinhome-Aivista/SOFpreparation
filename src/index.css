@@ -162,3 +162,7 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+
+.p-inputotp {
+    justify-content: space-around;
+}

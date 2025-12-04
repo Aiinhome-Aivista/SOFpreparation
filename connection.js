@@ -28,6 +28,9 @@ export const POST_APIS = {
   adminuploadprocess: `${BASE_URL}AdminMicroservices/upload_process`,
   adminaddchild: `${BASE_URL}AdminMicroservices/admin_add_child`,
   assigntestadmin: `${BASE_URL}AdminMicroservices/assign_test_admin `,
+  forgot_password_sent_otp: `${BASE_URL}AuthMicroservices/forgot_password_sent_otp `,
+  reset_password_usingotp: `${BASE_URL}AuthMicroservices/reset_password_usingotp `,
+  change_password_using_email: `${BASE_URL}AuthMicroservices/change_password_using_email `,
 };
 
 export const PUT_APIS = {
