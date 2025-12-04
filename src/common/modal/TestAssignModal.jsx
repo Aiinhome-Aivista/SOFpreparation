@@ -164,7 +164,7 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   return (
     <Dialog visible={visible} onHide={onHide} header="Assign Test to Students" className="w-[90%] md:w-[50%] no-scroll-dialog" position="center" draggable={false}>
       <Toast ref={toast} />
-      <div className="">
+      <div className="pr-2">
         <div className="space-y-2">
           <div className="space-y-1"><label className="text-sm font-medium">Test Name *</label><InputText id="testName" placeholder="e.g., Science Olympiad Mock Test" value={newAssignment.testName} onChange={(e) => setNewAssignment({ ...newAssignment, testName: e.target.value })} className="w-full" />
          </div>
