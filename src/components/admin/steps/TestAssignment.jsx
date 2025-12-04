@@ -24,6 +24,7 @@ import TestAssignModal from '../../../common/modal/TestAssignModal';
 export default function TestAssignment() {
   const toast = useRef(null);
   const [showAssignTest, setShowAssignTest] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
   const [kpis, setKpis] = useState({
     total_assignments: 0,
     pending: 0,
@@ -171,100 +172,107 @@ export default function TestAssignment() {
             </div>
           </div>
 
-          <div className="rounded-lg">
+          <div className="">
+              <div className="mt-4">
+                <div className="flex gap-3  p-2 rounded-xl w-fit shadow-inner">
+                  {[
+                    { key: "all", label: "All" },
+                    { key: "pending", label: "Pending" },
+                    { key: "completed", label: "Completed" },
+                  ].map((tab) => {
+                    const isActive = activeTab === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`
+            rounded-xl px-5 py-2 text-sm font-medium transition-all cursor-pointer
+            ${isActive
+                            ? "bg-[#1C398E] text-white shadow-md"
+                            : "bg-[#E8F0FF] text-[#1C398E] hover:bg-[#bcd2ff]"
+                          }
+          `}
+                      >
+                        {tab.label} ({groupedAssignments[tab.key].length})
+                      </button>
+                    );
+                  })}
+                </div>
 
-            <Tabs defaultValue="all" className="mt-4">
 
-              {/* Tabs Header */}
-              <TabsList className="flex gap-3 bg-gray-100 p-1 rounded-full w-fit">
-                {[
-                  { key: "all", label: "All" },
-                  { key: "pending", label: "Pending" },
-                  { key: "completed", label: "Completed" },
-                ].map((tab) => (
-                  <TabsTrigger
-                    key={tab.key}
-                    value={tab.key}
-                    className="
-          rounded-full px-4 py-1 font-medium text-sm text-gray-600
-          data-[state=pending]:bg-blue-600
-          data-[state=pending]:text-white
-          transition-all
-        "
-                  >
-                    {tab.label} ({groupedAssignments[tab.key].length})
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+                {/* Tab Panels */}
+                {["all", "pending", "completed"].map((tab) =>
+                  activeTab === tab && (
+                    <div key={tab} className="mt-4 space-y-3">
+                      {groupedAssignments[tab].length === 0 ? (
+                        <div className="text-center py-10 text-gray-500">
+                          <ClipboardCheck className="size-12 mx-auto mb-3 text-gray-300" />
+                          No {tab} tests found
+                        </div>
+                      ) : (
+                        groupedAssignments[tab].map((assignment) => (
+                          <Card
+                            key={assignment.id}
+                            className="hover:shadow-md mb-4 border border-gray-200 rounded-xl"
+                          >
+                            <CardContent className="p-5 space-y-3">
 
-              {/* Tab Panels */}
-              {["all", "pending", "completed"].map((tab) => (
-                <TabsContent key={tab} value={tab} className="mt-4 space-y-3">
+                              {/* Title */}
+                              <h3 className="text-blue-900">
+                                {assignment.testName}
+                              </h3>
 
-                  {groupedAssignments[tab].length === 0 ? (
-                    <div className="text-center py-10 text-gray-500">
-                      <ClipboardCheck className="size-12 mx-auto mb-3 text-gray-300" />
-                      No {tab} tests found
+                              {/* Badges */}
+                              <div className="flex flex-wrap gap-2">
+                                <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
+                                  Class {assignment.class}
+                                </Badge>
+                                <Badge className="bg-green-50 text-green-700 border border-green-200">
+                                  {assignment.subject}
+                                </Badge>
+                                <Badge className={getStatusColor(assignment.status)}>
+                                  {assignment.status}
+                                </Badge>
+                              </div>
+
+                              {/* Stats Row */}
+                              <div className="grid grid-cols-4 gap-4 text-gray-700 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4" />
+                                  {assignment.assignedTo.length} students assigned
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="w-4" />
+                                  {assignment.completedBy}/{assignment.assignedTo.length} completed
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4" />
+                                  {assignment.duration} minutes
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <CalendarIcon className="w-4" />
+                                  Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                                </div>
+                              </div>
+
+                              {/* Footer */}
+                              <p className="text-xs text-gray-500">
+                                {assignment.totalQuestions} questions • Assigned on{" "}
+                                {new Date(assignment.assignedDate).toLocaleDateString()}
+                              </p>
+
+                            </CardContent>
+                          </Card>
+                        ))
+                      )}
                     </div>
-                  ) : (
-                    groupedAssignments[tab].map((assignment) => (
-                      <Card key={assignment.id} className="hover:shadow-md mb-4 border border-gray-200 rounded-xl">
-                        <CardContent className="p-5 space-y-3">
+                  )
+                )}
 
-                          {/* Title */}
-                          <h3 className="text-blue-900">
-                            {assignment.testName}
-                          </h3>
-
-                          {/* Badges */}
-                          <div className="flex flex-wrap gap-2">
-                            <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
-                              Class {assignment.class}
-                            </Badge>
-                            <Badge className="bg-green-50 text-green-700 border border-green-200">
-                              {assignment.subject}
-                            </Badge>
-                            <Badge className={getStatusColor(assignment.status)}>
-                              {assignment.status}
-                            </Badge>
-                          </div>
-
-                          {/* Stats Row */}
-                          <div className="grid grid-cols-4 gap-4 text-gray-700 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Users className="w-4" />
-                              {assignment.assignedTo.length} students assigned
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-4" />
-                              {assignment.completedBy}/{assignment.assignedTo.length} completed
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-4" />
-                              {assignment.duration} minutes
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <CalendarIcon className="w-4" />
-                              Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                            </div>
-                          </div>
-
-                          {/* Footer */}
-                          <p className="text-xs text-gray-500">
-                            {assignment.totalQuestions} questions • Assigned on {new Date(assignment.assignedDate).toLocaleDateString()}
-                          </p>
-
-                        </CardContent>
-                      </Card>
-
-                    ))
-                  )}
-                </TabsContent>
-              ))}
-            </Tabs>
+           </div>
           </div>
         </CardContent>
       </Card>

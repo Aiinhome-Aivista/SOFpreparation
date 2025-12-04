@@ -31,18 +31,14 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   const [students, setStudents] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filterGrade, setFilterGrade] = useState(null);
   const [subjectOptions, setSubjectOptions] = useState([]);
 
   useEffect(() => {
     if (visible) {
       fetchStudentsData();
       fetchSubjects();
-      // Reset form when modal becomes visible, except for the first time
-      if (newAssignment.testName) {
-        setNewAssignment(initialAssignmentState);
-        setFilterGrade(null);
-      }
+      // Reliably reset the form state each time the modal is opened
+      setNewAssignment(initialAssignmentState);
     }
   }, [visible]);
 
@@ -91,7 +87,7 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   ];
 
   const filteredStudents = students.filter(
-    (student) => !filterGrade || String(student.class_grade) === filterGrade
+    (student) => !newAssignment.grade || String(student.class_grade) === newAssignment.grade
   );
 
   const handleStudentToggle = (studentId) => {
@@ -192,7 +188,15 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
 
             <div className="space-y-1">
               <label className="text-sm font-medium">Class/Grade Level</label>
-              <Dropdown value={filterGrade} onChange={(e) => { setNewAssignment({ ...newAssignment, grade: e.value }); setFilterGrade(e.value); }} options={gradeOptions.slice(1)} placeholder="Select Class" className="w-full" 
+              <Dropdown value={newAssignment.grade} onChange={(e) => { 
+                setNewAssignment({ 
+                  ...newAssignment, 
+                  grade: e.value,
+                  selectedStudents: [],
+                  assignToAll: false,
+                }); 
+                }} 
+                options={gradeOptions.slice(1)} placeholder="Select Class" className="w-full" 
                 showClear filter/>
             </div>
           </div>
