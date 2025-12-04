@@ -15,7 +15,7 @@ import { GET_APIS, POST_APIS } from "../../../connection";
 
 export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   const toast = useRef(null);
-  const [newAssignment, setNewAssignment] = useState({
+  const initialAssignmentState = {
     testName: '',
     subject: '',
     grade: '',
@@ -24,7 +24,9 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
     dueDate: new Date(),
     selectedStudents: [],
     assignToAll: false,
-  });
+  };
+
+  const [newAssignment, setNewAssignment] = useState(initialAssignmentState);
 
   const [students, setStudents] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
@@ -36,6 +38,11 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
     if (visible) {
       fetchStudentsData();
       fetchSubjects();
+      // Reset form when modal becomes visible, except for the first time
+      if (newAssignment.testName) {
+        setNewAssignment(initialAssignmentState);
+        setFilterGrade(null);
+      }
     }
   }, [visible]);
 
@@ -143,7 +150,11 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
 
       if (response?.isSuccess) {
         toast.current.show({ severity: 'success', summary: 'Success', detail: response.message || 'Test assigned successfully!' });
-        setTimeout(onHide, 1500);
+        setTimeout(() => {
+          onHide();
+          setNewAssignment(initialAssignmentState); // Reset form
+          setFilterGrade(null);
+        }, 1500);
       } else {
         toast.current.show({ severity: 'error', summary: 'Error', detail: response?.message || 'Failed to assign test.' });
       }
