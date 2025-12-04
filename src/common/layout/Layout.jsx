@@ -6,6 +6,7 @@ import RegistrationModal from '../modal/RegistrationModal';
 import ConfirmLogoutModal from '../modal/ConfirmLogoutModal';
 import AddChildModal from '../modal/AddChildModal';
 import { UserProvider } from '../helper/UserContext';
+import ForgotPasswordModal from '../modal/ForgotPasswordModal';
 
 function Modals() {
     const { modalState } = useAuth();
@@ -13,6 +14,7 @@ function Modals() {
     if (modalState === 'register') return <RegistrationModal />;
     if (modalState === 'logout') return <ConfirmLogoutModal />;
     if (modalState === 'addChild') return <AddChildModal />;
+    if (modalState === 'forgot') return <ForgotPasswordModal />;
     return null;
 }
 

@@ -5,6 +5,7 @@ import ParentsManager from "../steps/ParentsManager";
 import StudentsManager from "../steps/StudentsManager";
 import AdminResource from "../steps/AdminResource";
 import TestAssignment from "../steps/TestAssignment";
+import NewAdminResource from "../steps/NewAdminResource";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("parents");
@@ -60,7 +61,8 @@ function AdminDashboard() {
       {/* CONTENT */}
       {activeTab === "parents" && <ParentsManager />}
       {activeTab === "students" && <StudentsManager />}
-      {activeTab === "resources" && <AdminResource />}
+      {activeTab === "resources" && <NewAdminResource />}
+      {/* {activeTab === "resources" && <AdminResource />} */}
       {activeTab === "assign-tests" && <TestAssignment />}
     </div>
   );

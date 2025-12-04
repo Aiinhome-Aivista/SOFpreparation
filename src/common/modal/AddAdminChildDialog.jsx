@@ -171,10 +171,10 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
     >
       <Toast ref={toast} />
 
-      <div className="space-y-4 px-3 pb-2">
+      <div className="space-y-4 pr-3 pb-2">
         {/* Child Name */}
         <div>
-          <label className="text-sm font-medium">Child Name *</label>
+          <label className="text-sm font-medium">Child Name <span className="text-red-500">*</span></label>
           <InputText
             className={`w-full ${errors.child_name ? "border-red-500" : ""}`}
             value={form.child_name}
@@ -203,7 +203,7 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
 
         {/* Email */}
         <div>
-          <label className="text-sm font-medium">Email *</label>
+          <label className="text-sm font-medium">Email <span className="text-red-500">*</span></label>
           <InputText
             className={`w-full ${errors.email ? "border-red-500" : ""}`}
             value={form.email}
@@ -216,7 +216,7 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
 
         {/* Class Dropdown */}
         <div>
-          <label className="text-sm font-medium">Class *</label>
+          <label className="text-sm font-medium">Class <span className="text-red-500">*</span></label>
           <Dropdown
             value={form.class_grade}
             onChange={(e) => setForm({ ...form, class_grade: e.value })}
@@ -237,7 +237,7 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
 
         {/* School */}
         <div>
-          <label className="text-sm font-medium">School *</label>
+          <label className="text-sm font-medium">School <span className="text-red-500">*</span></label>
           <InputText
             className={`w-full ${errors.school ? "border-red-500" : ""}`}
             value={form.school}
@@ -250,7 +250,7 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
 
         {/* Password */}
         <div>
-          <label className="text-sm font-medium">Password *</label>
+          <label className="text-sm font-medium">Password <span className="text-red-500">*</span></label>
           <div className="relative">
             <InputText
               type={showPassword ? "text" : "password"}
@@ -280,7 +280,7 @@ export default function AddAdminChildDialog({ visible, onClose, onSuccess }) {
 
         {/* Confirm Password */}
         <div>
-          <label className="text-sm font-medium">Confirm Password *</label>
+          <label className="text-sm font-medium">Confirm Password <span className="text-red-500">*</span></label>
           <div className="relative">
             <InputText
               type={showConfirmPassword ? "text" : "password"}

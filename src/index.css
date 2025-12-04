@@ -169,3 +169,7 @@
   max-height: none !important;
 }
 
+
+.p-inputotp {
+    justify-content: space-around;
+}
