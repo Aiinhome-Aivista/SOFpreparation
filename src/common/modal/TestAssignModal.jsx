@@ -78,7 +78,7 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   const gradeOptions = [
     { label: "All Grades", value: null },
     ...Array.from({ length: 12 }, (_, i) => ({
-      label: `Grade ${i + 1}`,
+      label: `Class ${i + 1}`,
       value: `${i + 1}`,
     })),
   ];
@@ -155,11 +155,12 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
   };
 
   return (
-    <Dialog visible={visible} onHide={onHide} header="Assign Test to Students" className="w-[90%] md:w-[50%]" position="center" draggable={false}>
+    <Dialog visible={visible} onHide={onHide} header="Assign Test to Students" className="w-[90%] md:w-[50%] no-scroll-dialog" position="center" draggable={false}>
       <Toast ref={toast} />
-      <div className="space-y-4 p-4">
-        <div className="space-y-4">
-          <div className="space-y-1"><label className="text-sm font-medium">Test Name *</label><InputText id="testName" placeholder="e.g., Science Olympiad Mock Test" value={newAssignment.testName} onChange={(e) => setNewAssignment({ ...newAssignment, testName: e.target.value })} className="w-full" /></div>
+      <div className="">
+        <div className="space-y-2">
+          <div className="space-y-1"><label className="text-sm font-medium">Test Name *</label><InputText id="testName" placeholder="e.g., Science Olympiad Mock Test" value={newAssignment.testName} onChange={(e) => setNewAssignment({ ...newAssignment, testName: e.target.value })} className="w-full" />
+         </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">
@@ -179,8 +180,8 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">Grade Level</label>
-              <Dropdown value={filterGrade} onChange={(e) => { setNewAssignment({ ...newAssignment, grade: e.value }); setFilterGrade(e.value); }} options={gradeOptions.slice(1)} placeholder="Select Grade" className="w-full" 
+              <label className="text-sm font-medium">Class/Grade Level</label>
+              <Dropdown value={filterGrade} onChange={(e) => { setNewAssignment({ ...newAssignment, grade: e.value }); setFilterGrade(e.value); }} options={gradeOptions.slice(1)} placeholder="Select Class" className="w-full" 
                 showClear filter/>
             </div>
           </div>
@@ -192,21 +193,21 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
             <div className="space-y-1"><label className="text-sm font-medium">Due Date</label><PrimeCalendar value={newAssignment.dueDate} onChange={(e) => e.value && setNewAssignment({ ...newAssignment, dueDate: e.value })} className="w-full" showIcon /></div>
           </div>
         </div>
-        <div className="space-y-3 border-t pt-4">
+        <div className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Select Students *</label>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2"><Checkbox inputId="assignToAll" checked={newAssignment.assignToAll} onChange={(e) => handleAssignToAll(e.checked)} /><label htmlFor="assignToAll" className="cursor-pointer text-sm">Assign to all filtered students</label></div>
             </div>
           </div>
-          <div className="border rounded-lg p-4 max-h-64 overflow-y-auto space-y-2 hide-scrollbar">
+          <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
             {filteredStudents.map((student) => (
               <div key={student.user_id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
                 <Checkbox inputId={`student-${student.user_id}`} value={student.user_id} checked={newAssignment.selectedStudents.includes(student.user_id)} onChange={() => handleStudentToggle(student.user_id)} />
 
                 <label htmlFor={`student-${student.user_id}`} className="flex-1 cursor-pointer flex items-center justify-between">
                   <div><p>{student.student_name}</p><p className="text-sm text-gray-500">{student.student_email}</p></div>
-                  <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Grade {student.class_grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parent_name}</Badge></div>
+                  <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Class {student.class_grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parent_name}</Badge></div>
                 </label>
               </div>
             ))}

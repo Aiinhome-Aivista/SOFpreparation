@@ -195,7 +195,7 @@ export default function StudentsManager() {
                 <TableHeader>
                   <TableRow className="border-b border-bottom-2 border-gray-300">
                     <TableHead>Student</TableHead>
-                    <TableHead>Grade</TableHead>
+                    <TableHead>Class</TableHead>
                     <TableHead>Parent</TableHead>
                     <TableHead>Tests</TableHead>
                     <TableHead>Avg Score</TableHead>

@@ -27,37 +27,37 @@ export default function TestAssignment() {
       id: '1',
       testName: 'Science Olympiad Mock Test 1',
       subject: 'Science',
-      grade: '7',
+      class: '7',
       assignedTo: ['1', '3'],
       assignedDate: '2024-11-15',
       dueDate: '2024-11-22',
       duration: 60,
       totalQuestions: 50,
-      status: 'active',
+      status: 'pending',
       completedBy: 1,
     },
     {
       id: '2',
       testName: 'Mathematics Speed Challenge',
       subject: 'Mathematics',
-      grade: '6',
+      class: '6',
       assignedTo: ['3', '6'],
       assignedDate: '2024-11-18',
       dueDate: '2024-11-25',
       duration: 45,
       totalQuestions: 40,
-      status: 'active',
+      status: 'pending',
       completedBy: 0,
     },
   ]);
 
   const students = [
-    { id: '1', name: 'Aarav Kumar', email: 'aarav@example.com', grade: '7', parentName: 'Rajesh Kumar' },
-    { id: '2', name: 'Diya Sharma', email: 'diya@example.com', grade: '5', parentName: 'Priya Sharma' },
-    { id: '3', name: 'Arjun Patel', email: 'arjun@example.com', grade: '6', parentName: 'Amit Patel' },
-    { id: '4', name: 'Ananya Patel', email: 'ananya@example.com', grade: '8', parentName: 'Amit Patel' },
-    { id: '5', name: 'Ishaan Patel', email: 'ishaan@example.com', grade: '4', parentName: 'Amit Patel' },
-    { id: '6', name: 'Riya Gupta', email: 'riya@example.com', grade: '6', parentName: 'Sneha Gupta' },
+    { id: '1', name: 'Aarav Kumar', email: 'aarav@example.com', class: '7', parentName: 'Rajesh Kumar' },
+    { id: '2', name: 'Diya Sharma', email: 'diya@example.com', class: '5', parentName: 'Priya Sharma' },
+    { id: '3', name: 'Arjun Patel', email: 'arjun@example.com', class: '6', parentName: 'Amit Patel' },
+    { id: '4', name: 'Ananya Patel', email: 'ananya@example.com', class: '8', parentName: 'Amit Patel' },
+    { id: '5', name: 'Ishaan Patel', email: 'ishaan@example.com', class: '4', parentName: 'Amit Patel' },
+    { id: '6', name: 'Riya Gupta', email: 'riya@example.com', class: '6', parentName: 'Sneha Gupta' },
   ];
 
   const handleAssignTest = (assignmentData) => {
@@ -70,7 +70,7 @@ export default function TestAssignment() {
       id: Math.random().toString(36).substring(2, 9),
       testName: assignmentData.testName,
       subject: assignmentData.subject,
-      grade: assignmentData.grade,
+      class: assignmentData.class,
       assignedTo: assignmentData.selectedStudents,
       assignedDate: new Date().toISOString().split('T')[0],
       dueDate: assignmentData.dueDate.toISOString().split('T')[0],
@@ -87,8 +87,8 @@ export default function TestAssignment() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-0';
-      case 'upcoming': return 'bg-blue-100 text-blue-800 border-0';
+      case 'pending': return 'bg-green-100 text-green-800 border-0';
+
       case 'completed': return 'bg-gray-100 text-gray-800 border-0';
       default: return 'bg-gray-100 text-gray-800 border-0';
     }
@@ -96,8 +96,7 @@ export default function TestAssignment() {
 
   const groupedAssignments = {
     all: assignments,
-    active: assignments.filter((a) => a.status === 'active'),
-    upcoming: assignments.filter((a) => a.status === 'upcoming'),
+    pending: assignments.filter((a) => a.status === 'pending'),
     completed: assignments.filter((a) => a.status === 'completed'),
   };
 
@@ -127,12 +126,12 @@ export default function TestAssignment() {
               <p className="text-xl font-semibold text-blue-900">{assignments.length}</p>
             </div>
             <div className="p-4 rounded-lg border bg-green-50 border-green-100">
-              <p className="text-sm text-gray-600">Active Tests</p>
-              <p className="text-xl font-semibold text-green-900">{assignments.filter((a) => a.status === 'active').length}</p>
+              <p className="text-sm text-gray-600">Pending Tests</p>
+              <p className="text-xl font-semibold text-green-900">{assignments.filter((a) => a.status === 'pending').length}</p>
             </div>
             <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
-              <p className="text-sm text-gray-600">Upcoming</p>
-              <p className="text-xl font-semibold text-purple-900">{assignments.filter((a) => a.status === 'upcoming').length}</p>
+              <p className="text-sm text-gray-600">Completed</p>
+              <p className="text-xl font-semibold text-purple-900">{assignments.filter((a) => a.status === 'completed').length}</p>
             </div>
             <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Completion Rate</p>
@@ -150,8 +149,7 @@ export default function TestAssignment() {
               <TabsList className="flex gap-3 bg-gray-100 p-1 rounded-full w-fit">
                 {[
                   { key: "all", label: "All" },
-                  { key: "active", label: "Active" },
-                  { key: "upcoming", label: "Upcoming" },
+                  { key: "pending", label: "Pending" },
                   { key: "completed", label: "Completed" },
                 ].map((tab) => (
                   <TabsTrigger
@@ -159,8 +157,8 @@ export default function TestAssignment() {
                     value={tab.key}
                     className="
           rounded-full px-4 py-1 font-medium text-sm text-gray-600
-          data-[state=active]:bg-blue-600
-          data-[state=active]:text-white
+          data-[state=pending]:bg-blue-600
+          data-[state=pending]:text-white
           transition-all
         "
                   >
@@ -170,7 +168,7 @@ export default function TestAssignment() {
               </TabsList>
 
               {/* Tab Panels */}
-              {["all", "active", "upcoming", "completed"].map((tab) => (
+              {["all", "pending", "completed"].map((tab) => (
                 <TabsContent key={tab} value={tab} className="mt-4 space-y-3">
 
                   {groupedAssignments[tab].length === 0 ? (
@@ -191,7 +189,7 @@ export default function TestAssignment() {
                           {/* Badges */}
                           <div className="flex flex-wrap gap-2">
                             <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
-                              Grade {assignment.grade}
+                              Class {assignment.class}
                             </Badge>
                             <Badge className="bg-green-50 text-green-700 border border-green-200">
                               {assignment.subject}
