@@ -31,44 +31,30 @@ export default function TestAssignment() {
     completion_rate: 0,
   });
 
-  const [assignments, setAssignments] = useState([
-    {
-      id: '1',
-      testName: 'Science Olympiad Mock Test 1',
-      subject: 'Science',
-      class: '7',
-      assignedTo: ['1', '3'],
-      assignedDate: '2024-11-15',
-      dueDate: '2024-11-22',
-      duration: 60,
-      totalQuestions: 50,
-      status: 'pending',
-      completedBy: 1,
-    },
-    {
-      id: '2',
-      testName: 'Mathematics Speed Challenge',
-      subject: 'Mathematics',
-      class: '6',
-      assignedTo: ['3', '6'],
-      assignedDate: '2024-11-18',
-      dueDate: '2024-11-25',
-      duration: 45,
-      totalQuestions: 40,
-      status: 'pending',
-      completedBy: 0,
-    },
-  ]);
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTestAnalytics();
   }, []);
 
   const fetchTestAnalytics = async () => {
+    setLoading(true);
     try {
       const response = await ApiService(GET_APIS.testanalyticsadmin);
       if (response && response.isSuccess) {
-        setKpis(response.data);
+        const analyticsData = response.data || [];
+        setAssignments(analyticsData);
+
+        if (analyticsData.length > 0) {
+          const kpiData = analyticsData[0];
+          setKpis({
+            total_assignments: kpiData.total_tests || 0,
+            pending: kpiData.total_pending_tests || 0,
+            completed: kpiData.total_completed_tests || 0,
+            completion_rate: kpiData.overall_completion_rate || 0,
+          });
+        }
       } else {
         toast.current.show({
           severity: 'error',
@@ -78,41 +64,14 @@ export default function TestAssignment() {
       }
     } catch (error) {
       toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const students = [
-    { id: '1', name: 'Aarav Kumar', email: 'aarav@example.com', class: '7', parentName: 'Rajesh Kumar' },
-    { id: '2', name: 'Diya Sharma', email: 'diya@example.com', class: '5', parentName: 'Priya Sharma' },
-    { id: '3', name: 'Arjun Patel', email: 'arjun@example.com', class: '6', parentName: 'Amit Patel' },
-    { id: '4', name: 'Ananya Patel', email: 'ananya@example.com', class: '8', parentName: 'Amit Patel' },
-    { id: '5', name: 'Ishaan Patel', email: 'ishaan@example.com', class: '4', parentName: 'Amit Patel' },
-    { id: '6', name: 'Riya Gupta', email: 'riya@example.com', class: '6', parentName: 'Sneha Gupta' },
-  ];
-
   const handleAssignTest = (assignmentData) => {
-    if (!assignmentData.testName || !assignmentData.subject || assignmentData.selectedStudents.length === 0) {
-      toast.current.show({ severity: 'error', summary: 'Error', detail: 'Please fill in all required fields and select at least one student' });
-      return;
-    }
-
-    const assignment = {
-      id: Math.random().toString(36).substring(2, 9),
-      testName: assignmentData.testName,
-      subject: assignmentData.subject,
-      class: assignmentData.class,
-      assignedTo: assignmentData.selectedStudents,
-      assignedDate: new Date().toISOString().split('T')[0],
-      dueDate: assignmentData.dueDate.toISOString().split('T')[0],
-      duration: assignmentData.duration,
-      totalQuestions: assignmentData.totalQuestions,
-      status: 'upcoming',
-      completedBy: 0,
-    };
-
-    setAssignments([assignment, ...assignments]);
     setShowAssignTest(false);
-    toast.current.show({ severity: 'success', summary: 'Success', detail: `Test "${assignment.testName}" assigned to ${assignment.assignedTo.length} students` });
+    fetchTestAnalytics(); 
   };
 
   const getStatusColor = (status) => {
@@ -201,74 +160,76 @@ export default function TestAssignment() {
 
                 {/* Tab Panels */}
                 {["all", "pending", "completed"].map((tab) =>
-                  activeTab === tab && (
-                    <div key={tab} className="mt-4 space-y-3">
-                      {groupedAssignments[tab].length === 0 ? (
-                        <div className="text-center py-10 text-gray-500">
-                          <ClipboardCheck className="size-12 mx-auto mb-3 text-gray-300" />
-                          No {tab} tests found
-                        </div>
-                      ) : (
-                        groupedAssignments[tab].map((assignment) => (
-                          <Card
-                            key={assignment.id}
-                            className="hover:shadow-md mb-4 border border-gray-200"
-                          >
-                            <CardContent className="p-5 space-y-3">
+                  activeTab === tab &&
+                  (loading ? (
+                    <div className="text-center py-10 text-gray-500">Loading...</div>
+                  ) : (
+                    <div key={tab} className="mt-4 space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                      {groupedAssignments[tab].length === 0 ?
+                        (
+                          <div className="text-center py-10 text-gray-500">
+                            <ClipboardCheck className="size-12 mx-auto mb-3 text-gray-300" />
+                            No {tab} tests found
+                          </div>
+                        ) : (
+                          groupedAssignments[tab].map((assignment, index) => (
+                            <Card
+                              key={index}
+                              className="hover:shadow-md mb-4 border border-gray-200"
+                            >
+                              <CardContent className="p-5 space-y-3">
+                                {/* Title */}
+                                <h3 className="text-blue-900">
+                                  {assignment.test_title}
+                                </h3>
 
-                              {/* Title */}
-                              <h3 className="text-blue-900">
-                                {assignment.testName}
-                              </h3>
-
-                              {/* Badges */}
-                              <div className="flex flex-wrap gap-2">
-                                <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
-                                  Class {assignment.class}
-                                </Badge>
-                                <Badge className="bg-green-50 text-green-700 border border-green-200">
-                                  {assignment.subject}
-                                </Badge>
-                                <Badge className={getStatusColor(assignment.status)}>
-                                  {assignment.status}
-                                </Badge>
-                              </div>
-
-                              {/* Stats Row */}
-                              <div className="grid grid-cols-4 gap-4 text-gray-700 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Users className="w-4" />
-                                  {assignment.assignedTo.length} students assigned
+                                {/* Badges */}
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
+                                    Class {assignment.class_grade}
+                                  </Badge>
+                                  <Badge className="bg-green-50 text-green-700 border border-green-200">
+                                    {assignment.subject_name}
+                                  </Badge>
+                                  <Badge className={getStatusColor(assignment.status)}>
+                                    {assignment.status}
+                                  </Badge>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                  <CheckCircle2 className="w-4" />
-                                  {assignment.completedBy}/{assignment.assignedTo.length} completed
+                                {/* Stats Row */}
+                                <div className="grid grid-cols-4 gap-4 text-gray-700 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Users className="w-4" />
+                                    {assignment.total_students_assigned} students assigned
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4" />
+                                    {assignment.total_students_completed}/{assignment.total_students_assigned} completed
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="w-4" />
+                                    {assignment.duration_minutes} minutes
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <CalendarIcon className="w-4" />
+                                    Due: {new Date(assignment.due_date).toLocaleDateString()}
+                                  </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                  <Clock className="w-4" />
-                                  {assignment.duration} minutes
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  <CalendarIcon className="w-4" />
-                                  Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                                </div>
-                              </div>
-
-                              {/* Footer */}
-                              <p className="text-xs text-gray-500">
-                                {assignment.totalQuestions} questions • Assigned on{" "}
-                                {new Date(assignment.assignedDate).toLocaleDateString()}
-                              </p>
-
-                            </CardContent>
-                          </Card>
-                        ))
-                      )}
+                                {/* Footer */}
+                                <p className="text-xs text-gray-500">
+                                  {assignment.total_questions} questions • Assigned on{" "}
+                                  {new Date(assignment.created_date).toLocaleDateString()}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
                     </div>
-                  )
+                  ))
                 )}
 
            </div>
@@ -278,7 +239,6 @@ export default function TestAssignment() {
       <TestAssignModal
         visible={showAssignTest}
         onHide={() => setShowAssignTest(false)}
-        students={students}
         onAssignTest={handleAssignTest}
       />
     </div>
