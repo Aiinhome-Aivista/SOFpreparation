@@ -8,6 +8,7 @@ export const GET_APIS = {
   adminstudentdashboardurl: `${BASE_URL}AdminMicroservices/admin_students_dashboard`,
   adminparentdashboardurl: `${BASE_URL}AdminMicroservices/admin_parents_dashboard`,
   fetchparents: `${BASE_URL}AdminMicroservices/fetch_parents`,
+  testanalyticsadmin: `${BASE_URL}AdminMicroservices/test_analytics`,
 };
 
 export const POST_APIS = {

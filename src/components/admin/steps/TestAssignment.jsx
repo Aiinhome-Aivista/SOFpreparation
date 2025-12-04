@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Card,
   CardHeader,
@@ -17,11 +17,20 @@ import {
   Users,
   CheckCircle2,
 } from 'lucide-react';
+import ApiService from '../../../service/ApiService';
+import { GET_APIS } from '../../../../connection';
 import TestAssignModal from '../../../common/modal/TestAssignModal';
 
 export default function TestAssignment() {
   const toast = useRef(null);
   const [showAssignTest, setShowAssignTest] = useState(false);
+  const [kpis, setKpis] = useState({
+    total_assignments: 0,
+    pending: 0,
+    completed: 0,
+    completion_rate: 0,
+  });
+
   const [assignments, setAssignments] = useState([
     {
       id: '1',
@@ -50,6 +59,27 @@ export default function TestAssignment() {
       completedBy: 0,
     },
   ]);
+
+  useEffect(() => {
+    fetchTestAnalytics();
+  }, []);
+
+  const fetchTestAnalytics = async () => {
+    try {
+      const response = await ApiService(GET_APIS.testanalyticsadmin);
+      if (response && response.isSuccess) {
+        setKpis(response.data);
+      } else {
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: response?.message || 'Failed to fetch test analytics.',
+        });
+      }
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message || 'An unexpected error occurred.' });
+    }
+  };
 
   const students = [
     { id: '1', name: 'Aarav Kumar', email: 'aarav@example.com', class: '7', parentName: 'Rajesh Kumar' },
@@ -123,20 +153,20 @@ export default function TestAssignment() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg border bg-blue-50 border-blue-100">
               <p className="text-sm text-gray-600">Total Assignments</p>
-              <p className="text-xl font-semibold text-blue-900">{assignments.length}</p>
+              <p className="text-xl font-semibold text-blue-900">{kpis.total_assignments}</p>
             </div>
             <div className="p-4 rounded-lg border bg-green-50 border-green-100">
               <p className="text-sm text-gray-600">Pending Tests</p>
-              <p className="text-xl font-semibold text-green-900">{assignments.filter((a) => a.status === 'pending').length}</p>
+              <p className="text-xl font-semibold text-green-900">{kpis.pending}</p>
             </div>
             <div className="p-4 rounded-lg border bg-purple-50 border-purple-100">
               <p className="text-sm text-gray-600">Completed</p>
-              <p className="text-xl font-semibold text-purple-900">{assignments.filter((a) => a.status === 'completed').length}</p>
+              <p className="text-xl font-semibold text-purple-900">{kpis.completed}</p>
             </div>
             <div className="p-4 rounded-lg border bg-orange-50 border-orange-100">
               <p className="text-sm text-gray-600">Completion Rate</p>
               <p className="text-xl font-semibold text-orange-900">
-                {assignments.length > 0 ? Math.round((assignments.reduce((acc, a) => acc + a.completedBy, 0) / assignments.reduce((acc, a) => acc + a.assignedTo.length, 0)) * 100) : 0}%
+                {parseFloat(kpis.completion_rate).toFixed(2)}%
               </p>
             </div>
           </div>

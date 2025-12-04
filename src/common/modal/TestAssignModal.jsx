@@ -212,16 +212,22 @@ export default function TestAssignModal({ visible, onHide, onAssignTest }) {
             </div>
           </div>
           <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
-            {filteredStudents.map((student) => (
-              <div key={student.user_id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                <Checkbox inputId={`student-${student.user_id}`} value={student.user_id} checked={newAssignment.selectedStudents.includes(student.user_id)} onChange={() => handleStudentToggle(student.user_id)} />
+            {filteredStudents.length > 0 ? (
+              filteredStudents.map((student) => (
+                <div key={student.user_id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                  <Checkbox inputId={`student-${student.user_id}`} value={student.user_id} checked={newAssignment.selectedStudents.includes(student.user_id)} onChange={() => handleStudentToggle(student.user_id)} />
 
-                <label htmlFor={`student-${student.user_id}`} className="flex-1 cursor-pointer flex items-center justify-between">
-                  <div><p>{student.student_name}</p><p className="text-sm text-gray-500">{student.student_email}</p></div>
-                  <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Class {student.class_grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parent_name}</Badge></div>
-                </label>
+                  <label htmlFor={`student-${student.user_id}`} className="flex-1 cursor-pointer flex items-center justify-between">
+                    <div><p>{student.student_name}</p><p className="text-sm text-gray-500">{student.student_email}</p></div>
+                    <div className="flex gap-2"><Badge className="bg-gray-100 text-gray-800 border-0">Class {student.class_grade}</Badge><Badge className="bg-blue-50 text-blue-800 border-0">{student.parent_name}</Badge></div>
+                  </label>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-4">
+                <p>No students found.</p>
               </div>
-            ))}
+            )}
           </div>
           <p className="text-sm text-gray-600">{newAssignment.selectedStudents.length} student(s) selected</p>
         </div>
