@@ -23,6 +23,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useAuth } from '../common/helper/AuthContext';
 import PaymentGateway from './PaymentGateway';
+import AuthSelectionModal from './AuthSelectionModal';
 
 // Removed: interface HomeProps { ... }
 
@@ -33,6 +34,7 @@ export default function Home() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentPlan, setSelectedPaymentPlan] = useState(null);
   const [pendingPaymentPlan, setPendingPaymentPlan] = useState(null);
+  const [showAuthSelectionModal, setShowAuthSelectionModal] = useState(false);
 
   useEffect(() => {
     if (user && pendingPaymentPlan) {
@@ -409,8 +411,10 @@ export default function Home() {
                     if (!user) {
                       if (plan.price !== 'Free') {
                         setPendingPaymentPlan(plan);
+                        setShowAuthSelectionModal(true);
+                      } else {
+                        openRegisterModal();
                       }
-                      openRegisterModal();
                     } else {
                       if (plan.price === 'Free') {
                         openRegisterModal();
@@ -511,6 +515,23 @@ export default function Home() {
           onPaymentSuccess={() => {
             alert("Payment Successful!");
             setShowPaymentModal(false);
+          }}
+        />
+      )}
+
+      {showAuthSelectionModal && (
+        <AuthSelectionModal
+          onClose={() => {
+            setShowAuthSelectionModal(false);
+            setPendingPaymentPlan(null);
+          }}
+          onLogin={() => {
+            setShowAuthSelectionModal(false);
+            openLoginModal();
+          }}
+          onRegister={() => {
+            setShowAuthSelectionModal(false);
+            openRegisterModal();
           }}
         />
       )}
