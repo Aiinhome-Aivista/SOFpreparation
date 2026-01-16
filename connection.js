@@ -1,4 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://122.163.121.176:3019/';
+// const BASE_URL ='http://122.163.121.176:3019/';
+const BASE_URL = 'http://157.173.221.226:4019/';
 
 export const GET_APIS = {
   subjectsdataurl: `${BASE_URL}CommonFeatuersMicroservices/subjects`,
