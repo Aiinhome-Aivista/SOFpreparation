@@ -81,7 +81,7 @@ function StudentDashboard() {
 
       {activeTab === "smart" && <SmartStudy />}
       {activeTab === "practice" && (
-        <SelfPractice />
+        <SelfPractice onTestCreated={() => setActiveTab("tests")} />
       )}
     </div>
   );

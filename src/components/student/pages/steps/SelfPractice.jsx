@@ -4,11 +4,12 @@ import { Badge } from "../../../ui/Badge";
 import { Shuffle, Target, Loader } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
+import { Calendar } from "primereact/calendar";
 import { GET_APIS, POST_APIS } from "../../../../../connection";
 import ApiService from "../../../../service/ApiService";
 import { Toast } from "primereact/toast";
 
-export default function SelfPractice() {
+export default function SelfPractice({ onTestCreated }) {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [numQuestions, setNumQuestions] = useState("10");
@@ -20,6 +21,7 @@ export default function SelfPractice() {
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [dueDate, setDueDate] = useState(null);
 
   const toast = useRef(null);
 
@@ -45,6 +47,7 @@ export default function SelfPractice() {
           label: s.subject_name,
         }));
         setSubjects(loadedSubjects);
+        setDueDate(null);
       }
     } catch (err) {
       console.error("Error fetching subjects:", err);
@@ -66,7 +69,7 @@ export default function SelfPractice() {
         `${GET_APIS.selfpracticedashboardurl}/${studentId}`,
         {
           method: "GET",
-        }
+        },
       );
 
       // If API failed
@@ -166,6 +169,11 @@ export default function SelfPractice() {
 
         // RESET ERRORS
         setErrors({});
+
+        // Switch to MyTests tab
+        if (onTestCreated) {
+          onTestCreated();
+        }
       }
     } catch (error) {
       console.error("Generate Practice Error:", error);
@@ -347,6 +355,21 @@ export default function SelfPractice() {
                   Recommended: 10–20 questions per session
                 </p>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-medium text-sm">
+                Due Date<span className="text-red-600"> *</span>
+              </label>
+              <Calendar
+                value={dueDate}
+                onChange={(e) => setDueDate(e.value)}
+                dateFormat="yy-mm-dd"
+                placeholder="Select a due date"
+                className="w-full"
+                showIcon
+                minDate={new Date()}
+              />
             </div>
 
             {/* Benefits Box */}
