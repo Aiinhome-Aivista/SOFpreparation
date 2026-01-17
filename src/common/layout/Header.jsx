@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Trophy, LogOut, UserPlus, Menu, X } from "lucide-react";
-import { useAuth } from "../helper/AuthContext";
-import { Button } from "../../components/ui/Button";
+import React, { useState } from 'react';
+import { Trophy, LogOut, UserPlus, Menu, X } from 'lucide-react';
+import { useAuth } from '../helper/AuthContext';
+import { Button } from '../../components/ui/button';
+import { useLocation } from 'react-router-dom';
 
 function Header() {
   const {
@@ -12,6 +13,8 @@ function Header() {
     openAddChildModal,
   } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
 
   return (
     <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
@@ -33,32 +36,14 @@ function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#subjects"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              Subjects
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              Pricing
-            </a>
-            <a
-              href="#testimonials"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              Reviews
-            </a>
-          </nav>
+          {isLandingPage && (
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Features</a>
+              <a href="#subjects" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Subjects</a>
+              <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
+              <a href="#testimonials" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Reviews</a>
+            </nav>
+          )}
 
           {/* Auth/User Buttons */}
           <div className="hidden md:flex items-center gap-3">
@@ -122,18 +107,14 @@ function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t bg-white">
             <nav className="flex flex-col gap-4">
-              <a href="#features" className="text-gray-700 px-2 py-1">
-                Features
-              </a>
-              <a href="#subjects" className="text-gray-700 px-2 py-1">
-                Subjects
-              </a>
-              <a href="#pricing" className="text-gray-700 px-2 py-1">
-                Pricing
-              </a>
-              <a href="#testimonials" className="text-gray-700 px-2 py-1">
-                Reviews
-              </a>
+              {isLandingPage && (
+                <>
+                  <a href="#features" className="text-gray-700 px-2 py-1">Features</a>
+                  <a href="#subjects" className="text-gray-700 px-2 py-1">Subjects</a>
+                  <a href="#pricing" className="text-gray-700 px-2 py-1">Pricing</a>
+                  <a href="#testimonials" className="text-gray-700 px-2 py-1">Reviews</a>
+                </>
+              )}
               <div className="flex flex-col gap-2 pt-4 border-t">
                 {user ? (
                   <Button
