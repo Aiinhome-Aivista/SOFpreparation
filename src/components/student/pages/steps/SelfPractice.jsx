@@ -142,7 +142,8 @@ export default function SelfPractice({ onTestCreated }) {
         subjectId: subject, // comes from dropdown
         questions: Number(numQuestions), // InputNumber
         timeLimit: Number(examTime),
-        difficulty: difficulty, // dropdown difficulty
+        difficulty: difficulty,
+        duedate: dueDate,// dropdown difficulty
       };
 
       console.log("Practice Payload:", payload);

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Trophy, LogOut, UserPlus, Menu, X } from 'lucide-react';
-import { useAuth } from '../helper/AuthContext';
-import { Button } from '../../components/ui/button';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from "react";
+import { LogOut, UserPlus, Menu, X, GraduationCap } from "lucide-react";
+import { useAuth } from "../helper/AuthContext";
+import { Button } from "../../components/ui/button";
+import { useLocation } from "react-router-dom";
 
 function Header() {
   const {
@@ -12,9 +12,11 @@ function Header() {
     openRegisterModal,
     openAddChildModal,
   } = useAuth();
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const isLandingPage = location.pathname === '/';
+  const isLandingPage = location.pathname === "/";
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
     <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
@@ -23,7 +25,7 @@ function Header() {
           {/* Logo Section */}
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-              <Trophy className="size-6 text-white" />
+              <GraduationCap className="size-8 text-white" />
             </div>
             <div>
               <h1 className="text-blue-900 font-bold leading-tight">
@@ -38,57 +40,79 @@ function Header() {
           {/* Desktop Navigation */}
           {isLandingPage && (
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Features</a>
-              <a href="#subjects" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Subjects</a>
-              <a href="#pricing" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Pricing</a>
-              <a href="#testimonials" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">Reviews</a>
+              <a
+                href="#features"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Features
+              </a>
+              <a
+                href="#subjects"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Subjects
+              </a>
+              <a
+                href="#pricing"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Pricing
+              </a>
+              <a
+                href="#testimonials"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Reviews
+              </a>
             </nav>
           )}
 
           {/* Auth/User Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            {user ? (
-              <>
-                <span className="text-sm font-semibold text-blue-900 mr-2">
-                  Hi, {user.name}
-                </span>
-                {user.role === "parent" && (
+          {!isAdminPage && (
+            <div className="hidden md:flex items-center gap-3">
+              {user ? (
+                <>
+                  <span className="text-sm font-semibold text-blue-900 mr-2">
+                    Hi, {user.name}
+                  </span>
+                  {user.role === "parent" && (
+                    <Button
+                      onClick={openAddChildModal}
+                      variant="outline"
+                      className="flex items-center gap-2 h-9"
+                    >
+                      <UserPlus className="size-4" />
+                      Add Child
+                    </Button>
+                  )}
                   <Button
-                    onClick={openAddChildModal}
-                    variant="outline"
-                    className="flex items-center gap-2 h-9"
+                    onClick={openLogoutModal}
+                    variant="ghost"
+                    className="flex items-center gap-2 h-9 text-gray-600"
                   >
-                    <UserPlus className="size-4" />
-                    Add Child
+                    <LogOut className="size-4" />
+                    Logout
                   </Button>
-                )}
-                <Button
-                  onClick={openLogoutModal}
-                  variant="ghost"
-                  className="flex items-center gap-2 h-9 text-gray-600"
-                >
-                  <LogOut className="size-4" />
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  onClick={openLoginModal}
-                  variant="outline"
-                  className="h-9 border-gray-300"
-                >
-                  Login
-                </Button>
-                <Button
-                  onClick={openRegisterModal}
-                  className="h-9 bg-blue-600 hover:bg-blue-700"
-                >
-                  Get Started Free
-                </Button>
-              </>
-            )}
-          </div>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={openLoginModal}
+                    variant="outline"
+                    className="h-9 border-gray-300"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    onClick={openRegisterModal}
+                    className="h-9 bg-blue-600 hover:bg-blue-700"
+                  >
+                    Get Started Free
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button
@@ -109,39 +133,49 @@ function Header() {
             <nav className="flex flex-col gap-4">
               {isLandingPage && (
                 <>
-                  <a href="#features" className="text-gray-700 px-2 py-1">Features</a>
-                  <a href="#subjects" className="text-gray-700 px-2 py-1">Subjects</a>
-                  <a href="#pricing" className="text-gray-700 px-2 py-1">Pricing</a>
-                  <a href="#testimonials" className="text-gray-700 px-2 py-1">Reviews</a>
+                  <a href="#features" className="text-gray-700 px-2 py-1">
+                    Features
+                  </a>
+                  <a href="#subjects" className="text-gray-700 px-2 py-1">
+                    Subjects
+                  </a>
+                  <a href="#pricing" className="text-gray-700 px-2 py-1">
+                    Pricing
+                  </a>
+                  <a href="#testimonials" className="text-gray-700 px-2 py-1">
+                    Reviews
+                  </a>
                 </>
               )}
-              <div className="flex flex-col gap-2 pt-4 border-t">
-                {user ? (
-                  <Button
-                    onClick={openLogoutModal}
-                    variant="outline"
-                    className="w-full justify-start gap-2"
-                  >
-                    <LogOut className="size-4" /> Logout
-                  </Button>
-                ) : (
-                  <>
+              {!isAdminPage && (
+                <div className="flex flex-col gap-2 pt-4 border-t">
+                  {user ? (
                     <Button
-                      onClick={openLoginModal}
+                      onClick={openLogoutModal}
                       variant="outline"
-                      className="w-full"
+                      className="w-full justify-start gap-2"
                     >
-                      Login
+                      <LogOut className="size-4" /> Logout
                     </Button>
-                    <Button
-                      onClick={openRegisterModal}
-                      className="w-full bg-blue-600 text-white"
-                    >
-                      Get Started Free
-                    </Button>
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={openLoginModal}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        onClick={openRegisterModal}
+                        className="w-full bg-blue-600 text-white"
+                      >
+                        Get Started Free
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
             </nav>
           </div>
         )}
