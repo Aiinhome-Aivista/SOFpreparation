@@ -16,12 +16,12 @@ export default function LoginModal() {
   const [parentPassword, setParentPassword] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  // const [adminEmail, setAdminEmail] = useState("");
+  // const [adminPassword, setAdminPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showParentPassword, setShowParentPassword] = useState(false);
   const [showStudentPassword, setShowStudentPassword] = useState(false);
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  // const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -144,6 +144,7 @@ export default function LoginModal() {
               <UserCircle className="size-4" />
               Parent
             </button>
+
             <button
               onClick={() => setActiveTab("student")}
               className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium ${
@@ -155,7 +156,8 @@ export default function LoginModal() {
               <User className="size-4" />
               Student
             </button>
-            <button
+
+            {/* <button
               onClick={() => setActiveTab("admin")}
               className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium ${
                 activeTab === "admin"
@@ -165,7 +167,7 @@ export default function LoginModal() {
             >
               <Shield className="size-4" />
               Admin
-            </button>
+            </button> */}
           </div>
 
           {activeTab === "parent" && (
@@ -310,7 +312,7 @@ export default function LoginModal() {
             </form>
           )}
 
-          {activeTab === "admin" && (
+          {/* {activeTab === "admin" && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
                 <label
@@ -367,13 +369,13 @@ export default function LoginModal() {
                 {isLoading ? "Logging in..." : "Login as Admin"}
               </button>
             </form>
-          )}
+          )} */}
         </div>
 
         <div className="pt-4 mt-4 border-t border-gray-200">
           {activeTab === "parent" ? (
             <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              Don't have an account?
               <button
                 type="button"
                 onClick={() => {
@@ -397,6 +399,7 @@ export default function LoginModal() {
             </p>
           )}
         </div>
+
       </div>
     </div>
   );
